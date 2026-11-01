@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { getDestinationImage } from '@/lib/constants/destination-images';
+import { generateClientExploreDossier } from '@/lib/ai/client-ai-engine';
 
 interface Destination {
   id: string;
@@ -322,26 +323,38 @@ export default function ExplorePage() {
 
     setAiGenerating(true);
     try {
-      const localGeminiKey = typeof window !== 'undefined' ? localStorage.getItem('safar_gemini_api_key') : null;
-      const localGroqKey = typeof window !== 'undefined' ? localStorage.getItem('safar_groq_api_key') : null;
-      const res = await fetch('/api/ai/explore-dossier', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(localGeminiKey ? { 'x-gemini-key': localGeminiKey } : {}),
-          ...(localGroqKey ? { 'x-groq-key': localGroqKey } : {}),
-        },
-        body: JSON.stringify({
-          destination: q,
-          currency: 'INR',
-          userOrigin: 'India',
-        }),
-      });
+      let loaded = false;
+      try {
+        const localGeminiKey = typeof window !== 'undefined' ? localStorage.getItem('safar_gemini_api_key') : null;
+        const localGroqKey = typeof window !== 'undefined' ? localStorage.getItem('safar_groq_api_key') : null;
+        const res = await fetch('/api/ai/explore-dossier', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            ...(localGeminiKey ? { 'x-gemini-key': localGeminiKey } : {}),
+            ...(localGroqKey ? { 'x-groq-key': localGroqKey } : {}),
+          },
+          body: JSON.stringify({
+            destination: q,
+            currency: 'INR',
+            userOrigin: 'India',
+          }),
+        });
 
-      if (res.ok && res.headers.get('content-type')?.includes('application/json')) {
-        const data = await res.json();
-        if (data.success && data.dossier) {
-          setCustomDossier(data.dossier);
+        if (res.ok && res.headers.get('content-type')?.includes('application/json')) {
+          const data = await res.json();
+          if (data.success && data.dossier) {
+            setCustomDossier(data.dossier);
+            loaded = true;
+          }
+        }
+      } catch (srvErr) {}
+
+      // If server returned non-JSON/404 (e.g. GitHub Pages), synthesize directly with Gemini/Groq
+      if (!loaded) {
+        const dossier = await generateClientExploreDossier(q, 'INR');
+        if (dossier) {
+          setCustomDossier(dossier);
         }
       }
     } catch (e) {

@@ -21,6 +21,7 @@ import { Input } from '@/components/ui/input';
 import { MarkdownRenderer } from '@/components/ui/markdown-renderer';
 import { getTrips, createTrip } from '@/lib/services/trip-service';
 import { askCopilot } from '@/lib/ai/gemini';
+import { chatWithClientCopilot } from '@/lib/ai/client-ai-engine';
 import type { Trip } from '@/types';
 import { getCurrent12HourTime } from '@/lib/utils/time-format';
 
@@ -165,23 +166,20 @@ export default function CopilotPage() {
       }
 
       if (!data) {
-        // Fallback to client-side assistant
-        const clientReply = await askCopilot({
-          message: textToSend,
-          context: activeTrip
+        // Fallback to client-side Copilot via Gemini / Groq Cascade
+        const clientReply = await chatWithClientCopilot(
+          textToSend,
+          messages.map((m) => ({ role: m.role, content: m.content })),
+          activeTrip
             ? {
-                activeTrip: {
-                  destination: activeTrip.destination,
-                  budget: activeTrip.budget,
-                  currency: activeTrip.currency,
-                  startDate: activeTrip.start_date,
-                  endDate: activeTrip.end_date,
-                },
-                travelers: activeTrip.travelers,
-                userPreferences: activeTrip.interests,
+                destination: activeTrip.destination,
+                budget: activeTrip.budget,
+                currency: activeTrip.currency,
+                startDate: activeTrip.start_date,
+                endDate: activeTrip.end_date,
               }
-            : undefined,
-        }).catch(() => 'I am here to help you plan your journey. How can I assist with your destination, budget, or bookings?');
+            : undefined
+        ).catch(() => 'I am here to help you plan your journey. How can I assist with your destination, budget, or bookings?');
 
         data = {
           reply: clientReply,

@@ -23,6 +23,8 @@ export const DESTINATION_GPS_CENTERS: Record<string, GpsCoordinate> = {
   sundarbans: { latitude: 21.9497, longitude: 89.1833 },
   sunderbans: { latitude: 21.9497, longitude: 89.1833 },
   hampi: { latitude: 15.3350, longitude: 76.4600 },
+  palitana: { latitude: 21.5167, longitude: 71.8500 },
+  shatrunjaya: { latitude: 21.5188, longitude: 71.8592 },
   kochi: { latitude: 9.9312, longitude: 76.2673 },
   kerala: { latitude: 9.9312, longitude: 76.2673 },
   munnar: { latitude: 10.0889, longitude: 77.0595 },

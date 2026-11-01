@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { ArrowLeftRight, Check, Copy, Globe2, Languages, Loader2, Sparkles, Volume2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
+import { translateWithClientAi } from '@/lib/ai/client-ai-engine';
 
 const languages = [
   { code: 'hi', name: 'Hindi (हिंदी)' },
@@ -43,27 +44,44 @@ export default function TranslatePage() {
 
     setLoading(true);
     try {
-      const localGeminiKey = typeof window !== 'undefined' ? localStorage.getItem('safar_gemini_api_key') : null;
-      const localGroqKey = typeof window !== 'undefined' ? localStorage.getItem('safar_groq_api_key') : null;
-      const res = await fetch('/api/translate', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(localGeminiKey ? { 'x-gemini-key': localGeminiKey } : {}),
-          ...(localGroqKey ? { 'x-groq-key': localGroqKey } : {}),
-        },
-        body: JSON.stringify({
-          text,
-          targetLang,
-        }),
-      });
+      let loaded = false;
+      try {
+        const localGeminiKey = typeof window !== 'undefined' ? localStorage.getItem('safar_gemini_api_key') : null;
+        const localGroqKey = typeof window !== 'undefined' ? localStorage.getItem('safar_groq_api_key') : null;
+        const res = await fetch('/api/translate', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            ...(localGeminiKey ? { 'x-gemini-key': localGeminiKey } : {}),
+            ...(localGroqKey ? { 'x-groq-key': localGroqKey } : {}),
+          },
+          body: JSON.stringify({
+            text,
+            targetLang,
+          }),
+        });
 
-      if (res.ok && res.headers.get('content-type')?.includes('application/json')) {
-        const data = await res.json();
-        setTranslatedText(data.translatedText);
-        setPronunciation(data.pronunciation || '');
-        setCulturalEtiquette(data.culturalEtiquette || '');
-        setProviderTag(data.provider || 'Autonomous Neural AI');
+        if (res.ok && res.headers.get('content-type')?.includes('application/json')) {
+          const data = await res.json();
+          setTranslatedText(data.translatedText);
+          setPronunciation(data.pronunciation || '');
+          setCulturalEtiquette(data.culturalEtiquette || '');
+          setProviderTag(data.provider || 'Autonomous Neural AI');
+          loaded = true;
+        }
+      } catch (srvErr) {}
+
+      // Fallback directly to Client AI Engine (Gemini / Groq)
+      if (!loaded) {
+        const targetLangName = languages.find(l => l.code === targetLang)?.name || targetLang;
+        const aiRes = await translateWithClientAi(text, targetLangName);
+        if (aiRes && aiRes.translatedText) {
+          setTranslatedText(aiRes.translatedText);
+          setPronunciation(aiRes.transliteration || '');
+          setCulturalEtiquette(aiRes.culturalNote || '');
+          setProviderTag('Gemini & Groq Neural AI');
+          loaded = true;
+        }
       }
     } catch {
       setTranslatedText('Translation unavailable at this moment.');

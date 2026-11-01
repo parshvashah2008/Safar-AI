@@ -618,7 +618,131 @@ export function generateFallbackItinerary(params: {
     });
   }
 
-  // 3. Generic World / India Destination Generator
+  // 3. Palitana / Shatrunjaya Jain Pilgrimage Curation
+  if (normDest.includes('palitana') || normDest.includes('shatrunjay')) {
+    const palitanaDaysData = [
+      {
+        title: 'Day 1: Arrival, Taleti Foothills & Orientation',
+        activities: [
+          {
+            time: '09:00 AM',
+            title: 'Arrival in Palitana & Check-in',
+            description: 'Arrive in Palitana and settle into your Dharamshala or hotel near Taleti Road.',
+            estimated_cost: convertCurrency(10 * travelers, 'USD', currency),
+            duration_minutes: 90,
+            category: 'transit' as StopCategory,
+            place_name: 'Hotel Sumeru / Taleti Road, Palitana',
+            latitude: 21.5193,
+            longitude: 71.8443,
+            is_optional: false,
+          },
+          {
+            time: '12:30 PM',
+            title: `Authentic Kathiyawadi Jain Thali Lunch${dietaryNote}`,
+            description: 'Pure satvik meal prepared in strict accordance with Jain culinary principles.',
+            estimated_cost: convertCurrency(8 * travelers, 'USD', currency),
+            duration_minutes: 60,
+            category: 'meal' as StopCategory,
+            place_name: 'Hotel Shravak Restaurant, Palitana',
+            latitude: 21.5165,
+            longitude: 71.8495,
+            is_optional: false,
+          },
+          {
+            time: '03:30 PM',
+            title: 'Taleti Base Temples & Adinath Museum',
+            description: 'Explore the serene marble shrines at the base of Shatrunjaya and view historic scriptures at the museum.',
+            estimated_cost: convertCurrency(3 * travelers, 'USD', currency),
+            duration_minutes: 120,
+            category: 'sightseeing' as StopCategory,
+            place_name: 'Taleti Foot-hills & Adinath Museum',
+            latitude: 21.5160,
+            longitude: 71.8540,
+            is_optional: false,
+          },
+          {
+            time: '06:30 PM',
+            title: `Bhakti Aarti & Chouvihaar Evening Meal${dietaryNote}`,
+            description: 'Traditional evening aarti followed by an early sunset meal before twilight.',
+            estimated_cost: convertCurrency(7 * travelers, 'USD', currency),
+            duration_minutes: 60,
+            category: 'meal' as StopCategory,
+            place_name: 'Nilkanth Restaurant & Bhojanshala',
+            latitude: 21.5170,
+            longitude: 71.8490,
+            is_optional: false,
+          },
+        ],
+      },
+      {
+        title: 'Day 2: Sacred Shatrunjaya Hill Ascent & Shri Adishwar Temple',
+        activities: [
+          {
+            time: '05:00 AM',
+            title: 'Dawn Ascent of Shatrunjaya Hill (3,800 Steps)',
+            description: 'Begin the sacred barefoot climb in cool morning air to the summit of the mountain of enlightenment.',
+            estimated_cost: convertCurrency(5 * travelers, 'USD', currency),
+            duration_minutes: 180,
+            category: 'activity' as StopCategory,
+            place_name: 'Shatrunjaya Hill Pathway, Taleti',
+            latitude: 21.5160,
+            longitude: 71.8540,
+            is_optional: false,
+          },
+          {
+            time: '08:30 AM',
+            title: 'Darshan at Shri Adishwar Temple & Chaumukhji Tirth',
+            description: 'Worship at the principal 10th-century marble temple dedicated to Lord Rishabhanatha with panoramic views of Shetrunji River.',
+            estimated_cost: convertCurrency(0, 'USD', currency),
+            duration_minutes: 150,
+            category: 'sightseeing' as StopCategory,
+            place_name: 'Shri Adishwar Temple Summit',
+            latitude: 21.5188,
+            longitude: 71.8592,
+            is_optional: false,
+          },
+          {
+            time: '11:30 AM',
+            title: 'Mindful Descent to Taleti Base',
+            description: 'Descend the pilgrim staircase back to the base foothills before the midday heat.',
+            estimated_cost: convertCurrency(0, 'USD', currency),
+            duration_minutes: 90,
+            category: 'activity' as StopCategory,
+            place_name: 'Taleti Base Gateway',
+            latitude: 21.5160,
+            longitude: 71.8540,
+            is_optional: false,
+          },
+          {
+            time: '01:30 PM',
+            title: `Pilgrim Post-Fast Traditional Gujarati Lunch${dietaryNote}`,
+            description: 'Nourishing warm Gujarati khichdi, kadhi, and cooling chaas (buttermilk).',
+            estimated_cost: convertCurrency(8 * travelers, 'USD', currency),
+            duration_minutes: 60,
+            category: 'meal' as StopCategory,
+            place_name: 'Taleti Bhojanshala, Palitana',
+            latitude: 21.5165,
+            longitude: 71.8495,
+            is_optional: false,
+          },
+        ],
+      },
+    ];
+
+    return dates.map((date, idx) => {
+      const template = palitanaDaysData[idx % palitanaDaysData.length];
+      return {
+        date,
+        title: `Day ${idx + 1}: ${template.title.split(': ')[1] || template.title}`,
+        activities: template.activities.map((act) => ({
+          ...act,
+          estimated_cost: Math.round(act.estimated_cost),
+        })),
+      };
+    });
+  }
+
+  // 4. Generic World / India Destination Generator
   return dates.map((date, idx) => {
     const dayNum = idx + 1;
     const isFirst = idx === 0;

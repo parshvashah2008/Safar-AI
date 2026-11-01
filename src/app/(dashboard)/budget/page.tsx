@@ -10,6 +10,7 @@ import { formatMoney, formatDate } from '@/lib/utils';
 import { getTrips } from '@/lib/services/trip-service';
 import { getExpenses, addExpense, calculateTripFinancials, checkBudgetWarning } from '@/lib/services/budget-service';
 import { SYNC_EVENTS, emitWalletChange } from '@/lib/services/sync-bus';
+import { callAiWithCascade } from '@/lib/ai/client-ai-engine';
 import type { Trip, Expense, ExpenseCategory } from '@/types';
 
 function BudgetContent() {
@@ -37,29 +38,50 @@ function BudgetContent() {
     if (!tripToUse) return;
     setAiLoading(true);
     try {
-      const localGeminiKey = typeof window !== 'undefined' ? localStorage.getItem('safar_gemini_api_key') : null;
-      const localGroqKey = typeof window !== 'undefined' ? localStorage.getItem('safar_groq_api_key') : null;
-      const res = await fetch('/api/ai/budget-advisor', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(localGeminiKey ? { 'x-gemini-key': localGeminiKey } : {}),
-          ...(localGroqKey ? { 'x-groq-key': localGroqKey } : {}),
-        },
-        body: JSON.stringify({
-          destination: tripToUse.destination,
-          budget: tripToUse.budget,
-          currency: tripToUse.currency,
-          expenses: currentExpenses,
-          days: 4,
-          travelers: tripToUse.travelers || 2,
-        }),
-      });
-      if (res.ok && res.headers.get('content-type')?.includes('application/json')) {
-        const data = await res.json();
-        if (data.success && data.advisor) {
-          setAiAdvisor(data.advisor);
+      let loaded = false;
+      try {
+        const localGeminiKey = typeof window !== 'undefined' ? localStorage.getItem('safar_gemini_api_key') : null;
+        const localGroqKey = typeof window !== 'undefined' ? localStorage.getItem('safar_groq_api_key') : null;
+        const res = await fetch('/api/ai/budget-advisor', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            ...(localGeminiKey ? { 'x-gemini-key': localGeminiKey } : {}),
+            ...(localGroqKey ? { 'x-groq-key': localGroqKey } : {}),
+          },
+          body: JSON.stringify({
+            destination: tripToUse.destination,
+            budget: tripToUse.budget,
+            currency: tripToUse.currency,
+            expenses: currentExpenses,
+            days: 4,
+            travelers: tripToUse.travelers || 2,
+          }),
+        });
+        if (res.ok && res.headers.get('content-type')?.includes('application/json')) {
+          const data = await res.json();
+          if (data.success && data.advisor) {
+            setAiAdvisor(data.advisor);
+            loaded = true;
+          }
         }
+      } catch (srvErr) {}
+
+      // Client AI Fallback
+      if (!loaded) {
+        const prompt = `Perform a financial budget audit for a trip to ${tripToUse.destination}.
+Budget: ${tripToUse.currency} ${tripToUse.budget}.
+Expenses logged so far: ${JSON.stringify(currentExpenses)}.
+Return JSON ONLY:
+{
+  "summary": "1-2 sentence assessment of spending velocity",
+  "recommendedDailyAllowance": number,
+  "topSavingsTip": "1 practical actionable tip for saving money here",
+  "burnRateAlert": boolean
+}`;
+        const raw = await callAiWithCascade(prompt, 'You are a prudent travel finance auditor.', true);
+        const parsed = JSON.parse(raw.replace(/```json\n?|\n?```/g, '').trim());
+        setAiAdvisor(parsed);
       }
     } catch (e) {
       console.warn('AI budget audit error:', e);

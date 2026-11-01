@@ -1,12 +1,13 @@
 import type { AppConfig } from '@/types';
+import { getActiveGeminiKey } from '@/lib/ai/client-ai-engine';
 
-/** Validate a Gemini API key — real keys start with "AIza" */
+/** Validate a Gemini API key */
 function isValidGeminiKey(key: string | undefined | null): boolean {
-  return Boolean(key && key.trim().length > 10 && key.trim().startsWith('AIza'));
+  return Boolean(key && key.trim().length > 10);
 }
 
 export function getAppConfig(): AppConfig {
-  const geminiKey = process.env.GEMINI_API_KEY;
+  const geminiKey = process.env.GEMINI_API_KEY || getActiveGeminiKey();
   const mapsKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -35,10 +36,11 @@ export function getAppConfig(): AppConfig {
 }
 
 export function requireGeminiKey(): string {
-  const key = process.env.GEMINI_API_KEY || '';
-  return key.trim();
+  const envKey = process.env.GEMINI_API_KEY || '';
+  if (envKey.trim().length > 10) return envKey.trim();
+  return getActiveGeminiKey();
 }
 
 export function getGeminiModel(): string {
-  return process.env.GEMINI_MODEL || 'gemini-3.5-flash';
+  return process.env.GEMINI_MODEL || 'gemini-2.5-flash';
 }

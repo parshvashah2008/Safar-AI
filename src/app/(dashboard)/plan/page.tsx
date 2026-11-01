@@ -53,6 +53,7 @@ import {
   CompareRoutesResult,
 } from '@/lib/services/gemini-route-service';
 import { generateFallbackItinerary } from '@/lib/services/fallback-itinerary';
+import { generateClientItinerary } from '@/lib/ai/client-ai-engine';
 import type { StopCategory } from '@/types';
 
 const defaultInterests = [
@@ -445,31 +446,30 @@ function PlannerContent() {
         console.warn('Network error reaching /api/ai/itinerary, falling back to client synthesis:', fetchErr);
       }
 
-      // If server returned non-JSON/404 or did not provide days, synthesize directly in browser
+      // If server returned non-JSON/404 or did not provide days, synthesize directly via Gemini / Groq Client Engine
       if (aiDays.length === 0) {
         try {
-          // Only attempt client-side Gemini if user has provided a valid API key (starts with AIza)
-          const clientKey = localGeminiKey?.trim();
-          const isValidClientKey = clientKey && clientKey.startsWith('AIza') && clientKey.length > 20;
-          if (isValidClientKey) {
-            const { GoogleGenerativeAI } = await import('@google/generative-ai');
-            const genAI = new GoogleGenerativeAI(clientKey);
-            const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
-            const prompt = `Create a realistic JSON itinerary from ${form.startDate} to ${form.endDate} for ${finalDestination}, ${finalCountry}.
-Travelers: ${form.travelers}. Planned Budget: ${form.currency} ${form.budget}. Interests: ${form.interests.join(', ')}. Dietary: ${form.dietary || 'None specified'}.
-Return JSON only: { "corrected_destination": string, "days": [{ "date": "YYYY-MM-DD", "title": string, "activities": [{ "time": "10:00 AM", "title": string, "description": string, "estimated_cost": number, "duration_minutes": number, "category": string, "place_name": string, "latitude": number, "longitude": number, "is_optional": boolean }] }] }`;
-            const resp = await model.generateContent(prompt);
-            const txt = resp.response.text().replace(/```json\n?|\n?```/g, '').trim();
-            const parsed = JSON.parse(txt);
-            if (parsed.days && Array.isArray(parsed.days) && parsed.days.length > 0) {
-              aiDays = parsed.days;
-              if (parsed.corrected_destination) {
-                finalDestination = parsed.corrected_destination.trim();
-              }
+          const clientSynth = await generateClientItinerary({
+            origin,
+            destination: finalDestination,
+            startDate: form.startDate,
+            endDate: form.endDate,
+            travelers: form.travelers,
+            budget: form.budget,
+            currency: form.currency,
+            interests: form.interests,
+            dietary: form.dietary,
+            accessibility: form.accessibility,
+            routeMode,
+          });
+          if (clientSynth && clientSynth.days && Array.isArray(clientSynth.days) && clientSynth.days.length > 0) {
+            aiDays = clientSynth.days;
+            if (clientSynth.corrected_destination) {
+              finalDestination = clientSynth.corrected_destination.trim();
             }
           }
-        } catch (geminiClientErr) {
-          console.warn('Client Gemini synthesis offline or rate-limited, applying deterministic curated synthesis:', geminiClientErr);
+        } catch (clientAiErr) {
+          console.warn('Client AI Engine cascade error, using curated backup:', clientAiErr);
         }
       }
 

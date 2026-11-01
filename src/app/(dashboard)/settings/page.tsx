@@ -175,10 +175,12 @@ export default function SettingsPage() {
               </div>
               {geminiKey ? (
                 <span className="text-[10px] font-mono text-emerald-700 dark:text-emerald-300 bg-emerald-100/70 dark:bg-emerald-950 px-2 py-0.5 rounded font-semibold">
-                  ACTIVE
+                  ACTIVE (CUSTOM KEY)
                 </span>
               ) : (
-                <span className="text-[10px] font-mono text-ink-400 dark:text-[#74877e]">SERVER DEFAULT</span>
+                <span className="text-[10px] font-mono text-emerald-700 dark:text-emerald-300 bg-emerald-100/70 dark:bg-emerald-950 px-2 py-0.5 rounded font-semibold">
+                  ACTIVE (BUILT-IN ENGINE)
+                </span>
               )}
             </div>
             <div className="relative">
@@ -304,10 +306,12 @@ export default function SettingsPage() {
               </div>
               {groqKey ? (
                 <span className="text-[10px] font-mono text-emerald-700 dark:text-emerald-300 bg-emerald-100/70 dark:bg-emerald-950 px-2 py-0.5 rounded font-semibold">
-                  ACTIVE
+                  ACTIVE (CUSTOM KEY)
                 </span>
               ) : (
-                <span className="text-[10px] font-mono text-ink-400 dark:text-[#74877e]">SERVER DEFAULT</span>
+                <span className="text-[10px] font-mono text-emerald-700 dark:text-emerald-300 bg-emerald-100/70 dark:bg-emerald-950 px-2 py-0.5 rounded font-semibold">
+                  ACTIVE (BUILT-IN ENGINE)
+                </span>
               )}
             </div>
             <div className="relative">
