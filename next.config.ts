@@ -1,7 +1,7 @@
 import type { NextConfig } from 'next';
 import path from 'path';
 
-const basePath = process.env.NEXT_PUBLIC_BASE_PATH || process.env.BASE_PATH || '';
+const basePath = process.env.NEXT_PUBLIC_BASE_PATH ?? (process.env.NODE_ENV === 'production' ? '/Safar-AI' : '');
 
 const nextConfig: NextConfig = {
   compress: false,
