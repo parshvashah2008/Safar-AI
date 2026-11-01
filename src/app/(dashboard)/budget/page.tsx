@@ -2,6 +2,7 @@
 
 import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
+import Link from 'next/link';
 import { AlertTriangle, CheckCircle2, IndianRupee, Plus, Sparkles, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -9,12 +10,13 @@ import { Label } from '@/components/ui/label';
 import { formatMoney, formatDate } from '@/lib/utils';
 import { getTrips } from '@/lib/services/trip-service';
 import { getExpenses, addExpense, calculateTripFinancials, checkBudgetWarning } from '@/lib/services/budget-service';
-import { SYNC_EVENTS, emitWalletChange } from '@/lib/services/sync-bus';
+import { SYNC_EVENTS, emitWalletChange, useActiveSearch } from '@/lib/services/sync-bus';
 import { callAiWithCascade } from '@/lib/ai/client-ai-engine';
 import type { Trip, Expense, ExpenseCategory } from '@/types';
 
 function BudgetContent() {
   const searchParams = useSearchParams();
+  const { activeSearch } = useActiveSearch();
   const initialTripId = searchParams?.get('tripId') || '';
 
   const [trips, setTrips] = useState<Trip[]>([]);
@@ -246,6 +248,23 @@ Return JSON ONLY:
           </div>
         )}
       </div>
+
+      {/* Synchronized Home Search Trip Banner */}
+      {activeSearch.destination && (
+        <div className="p-3.5 rounded-2xl bg-emerald-50/80 dark:bg-emerald-950/40 border border-emerald-300/80 dark:border-emerald-800/60 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+          <div className="flex items-center gap-2">
+            <Sparkles className="h-4 w-4 text-[#0d5c48] dark:text-emerald-400 shrink-0" />
+            <span className="text-[#111a16] dark:text-[#edf2ee]">
+              Planned Target for <strong className="text-[#0d5c48] dark:text-emerald-300 underline">{activeSearch.destination}</strong>: <strong>₹{activeSearch.budget.toLocaleString()}</strong> ({activeSearch.travelers} travelers)
+            </span>
+          </div>
+          <Link href={`/plan?destination=${encodeURIComponent(activeSearch.destination)}&travelers=${activeSearch.travelers}&budget=${activeSearch.budget}`}>
+            <Button size="sm" className="h-7 text-[11px] bg-[#0d5c48] hover:bg-[#094032] text-white rounded-lg font-semibold shrink-0">
+              Generate Formal Itinerary →
+            </Button>
+          </Link>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="rounded-2xl border border-ivory-300 bg-white p-5 shadow-card">

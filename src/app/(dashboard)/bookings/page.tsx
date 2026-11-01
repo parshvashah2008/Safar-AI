@@ -54,15 +54,17 @@ import {
   formatCurrencyAmount,
 } from '@/lib/services/currency-service';
 import { formatTo12Hour, getCurrent12HourTime } from '@/lib/utils/time-format';
-import { SYNC_EVENTS, emitCurrencyChange } from '@/lib/services/sync-bus';
+import { SYNC_EVENTS, emitCurrencyChange, getStoredActiveSearch, useActiveSearch } from '@/lib/services/sync-bus';
 import type { Booking, BookingType, Trip } from '@/types';
 
 type SearchCategory = 'flight' | 'train' | 'hotel' | 'dining';
 
 function BookingsContent() {
   const searchParams = useSearchParams();
+  const stored = getStoredActiveSearch();
   const initialTripId = searchParams?.get('tripId') || '';
   const initialCategory = (searchParams?.get('category') as SearchCategory) || 'flight';
+  const initialDestFromParam = searchParams?.get('destination') || stored.destination || '';
 
   const [trips, setTrips] = useState<Trip[]>([]);
   const [selectedTripId, setSelectedTripId] = useState<string>('');
@@ -72,10 +74,10 @@ function BookingsContent() {
 
   // Search Engine State
   const [activeCategory, setActiveCategory] = useState<SearchCategory>(initialCategory);
-  const [searchOrigin, setSearchOrigin] = useState('Surat (STV)');
-  const [searchDest, setSearchDest] = useState('New York (JFK)');
+  const [searchOrigin, setSearchOrigin] = useState(stored.origin || 'Mumbai (BOM)');
+  const [searchDest, setSearchDest] = useState(initialDestFromParam || 'Palitana (BVP)');
   const [searchDate, setSearchDate] = useState('2026-11-20');
-  const [passengers, setPassengers] = useState<number>(1);
+  const [passengers, setPassengers] = useState<number>(stored.travelers || 2);
   const [cabinClass, setCabinClass] = useState<'economy' | 'premium_economy' | 'business' | 'first'>('economy');
   const [selectedCurrency, setSelectedCurrency] = useState<string>('INR');
   const [flightSort, setFlightSort] = useState<'cheapest' | 'fastest' | 'value'>('cheapest');

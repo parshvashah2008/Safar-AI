@@ -2,11 +2,12 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Compass, Menu, Sparkles } from 'lucide-react';
+import { Compass, Menu, Sparkles, MapPin } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { navItems } from '@/components/layout/sidebar';
 import { NotificationPopover } from '@/components/layout/notification-popover';
 import { ThemeToggle } from '@/components/layout/theme-toggle';
+import { useActiveSearch } from '@/lib/services/sync-bus';
 
 interface TopbarProps {
   onOpenMobileNav: () => void;
@@ -14,6 +15,7 @@ interface TopbarProps {
 
 export function Topbar({ onOpenMobileNav }: TopbarProps) {
   const pathname = usePathname();
+  const { activeSearch } = useActiveSearch();
   const currentItem = navItems.find((item) => item.href === pathname || (item.href !== '/' && pathname.startsWith(item.href)));
   const pageTitle = currentItem ? currentItem.label : 'Journey View';
 
@@ -36,11 +38,29 @@ export function Topbar({ onOpenMobileNav }: TopbarProps) {
           </Link>
           <span className="text-[#c5c2b8] dark:text-[#33463c]">/</span>
           <span className="font-semibold text-[#111a16] dark:text-[#edf2ee] font-sans">{pageTitle}</span>
+
+          {activeSearch.destination && (
+            <Link
+              href={`/plan?destination=${encodeURIComponent(activeSearch.destination)}&travelers=${activeSearch.travelers}&budget=${activeSearch.budget}`}
+              className="ml-2 hidden sm:inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200/80 dark:border-emerald-800/60 text-[#0d5c48] dark:text-emerald-300 font-semibold text-[11px] hover:bg-emerald-100 transition-colors shadow-2xs"
+              title="Click to view or plan this journey"
+            >
+              <MapPin className="h-2.5 w-2.5 text-emerald-600 dark:text-emerald-400" />
+              <span>{activeSearch.destination}</span>
+            </Link>
+          )}
         </div>
       </div>
 
       <div className="flex items-center gap-2.5 sm:gap-3 shrink-0">
-        <Link href="/plan" className="shrink-0">
+        <Link
+          href={
+            activeSearch.destination
+              ? `/plan?destination=${encodeURIComponent(activeSearch.destination)}&travelers=${activeSearch.travelers}&budget=${activeSearch.budget}`
+              : '/plan'
+          }
+          className="shrink-0"
+        >
           <Button
             size="sm"
             className="hidden sm:inline-flex gap-1.5 bg-gradient-to-r from-[#094032] to-[#0d5c48] hover:from-[#063327] hover:to-[#094738] text-white shadow-sm shadow-emerald-950/20 text-xs font-semibold px-3.5 h-9 rounded-xl transition-all border border-[#dfb981]/25"
@@ -50,7 +70,14 @@ export function Topbar({ onOpenMobileNav }: TopbarProps) {
           </Button>
         </Link>
 
-        <Link href="/copilot" className="shrink-0">
+        <Link
+          href={
+            activeSearch.destination
+              ? `/copilot?destination=${encodeURIComponent(activeSearch.destination)}`
+              : '/copilot'
+          }
+          className="shrink-0"
+        >
           <Button
             variant="outline"
             size="sm"

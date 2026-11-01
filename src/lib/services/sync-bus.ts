@@ -16,7 +16,17 @@ export const SYNC_EVENTS = {
   WALLET_CHANGED: 'safar:sync:wallet',
   ROUTE_CHANGED: 'safar:sync:route',
   BOOKING_CHANGED: 'safar:sync:booking',
+  SEARCH_CHANGED: 'safar:sync:search',
 } as const;
+
+export interface ActiveSearchPayload {
+  destination: string;
+  travelers: number;
+  budget: number;
+  origin?: string;
+  startDate?: string;
+  endDate?: string;
+}
 
 export interface CurrencySyncPayload {
   currency: string;
@@ -74,6 +84,83 @@ export function emitWalletChange() {
 
 export function emitRouteChange(mode: 'budget' | 'fastest', tripId?: string) {
   emitSyncEvent<RouteSyncPayload>(SYNC_EVENTS.ROUTE_CHANGED, { mode, tripId });
+}
+
+export function emitActiveSearch(payload: Partial<ActiveSearchPayload>) {
+  if (typeof window !== 'undefined') {
+    if (payload.destination !== undefined) localStorage.setItem('safar_active_destination', payload.destination);
+    if (payload.travelers !== undefined) localStorage.setItem('safar_active_travelers', String(payload.travelers));
+    if (payload.budget !== undefined) localStorage.setItem('safar_active_budget', String(payload.budget));
+    if (payload.origin !== undefined) localStorage.setItem('safar_active_origin', payload.origin);
+
+    const prev = getStoredActiveSearch();
+    const updated: ActiveSearchPayload = { ...prev, ...payload };
+    localStorage.setItem('safar_active_search', JSON.stringify(updated));
+  }
+  emitSyncEvent<Partial<ActiveSearchPayload>>(SYNC_EVENTS.SEARCH_CHANGED, payload);
+}
+
+export function getStoredActiveSearch(): ActiveSearchPayload {
+  const fallback: ActiveSearchPayload = { destination: '', travelers: 2, budget: 35000, origin: 'Mumbai' };
+  if (typeof window === 'undefined') return fallback;
+  try {
+    const raw = localStorage.getItem('safar_active_search');
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      return { ...fallback, ...parsed };
+    }
+  } catch (e) {}
+
+  return {
+    destination: localStorage.getItem('safar_active_destination') || '',
+    travelers: Number(localStorage.getItem('safar_active_travelers')) || 2,
+    budget: Number(localStorage.getItem('safar_active_budget')) || 35000,
+    origin: localStorage.getItem('safar_active_origin') || 'Mumbai',
+  };
+}
+
+export function useActiveSearch() {
+  const [activeSearch, setActiveSearch] = useState<ActiveSearchPayload>(() => getStoredActiveSearch());
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    // Refresh from localStorage on mount
+    const latest = getStoredActiveSearch();
+    setActiveSearch(latest);
+
+    const handleLocalSync = (e: Event) => {
+      const customEvent = e as CustomEvent<Partial<ActiveSearchPayload>>;
+      if (customEvent.detail) {
+        setActiveSearch((prev) => ({ ...prev, ...customEvent.detail }));
+      }
+    };
+
+    const handleStorage = (e: StorageEvent) => {
+      if (e.key === 'safar_active_search' && e.newValue) {
+        try {
+          setActiveSearch(JSON.parse(e.newValue));
+        } catch (err) {}
+      } else if (e.key === 'safar_active_destination' && e.newValue) {
+        setActiveSearch((prev) => ({ ...prev, destination: e.newValue || '' }));
+      }
+    };
+
+    window.addEventListener(SYNC_EVENTS.SEARCH_CHANGED, handleLocalSync);
+    window.addEventListener('storage', handleStorage);
+
+    return () => {
+      window.removeEventListener(SYNC_EVENTS.SEARCH_CHANGED, handleLocalSync);
+      window.removeEventListener('storage', handleStorage);
+    };
+  }, []);
+
+  const updateSearch = (update: Partial<ActiveSearchPayload>) => {
+    setActiveSearch((prev) => ({ ...prev, ...update }));
+    emitActiveSearch(update);
+  };
+
+  return { activeSearch, updateSearch };
 }
 
 /**

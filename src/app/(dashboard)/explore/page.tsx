@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import {
@@ -19,6 +20,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { getDestinationImage } from '@/lib/constants/destination-images';
 import { generateClientExploreDossier } from '@/lib/ai/client-ai-engine';
+import { getStoredActiveSearch, useActiveSearch } from '@/lib/services/sync-bus';
 
 interface Destination {
   id: string;
@@ -308,12 +310,25 @@ const destinations: Destination[] = [
   },
 ];
 
-export default function ExplorePage() {
+function ExploreContent() {
+  const searchParams = useSearchParams();
+  const { activeSearch } = useActiveSearch();
+  const urlDest = searchParams?.get('destination') || '';
+  const initialDestName = urlDest || activeSearch.destination || '';
+
   const [activeCategory, setActiveCategory] = useState<string>('All');
-  const [selectedDest, setSelectedDest] = useState<Destination>(destinations[0]);
+  const [selectedDest, setSelectedDest] = useState<Destination>(() => {
+    if (initialDestName) {
+      const match = destinations.find(
+        (d) => d.name.toLowerCase().includes(initialDestName.toLowerCase()) || d.id.toLowerCase() === initialDestName.toLowerCase()
+      );
+      if (match) return match;
+    }
+    return destinations[0];
+  });
 
   // AI Instant Destination Intelligence state
-  const [customQuery, setCustomQuery] = useState('');
+  const [customQuery, setCustomQuery] = useState(initialDestName);
   const [customDossier, setCustomDossier] = useState<any>(null);
   const [aiGenerating, setAiGenerating] = useState(false);
 
@@ -363,6 +378,14 @@ export default function ExplorePage() {
       setAiGenerating(false);
     }
   };
+
+  // Auto-generate dossier if arriving with a search query from homepage
+  useEffect(() => {
+    if (initialDestName && !customDossier && !aiGenerating) {
+      setCustomQuery(initialDestName);
+      handleGenerateDossier(initialDestName);
+    }
+  }, [initialDestName]);
 
   const filtered =
     activeCategory === 'All' ? destinations : destinations.filter((d) => d.category === activeCategory);
@@ -755,5 +778,13 @@ export default function ExplorePage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function ExplorePage() {
+  return (
+    <Suspense fallback={<div className="p-8 text-center text-xs text-muted-foreground">Loading Destination Intelligence...</div>}>
+      <ExploreContent />
+    </Suspense>
   );
 }

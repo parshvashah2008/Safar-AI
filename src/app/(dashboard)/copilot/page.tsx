@@ -24,6 +24,7 @@ import { askCopilot } from '@/lib/ai/gemini';
 import { chatWithClientCopilot } from '@/lib/ai/client-ai-engine';
 import type { Trip } from '@/types';
 import { getCurrent12HourTime } from '@/lib/utils/time-format';
+import { useActiveSearch } from '@/lib/services/sync-bus';
 
 interface ChatTripInfo {
   destination: string;
@@ -67,6 +68,7 @@ const starterPrompts = [
 ];
 
 export default function CopilotPage() {
+  const { activeSearch } = useActiveSearch();
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
       id: 'welcome-1',
@@ -130,6 +132,32 @@ export default function CopilotPage() {
 
     try {
       const localKey = typeof window !== 'undefined' ? localStorage.getItem('safar_gemini_api_key') : null;
+      const effectiveContext = activeTrip
+        ? {
+            activeTrip: {
+              destination: activeTrip.destination,
+              budget: activeTrip.budget,
+              currency: activeTrip.currency,
+              startDate: activeTrip.start_date,
+              endDate: activeTrip.end_date,
+            },
+            travelers: activeTrip.travelers,
+            userPreferences: activeTrip.interests,
+          }
+        : activeSearch.destination
+        ? {
+            activeTrip: {
+              destination: activeSearch.destination,
+              budget: activeSearch.budget,
+              currency: 'INR',
+              startDate: '2026-11-20',
+              endDate: '2026-11-24',
+            },
+            travelers: activeSearch.travelers || 2,
+            userPreferences: ['Heritage', 'Authentic Food'],
+          }
+        : undefined;
+
       const res = await fetch('/api/ai/chat', {
         method: 'POST',
         headers: {
@@ -138,19 +166,7 @@ export default function CopilotPage() {
         },
         body: JSON.stringify({
           message: textToSend.trim(),
-          context: activeTrip
-            ? {
-                activeTrip: {
-                  destination: activeTrip.destination,
-                  budget: activeTrip.budget,
-                  currency: activeTrip.currency,
-                  startDate: activeTrip.start_date,
-                  endDate: activeTrip.end_date,
-                },
-                travelers: activeTrip.travelers,
-                userPreferences: activeTrip.interests,
-              }
-            : undefined,
+          context: effectiveContext,
         }),
       });
 
@@ -170,15 +186,7 @@ export default function CopilotPage() {
         const clientReply = await chatWithClientCopilot(
           textToSend,
           messages.map((m) => ({ role: m.role, content: m.content })),
-          activeTrip
-            ? {
-                destination: activeTrip.destination,
-                budget: activeTrip.budget,
-                currency: activeTrip.currency,
-                startDate: activeTrip.start_date,
-                endDate: activeTrip.end_date,
-              }
-            : undefined
+          effectiveContext?.activeTrip
         ).catch(() => 'I am here to help you plan your journey. How can I assist with your destination, budget, or bookings?');
 
         data = {
@@ -286,7 +294,13 @@ export default function CopilotPage() {
             }}
             className="text-xs font-semibold text-teal-950 bg-transparent focus:outline-hidden cursor-pointer"
           >
-            <option value="">General Wanderlust (No context)</option>
+            {activeSearch.destination ? (
+              <option value="">
+                Home Search: {activeSearch.destination} (₹{activeSearch.budget.toLocaleString('en-IN')})
+              </option>
+            ) : (
+              <option value="">General Wanderlust (No context)</option>
+            )}
             {trips.map((t) => (
               <option key={t.id} value={t.id}>
                 {t.destination} ({t.currency} {t.budget.toLocaleString('en-IN')})
@@ -295,6 +309,26 @@ export default function CopilotPage() {
           </select>
         </div>
       </div>
+
+      {/* Active Search Synchronized Banner */}
+      {!selectedTripId && activeSearch.destination && (
+        <div className="p-3 rounded-2xl bg-emerald-50/80 dark:bg-emerald-950/40 border border-emerald-300/70 dark:border-emerald-800/60 flex items-center justify-between gap-3 text-xs">
+          <div className="flex items-center gap-2">
+            <Sparkles className="w-4 h-4 text-[#0d5c48] dark:text-emerald-400 shrink-0" />
+            <span className="text-[#111a16] dark:text-[#edf2ee]">
+              Copilot automatically tuned to: <strong className="text-[#0d5c48] dark:text-emerald-300 underline font-semibold">{activeSearch.destination}</strong>
+              <span className="hidden sm:inline text-muted-foreground ml-1 font-mono text-[11px]">
+                · ₹{activeSearch.budget.toLocaleString('en-IN')} cap · {activeSearch.travelers} traveler{activeSearch.travelers > 1 ? 's' : ''}
+              </span>
+            </span>
+          </div>
+          <Link href={`/plan?destination=${encodeURIComponent(activeSearch.destination)}&travelers=${activeSearch.travelers}&budget=${activeSearch.budget}`}>
+            <Button size="sm" className="h-7 text-[11px] bg-[#0d5c48] text-white rounded-lg">
+              Generate Full Itinerary →
+            </Button>
+          </Link>
+        </div>
+      )}
 
       {/* Messages Scroll Area */}
       <div className="flex-1 overflow-y-auto py-6 space-y-6 pr-2">

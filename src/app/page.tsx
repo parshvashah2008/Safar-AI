@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import {
@@ -20,6 +20,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { getDestinationImage } from '@/lib/constants/destination-images';
 import { ThemeToggle } from '@/components/layout/theme-toggle';
+import { useActiveSearch, emitActiveSearch } from '@/lib/services/sync-bus';
 
 const featuredDestinations = [
   {
@@ -80,15 +81,30 @@ const featuredDestinations = [
 
 export default function HomePage() {
   const router = useRouter();
-  const [quickSearch, setQuickSearch] = useState('');
-  const [travelers, setTravelers] = useState('2');
-  const [budget, setBudget] = useState('35000');
+  const { activeSearch, updateSearch } = useActiveSearch();
+  const [quickSearch, setQuickSearch] = useState(activeSearch.destination || '');
+  const [travelers, setTravelers] = useState(String(activeSearch.travelers || '2'));
+  const [budget, setBudget] = useState(String(activeSearch.budget || '35000'));
+
+  // Keep local fields in sync if activeSearch changed externally
+  useEffect(() => {
+    if (activeSearch.destination && !quickSearch) {
+      setQuickSearch(activeSearch.destination);
+    }
+  }, [activeSearch.destination]);
 
   const handleQuickSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const dest = quickSearch.trim() || 'Manali';
+    updateSearch({
+      destination: dest,
+      travelers: Number(travelers) || 2,
+      budget: Number(budget) || 35000,
+    });
     router.push(`/plan?destination=${encodeURIComponent(dest)}&travelers=${travelers}&budget=${budget}`);
   };
+
+  const currentDest = quickSearch.trim() || activeSearch.destination || '';
 
   return (
     <div className="min-h-screen bg-[#faf9f6] dark:bg-[#0b110e] text-[#111a16] dark:text-[#edf2ee] transition-colors">
@@ -110,19 +126,34 @@ export default function HomePage() {
           </Link>
 
           <nav className="hidden md:flex items-center gap-8 text-xs font-semibold text-[#4d5c54] dark:text-[#8ca397]">
-            <Link href="/explore" className="hover:text-[#0d5c48] dark:hover:text-emerald-400 transition-colors">
+            <Link
+              href={currentDest ? `/explore?destination=${encodeURIComponent(currentDest)}` : '/explore'}
+              className="hover:text-[#0d5c48] dark:hover:text-emerald-400 transition-colors"
+            >
               Destinations
             </Link>
-            <Link href="/plan" className="hover:text-[#0d5c48] dark:hover:text-emerald-400 transition-colors">
+            <Link
+              href={currentDest ? `/plan?destination=${encodeURIComponent(currentDest)}&travelers=${travelers}&budget=${budget}` : '/plan'}
+              className="hover:text-[#0d5c48] dark:hover:text-emerald-400 transition-colors"
+            >
               AI Planner
             </Link>
-            <Link href="/copilot" className="hover:text-[#0d5c48] dark:hover:text-emerald-400 transition-colors">
+            <Link
+              href={currentDest ? `/copilot?destination=${encodeURIComponent(currentDest)}` : '/copilot'}
+              className="hover:text-[#0d5c48] dark:hover:text-emerald-400 transition-colors"
+            >
               Copilot Concierge
             </Link>
-            <Link href="/budget" className="hover:text-[#0d5c48] dark:hover:text-emerald-400 transition-colors">
+            <Link
+              href={currentDest ? `/budget?destination=${encodeURIComponent(currentDest)}&budget=${budget}` : '/budget'}
+              className="hover:text-[#0d5c48] dark:hover:text-emerald-400 transition-colors"
+            >
               Budget Guardian
             </Link>
-            <Link href="/wallet" className="hover:text-[#0d5c48] dark:hover:text-emerald-400 transition-colors">
+            <Link
+              href={currentDest ? `/wallet?destination=${encodeURIComponent(currentDest)}` : '/wallet'}
+              className="hover:text-[#0d5c48] dark:hover:text-emerald-400 transition-colors"
+            >
               Trip Wallet
             </Link>
           </nav>
@@ -136,7 +167,7 @@ export default function HomePage() {
                 My Trips
               </Button>
             </Link>
-            <Link href="/plan">
+            <Link href={currentDest ? `/plan?destination=${encodeURIComponent(currentDest)}&travelers=${travelers}&budget=${budget}` : '/plan'}>
               <Button size="sm" className="gap-2 bg-[#0d5c48] hover:bg-[#094032] text-white text-xs font-semibold px-4 h-9 rounded-xl shadow-sm shadow-emerald-950/20">
                 <Sparkles className="h-3.5 w-3.5 text-amber-200" />
                 <span>Start Planning</span>
@@ -181,8 +212,12 @@ export default function HomePage() {
                   <input
                     type="text"
                     value={quickSearch}
-                    onChange={(e) => setQuickSearch(e.target.value)}
-                    placeholder="e.g. Manali, Kyoto, Varanasi, Amalfi"
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      setQuickSearch(val);
+                      updateSearch({ destination: val });
+                    }}
+                    placeholder="e.g. Palitana, Manali, Kyoto, Varanasi, Amalfi"
                     className="w-full text-xs font-semibold text-[#111a16] dark:text-[#edf2ee] placeholder:text-[#97a59d] dark:placeholder:text-[#5f7368] focus:outline-none bg-transparent"
                   />
                 </div>
@@ -196,7 +231,11 @@ export default function HomePage() {
                   <Users className="h-4 w-4 text-[#0d5c48] dark:text-emerald-400 shrink-0" />
                   <select
                     value={travelers}
-                    onChange={(e) => setTravelers(e.target.value)}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      setTravelers(val);
+                      updateSearch({ travelers: Number(val) || 2 });
+                    }}
                     className="w-full text-xs font-semibold text-[#111a16] dark:text-[#edf2ee] focus:outline-none bg-transparent"
                   >
                     <option value="1">1 Solo</option>
@@ -216,7 +255,11 @@ export default function HomePage() {
                   <input
                     type="number"
                     value={budget}
-                    onChange={(e) => setBudget(e.target.value)}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      setBudget(val);
+                      updateSearch({ budget: Number(val) || 35000 });
+                    }}
                     placeholder="35000"
                     className="w-full text-xs font-semibold text-[#111a16] dark:text-[#edf2ee] focus:outline-none bg-transparent"
                   />
@@ -235,17 +278,52 @@ export default function HomePage() {
 
             <div className="flex items-center justify-center gap-2 mt-3 text-[11px] text-[#6c7d74] font-mono">
               <span className="font-semibold text-[#0d5c48]">Trending:</span>
-              {['Manali', 'Kyoto', 'Rishikesh', 'Sundarbans', 'Goa'].map((p) => (
+              {['Palitana', 'Manali', 'Kyoto', 'Rishikesh', 'Sundarbans', 'Goa'].map((p) => (
                 <button
                   key={p}
                   type="button"
-                  onClick={() => setQuickSearch(p)}
+                  onClick={() => {
+                    setQuickSearch(p);
+                    updateSearch({ destination: p });
+                  }}
                   className="hover:text-[#0d5c48] hover:underline cursor-pointer"
                 >
                   {p}
                 </button>
               ))}
             </div>
+
+            {/* Live Synchronized Journey Pill everywhere on Home */}
+            {currentDest && (
+              <div className="mt-4 p-3 rounded-2xl border border-emerald-300/60 dark:border-emerald-800/60 bg-emerald-50/70 dark:bg-emerald-950/40 backdrop-blur-md flex flex-col sm:flex-row items-center justify-between gap-3 text-xs animate-in fade-in duration-300">
+                <div className="flex items-center gap-2 text-left">
+                  <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse shrink-0" />
+                  <span className="font-semibold text-[#111a16] dark:text-[#edf2ee]">
+                    Active Journey: <span className="text-[#0d5c48] dark:text-emerald-300 font-bold underline">{currentDest}</span>
+                  </span>
+                  <span className="text-[#5f7067] dark:text-[#8ca397] font-mono text-[11px] hidden sm:inline">
+                    · ₹{Number(budget || 35000).toLocaleString()} cap · {travelers} traveler{Number(travelers) > 1 ? 's' : ''}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <Link href={`/plan?destination=${encodeURIComponent(currentDest)}&travelers=${travelers}&budget=${budget}`}>
+                    <Button size="sm" className="h-7 text-[11px] bg-[#0d5c48] hover:bg-[#094032] text-white rounded-lg shadow-2xs font-semibold">
+                      AI Planner →
+                    </Button>
+                  </Link>
+                  <Link href={`/explore?destination=${encodeURIComponent(currentDest)}`}>
+                    <Button size="sm" variant="outline" className="h-7 text-[11px] border-emerald-300/80 dark:border-emerald-700 rounded-lg text-[#0d5c48] dark:text-emerald-300 font-medium">
+                      Explore Dossier
+                    </Button>
+                  </Link>
+                  <Link href={`/copilot?destination=${encodeURIComponent(currentDest)}`}>
+                    <Button size="sm" variant="ghost" className="h-7 text-[11px] text-[#33423a] dark:text-[#8ca397] rounded-lg">
+                      Ask Copilot
+                    </Button>
+                  </Link>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </section>

@@ -47,7 +47,7 @@ import {
   formatCurrencyAmount,
   convertCurrency,
 } from '@/lib/services/currency-service';
-import { SYNC_EVENTS, emitTripChange } from '@/lib/services/sync-bus';
+import { SYNC_EVENTS, emitTripChange, getStoredActiveSearch, emitActiveSearch } from '@/lib/services/sync-bus';
 import {
   compareRoutesWithGemini,
   CompareRoutesResult,
@@ -100,10 +100,11 @@ const DESTINATION_SUGGESTIONS: Record<string, { name: string; country: string }>
 function PlannerContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const initialDest = searchParams?.get('destination') || '';
-  const initialOrigin = searchParams?.get('origin') || '';
-  const initialTravelers = Number(searchParams?.get('travelers')) || 2;
-  const initialRawBudget = Number(searchParams?.get('budget')) || 40000;
+  const stored = getStoredActiveSearch();
+  const initialDest = searchParams?.get('destination') || stored.destination || '';
+  const initialOrigin = searchParams?.get('origin') || stored.origin || '';
+  const initialTravelers = Number(searchParams?.get('travelers')) || stored.travelers || 2;
+  const initialRawBudget = Number(searchParams?.get('budget')) || stored.budget || 40000;
   const initialBudget = (initialRawBudget >= 1000000 || initialRawBudget === 4000000 || initialRawBudget === 40000000) ? 40000 : initialRawBudget;
 
   const [form, setForm] = useState({
@@ -118,6 +119,18 @@ function PlannerContent() {
     dietary: '',
     accessibility: '',
   });
+
+  // Keep active search in sync
+  useEffect(() => {
+    if (form.destination) {
+      emitActiveSearch({
+        destination: form.destination,
+        travelers: form.travelers,
+        budget: form.budget,
+        origin: form.origin,
+      });
+    }
+  }, [form.destination, form.travelers, form.budget, form.origin]);
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<{ message: string; details?: string; isPaisaKamao?: boolean } | null>(null);

@@ -16,6 +16,8 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { ThemeToggle } from '@/components/layout/theme-toggle';
+import { Button } from '@/components/ui/button';
+import { useActiveSearch } from '@/lib/services/sync-bus';
 
 export const navItems = [
   { href: '/trips', label: 'My Trips', icon: Plane },
@@ -31,6 +33,7 @@ export const navItems = [
 
 export function Sidebar() {
   const pathname = usePathname();
+  const { activeSearch } = useActiveSearch();
 
   return (
     <aside className="fixed inset-y-0 left-0 z-30 hidden w-64 flex-col border-r border-[#e8e6df] dark:border-[#1e2e26] bg-[#ffffff]/90 dark:bg-[#121c17]/90 backdrop-blur-xl lg:flex transition-colors">
@@ -97,6 +100,40 @@ export function Sidebar() {
           );
         })}
       </nav>
+
+      {/* Active Synchronized Journey Card */}
+      {activeSearch.destination && (
+        <div className="mx-3 my-2 p-3 rounded-2xl bg-gradient-to-br from-emerald-50/90 to-teal-50/70 dark:from-emerald-950/40 dark:to-teal-950/30 border border-emerald-200/80 dark:border-emerald-800/60 shadow-2xs">
+          <div className="flex items-center gap-1.5 text-[10px] font-mono uppercase tracking-wider text-[#0d5c48] dark:text-emerald-400 font-bold">
+            <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+            <span>Active Journey</span>
+          </div>
+          <div className="font-semibold text-xs text-[#111a16] dark:text-[#edf2ee] mt-0.5 truncate" title={activeSearch.destination}>
+            {activeSearch.destination}
+          </div>
+          <div className="text-[11px] text-[#5f7067] dark:text-[#8ca397] font-mono mt-0.5">
+            ₹{activeSearch.budget.toLocaleString()} · {activeSearch.travelers} pax
+          </div>
+          <div className="flex items-center gap-1.5 mt-2">
+            <Link
+              href={`/plan?destination=${encodeURIComponent(activeSearch.destination)}&travelers=${activeSearch.travelers}&budget=${activeSearch.budget}`}
+              className="flex-1"
+            >
+              <Button size="sm" className="w-full h-6 text-[10px] bg-[#0d5c48] hover:bg-[#094032] text-white rounded-lg p-0 font-medium">
+                Plan
+              </Button>
+            </Link>
+            <Link
+              href={`/explore?destination=${encodeURIComponent(activeSearch.destination)}`}
+              className="flex-1"
+            >
+              <Button size="sm" variant="outline" className="w-full h-6 text-[10px] border-emerald-300 dark:border-emerald-800 rounded-lg p-0 font-medium text-[#0d5c48] dark:text-emerald-300">
+                Explore
+              </Button>
+            </Link>
+          </div>
+        </div>
+      )}
 
       {/* Theme Switch Control */}
       <div className="px-4 py-3 border-t border-[#f0eee9] dark:border-[#1e2e26] flex items-center justify-between">

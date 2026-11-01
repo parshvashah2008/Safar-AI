@@ -2,6 +2,7 @@
 
 import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
+import Link from 'next/link';
 import {
   ArrowDownLeft,
   ArrowUpRight,
@@ -10,19 +11,21 @@ import {
   Plus,
   ShieldAlert,
   Sliders,
+  Sparkles,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { formatMoney, formatDate } from '@/lib/utils';
 import { formatTo12Hour } from '@/lib/utils/time-format';
-import { SYNC_EVENTS, emitWalletChange } from '@/lib/services/sync-bus';
+import { SYNC_EVENTS, emitWalletChange, useActiveSearch } from '@/lib/services/sync-bus';
 import { getTrips } from '@/lib/services/trip-service';
 import { getWalletForTrip, getWalletTransactions, fundWallet, updateWalletLimits, computeWalletSpendable } from '@/lib/services/wallet-service';
 import type { Trip, WalletAccount, WalletTransaction } from '@/types';
 
 function WalletContent() {
   const searchParams = useSearchParams();
+  const { activeSearch } = useActiveSearch();
   const initialTripId = searchParams?.get('tripId') || '';
 
   const [trips, setTrips] = useState<Trip[]>([]);
@@ -181,6 +184,23 @@ function WalletContent() {
           </div>
         )}
       </div>
+
+      {/* Synchronized Home Search Vault Banner */}
+      {activeSearch.destination && (
+        <div className="p-3.5 rounded-2xl bg-emerald-50/80 dark:bg-emerald-950/40 border border-emerald-300/80 dark:border-emerald-800/60 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+          <div className="flex items-center gap-2">
+            <Sparkles className="h-4 w-4 text-[#0d5c48] dark:text-emerald-400 shrink-0" />
+            <span className="text-[#111a16] dark:text-[#edf2ee]">
+              Active Journey Vault for <strong className="text-[#0d5c48] dark:text-emerald-300 underline">{activeSearch.destination}</strong>: Planned Cap <strong>₹{activeSearch.budget.toLocaleString()}</strong> ({activeSearch.travelers} travelers)
+            </span>
+          </div>
+          <Link href={`/plan?destination=${encodeURIComponent(activeSearch.destination)}&travelers=${activeSearch.travelers}&budget=${activeSearch.budget}`}>
+            <Button size="sm" className="h-7 text-[11px] bg-[#0d5c48] hover:bg-[#094032] text-white rounded-lg font-semibold shrink-0">
+              Open Full Planner →
+            </Button>
+          </Link>
+        </div>
+      )}
 
       {notice && (
         <div className="rounded-xl bg-teal-50 border border-teal-200 p-3 text-xs text-teal-800 flex items-center gap-2">

@@ -1,13 +1,15 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ArrowLeftRight, Check, Copy, Globe2, Languages, Loader2, Sparkles, Volume2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { translateWithClientAi } from '@/lib/ai/client-ai-engine';
+import { useActiveSearch } from '@/lib/services/sync-bus';
 
 const languages = [
   { code: 'hi', name: 'Hindi (हिंदी)' },
+  { code: 'gu', name: 'Gujarati (ગુજરાતી)' },
   { code: 'ja', name: 'Japanese (日本語)' },
   { code: 'fr', name: 'French (Français)' },
   { code: 'es', name: 'Spanish (Español)' },
@@ -29,6 +31,7 @@ const essentialPhrases = [
 ];
 
 export default function TranslatePage() {
+  const { activeSearch } = useActiveSearch();
   const [sourceText, setSourceText] = useState('Where is the nearest hospital?');
   const [targetLang, setTargetLang] = useState('hi');
   const [translatedText, setTranslatedText] = useState('निकटतम अस्पताल कहाँ है?');
@@ -37,6 +40,32 @@ export default function TranslatePage() {
   const [loading, setLoading] = useState(false);
   const [copied, setCopied] = useState(false);
   const [providerTag, setProviderTag] = useState('Autonomous Neural AI');
+
+  // Auto-tune language based on active search from homepage
+  useEffect(() => {
+    if (activeSearch.destination) {
+      const destLower = activeSearch.destination.toLowerCase();
+      if (destLower.includes('palitana') || destLower.includes('gujarat') || destLower.includes('surat') || destLower.includes('ahmedabad')) {
+        setTargetLang('gu');
+      } else if (destLower.includes('japan') || destLower.includes('kyoto') || destLower.includes('tokyo')) {
+        setTargetLang('ja');
+      } else if (destLower.includes('france') || destLower.includes('paris')) {
+        setTargetLang('fr');
+      } else if (destLower.includes('italy') || destLower.includes('amalfi') || destLower.includes('rome') || destLower.includes('florence')) {
+        setTargetLang('it');
+      } else if (destLower.includes('germany') || destLower.includes('berlin')) {
+        setTargetLang('de');
+      } else if (destLower.includes('spain') || destLower.includes('madrid') || destLower.includes('barcelona')) {
+        setTargetLang('es');
+      } else if (destLower.includes('thailand') || destLower.includes('bangkok') || destLower.includes('phuket')) {
+        setTargetLang('th');
+      } else if (destLower.includes('bali') || destLower.includes('indonesia')) {
+        setTargetLang('id');
+      } else if (destLower.includes('dubai') || destLower.includes('uae')) {
+        setTargetLang('ar');
+      }
+    }
+  }, [activeSearch.destination]);
 
   const handleTranslate = async (textToTranslate?: string) => {
     const text = (textToTranslate || sourceText).trim();
