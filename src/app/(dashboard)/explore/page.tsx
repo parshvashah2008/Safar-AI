@@ -16,6 +16,7 @@ import {
   ShieldCheck,
   CheckCircle2,
   ExternalLink,
+  Utensils,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { getDestinationImage } from '@/lib/constants/destination-images';
@@ -535,6 +536,102 @@ function ExploreContent() {
               <span className="text-xs font-semibold text-ink dark:text-[#edf2ee]">{customDossier.climateVibe}</span>
             </div>
           </div>
+
+          {/* Real Tourist Attractions & Monuments */}
+          {customDossier.touristPlaces && customDossier.touristPlaces.length > 0 && (
+            <div className="space-y-3 pt-2">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-ink dark:text-[#edf2ee] font-serif flex items-center gap-1.5">
+                  <MapPin className="h-3.5 w-3.5 text-teal-600 dark:text-emerald-400" />
+                  <span>Must-Visit Tourist Attractions & Heritage Sites:</span>
+                </span>
+                <span className="text-[10px] font-mono text-ink-400 dark:text-[#8ca397]">
+                  {customDossier.touristPlaces.length} Verified Landmarks
+                </span>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {customDossier.touristPlaces.map((att: any, i: number) => (
+                  <div key={i} className="p-3.5 rounded-xl border border-sand-200 dark:border-[#22352b] bg-white dark:bg-[#15221b] space-y-1.5 hover:border-teal-500/40 transition-all">
+                    <div className="flex items-center justify-between gap-2">
+                      <h4 className="text-xs font-bold text-ink dark:text-[#edf2ee]">{att.name}</h4>
+                      {att.category && (
+                        <span className="px-2 py-0.5 rounded-md bg-teal-50 dark:bg-emerald-950/60 text-teal-800 dark:text-emerald-300 text-[9px] font-mono font-semibold">
+                          {att.category}
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-[11px] text-ink-500 dark:text-[#8ca397] leading-relaxed">{att.description}</p>
+                    {att.bestTimeToVisit && (
+                      <p className="text-[10px] text-amber-700 dark:text-amber-300 font-medium pt-0.5">
+                        🕒 Best time: {att.bestTimeToVisit}
+                      </p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Authentic Local Restaurants & Cafes */}
+          {customDossier.iconicRestaurants && customDossier.iconicRestaurants.length > 0 && (
+            <div className="space-y-3 pt-2">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-ink dark:text-[#edf2ee] font-serif flex items-center gap-1.5">
+                  <Utensils className="h-3.5 w-3.5 text-amber-600 dark:text-amber-400" />
+                  <span>Authentic Local Restaurants & Eateries:</span>
+                </span>
+                <span className="text-[10px] font-mono text-ink-400 dark:text-[#8ca397]">
+                  {customDossier.iconicRestaurants.length} Gastronomic Picks
+                </span>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {customDossier.iconicRestaurants.map((res: any, i: number) => (
+                  <div key={i} className="p-3.5 rounded-xl border border-amber-200/70 dark:border-[#2b271d] bg-amber-50/20 dark:bg-[#181c19] space-y-1.5 hover:border-amber-400/60 transition-all">
+                    <div className="flex items-center justify-between gap-2">
+                      <h4 className="text-xs font-bold text-ink dark:text-[#edf2ee]">{res.name}</h4>
+                      {res.dietaryTags && (
+                        <span className="px-2 py-0.5 rounded-md bg-emerald-50 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 text-[9px] font-mono font-semibold">
+                          {res.dietaryTags}
+                        </span>
+                      )}
+                    </div>
+                    <div className="text-[11px] text-teal-800 dark:text-emerald-400 font-medium">
+                      {res.cuisineType}
+                    </div>
+                    {res.mustTryDishes && (
+                      <p className="text-[11px] text-ink-600 dark:text-[#a8beaf]">
+                        <strong className="text-ink dark:text-white">Must try:</strong> {res.mustTryDishes}
+                      </p>
+                    )}
+                    {res.atmosphere && (
+                      <p className="text-[10px] text-ink-400 dark:text-[#6a7d73] italic">
+                        Atmosphere: {res.atmosphere}
+                      </p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Regional Dishes & Flavors */}
+          {customDossier.localCuisine && customDossier.localCuisine.length > 0 && (
+            <div className="space-y-2 pt-2">
+              <span className="text-xs font-bold text-ink dark:text-[#edf2ee] font-serif flex items-center gap-1.5">
+                <span>Regional Specialties to Taste:</span>
+              </span>
+              <div className="flex flex-wrap gap-2">
+                {customDossier.localCuisine.map((dish: string, i: number) => (
+                  <span
+                    key={i}
+                    className="px-3 py-1.5 rounded-xl bg-sand-100 dark:bg-[#1a2b22] border border-sand-200 dark:border-[#22352b] text-[11px] font-medium text-ink-700 dark:text-[#edf2ee]"
+                  >
+                    🍲 {dish}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* 3-Tier Budget Matrix */}
           {customDossier.budgetTiers && (

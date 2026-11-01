@@ -178,8 +178,10 @@ You craft authentic, deeply researched, multi-day itineraries for any city, pilg
 CRITICAL RULES:
 1. ALWAYS use the real, authentic place names of attractions, temples, viewpoints, and restaurants.
    NEVER output generic placeholders like "Central Heritage Quarter", "Renowned Local Restaurant", or "Scenic Point".
+   For meal activities, place_name MUST be an actual, verified, highly rated restaurant, historic eatery, or street food stall in that city.
    For example, for Palitana use: Shatrunjaya Hill, Shri Adishwar Temple, Chaumukhji Temple, Ghee Kanta, Taleti Foot-hills, Hotel Sumeru, Hotel Shravak Jain Restaurant, etc.
-   For Paris use: Eiffel Tower, Louvre, Montmartre, etc.
+   For Paris use: Eiffel Tower, Louvre, Montmartre, Café de Flore, etc.
+   For Tokyo use: Senso-ji, Shibuya Crossing, Meiji Shrine, Afuri Ramen, etc.
 2. Every activity MUST have accurate, realistic latitude and longitude coordinates.
 3. Every activity MUST use strict 12-hour clock format (e.g., "06:30 AM", "01:00 PM", "07:30 PM").
 4. Reflect dietary preferences strictly (e.g. Jain / pure vegetarian for pilgrimage destinations).
@@ -229,35 +231,77 @@ Return JSON ONLY:
 
 /**
  * 2. Generate Full Destination Dossier for /explore
+ * Curates exhaustive global data for ANY city, region, or town on Earth:
+ * Real tourist attractions, authentic named restaurants, hidden alleys, and local cuisine.
  */
 export async function generateClientExploreDossier(
   destination: string,
   currency: string = 'INR'
 ): Promise<any> {
   const systemInstruction = `You are Safar AI's World Knowledge Dossier Curator.
-Provide a rich, deeply researched destination dossier for the requested city, region, or pilgrimage.
-CRITICAL:
-- Use real names for landmarks, natural wonders, and authentic local food dishes.
-- Give real coordinates (latitude and longitude).
-- Return JSON ONLY.`;
+You possess exhaustive, deeply grounded travel intelligence for EVERY city, town, island, pilgrimage, and country on Earth.
+CRITICAL ENCYCLOPEDIC RULES:
+1. ALWAYS provide real, named tourist attractions and heritage landmarks with authentic local histories.
+2. ALWAYS provide real, existing, highly regarded local restaurants, authentic cafes, and street food bazaars with exact cuisine types and dietary notes (e.g., Pure Vegetarian, Jain, Halal, Vegan, Seafood).
+3. NEVER return generic placeholders like "Local Restaurant" or "Scenic Point". Use real names (e.g. for Palitana: Hotel Shravak Jain Restaurant, Hotel Sumeru, Ghee Kanta; for Kyoto: Nishiki Market, Gion Karyo; for Paris: Le Comptoir du Relais, Café de Flore).
+4. Provide realistic GPS coordinates (lat, lng).
+5. Output valid JSON ONLY matching the schema.`;
 
-  const prompt = `Create a travel dossier for "${destination}". Currency: ${currency}.
+  const prompt = `Create an exhaustive travel and gastronomy dossier for "${destination}". Currency: ${currency}.
 Return JSON ONLY matching:
 {
   "name": "${destination}",
   "country": string,
   "region": string,
   "isDomestic": boolean,
-  "tagline": "Compelling poetic one-liner",
-  "overview": "2-3 rich paragraphs detailing historical significance, geography, spiritual importance, and vibe.",
-  "idealDuration": "e.g. 2 - 3 Days",
+  "tagline": "Compelling poetic one-liner capturing the city's spirit",
+  "overview": "2-3 rich paragraphs detailing historical origins, cultural significance, geographical landscape, and atmospheric vibe.",
+  "idealDuration": "e.g. 3 - 4 Days",
   "bestMonths": "e.g. October to March",
-  "climateVibe": "e.g. Mild winters, crisp mornings, warm sunny afternoons",
-  "highlights": ["Real Attraction 1: with detail", "Real Attraction 2: with detail", "Real Attraction 3: with detail", "Real Attraction 4: with detail"],
-  "localCuisine": ["Authentic Dish 1", "Authentic Dish 2", "Authentic Dish 3", "Authentic Dish 4"],
-  "travelTips": ["Actionable tip 1", "Actionable tip 2", "Actionable tip 3", "Actionable tip 4"],
-  "hiddenGems": ["Offbeat spot 1", "Offbeat spot 2", "Offbeat spot 3"],
-  "estDailyBudget": "e.g. ${currency} 2,000 - 4,500 per traveler",
+  "climateVibe": "e.g. Crisp sunny mornings, mild evenings",
+  "touristPlaces": [
+    {
+      "name": "Actual Real Attraction Name",
+      "category": "Heritage / Nature / Temple / Architecture",
+      "description": "Why this place is iconic, what to see, and historical significance",
+      "bestTimeToVisit": "e.g. Sunrise / Early Morning"
+    }
+  ],
+  "iconicRestaurants": [
+    {
+      "name": "Actual Real Restaurant / Cafe / Eatery Name",
+      "cuisineType": "e.g. Authentic Gujarati Thali / Traditional Trattoria / Street Food Alley",
+      "mustTryDishes": "Signature local dish to order here",
+      "dietaryTags": "e.g. Pure Veg / Jain Friendly / Halal / Vegan Options",
+      "atmosphere": "e.g. Historic, Bustling, Rooftop with view"
+    }
+  ],
+  "localCuisine": [
+    "Famous Local Dish 1: with ingredients/description",
+    "Famous Local Dish 2: with ingredients/description",
+    "Famous Local Dish 3: with ingredients/description",
+    "Famous Local Dish 4: with ingredients/description"
+  ],
+  "secretExperiences": [
+    {
+      "title": "Offbeat Hidden Experience",
+      "description": "What to do away from tourist crowds",
+      "insiderTip": "Specific timing, etiquette, or local trick"
+    }
+  ],
+  "travelTips": [
+    "Practical safety, transit, or cash payment tip",
+    "Local cultural etiquette or dress code",
+    "Best viewpoint or sunrise photography spot",
+    "Local market or craft souvenir recommendation"
+  ],
+  "budgetTiers": {
+    "backpacker": "e.g. ${currency} 1,500 - 2,500 / day",
+    "comfortable": "e.g. ${currency} 4,500 - 7,500 / day",
+    "luxury": "e.g. ${currency} 15,000+ / day"
+  },
+  "transitGateway": "Direct flight/rail hubs and how to reach the city center",
+  "visaAndPermits": "Visa requirements or domestic travel permits if any",
   "coordinates": { "lat": number, "lng": number }
 }`;
 
