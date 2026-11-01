@@ -1,0 +1,224 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 40 20% 98%;
+    --foreground: 160 20% 10%;
+    --card: 0 0% 100%;
+    --card-foreground: 160 20% 10%;
+    --primary: 162 70% 20%;
+    --primary-foreground: 0 0% 100%;
+    --border: 40 10% 90%;
+    --input: 40 10% 90%;
+    --ring: 162 70% 30%;
+
+    --safar-bg: #faf9f6;
+    --safar-surface: #ffffff;
+    --safar-surface-2: #f4f3ee;
+    --safar-teal: #0d5c48;
+    --safar-teal-light: #12795f;
+    --safar-sand: #c99b5b;
+    --safar-sand-light: #dfb981;
+    --safar-ink: #111a16;
+    --safar-muted: #5f7067;
+    --safar-line: #e8e6df;
+  }
+
+  .dark {
+    --background: 160 25% 6%;
+    --foreground: 40 15% 95%;
+    --card: 160 20% 9%;
+    --card-foreground: 40 15% 95%;
+    --primary: 162 65% 35%;
+    --primary-foreground: 0 0% 100%;
+    --border: 160 15% 18%;
+    --input: 160 15% 18%;
+    --ring: 162 65% 45%;
+
+    --safar-bg: #0b110e;
+    --safar-surface: #121c17;
+    --safar-surface-2: #18251f;
+    --safar-teal: #198066;
+    --safar-teal-light: #25a383;
+    --safar-sand: #dfb981;
+    --safar-sand-light: #ebd6a8;
+    --safar-ink: #edf2ee;
+    --safar-muted: #8ca397;
+    --safar-line: #1e2e26;
+  }
+}
+
+body {
+  background-color: var(--safar-bg);
+  color: var(--safar-ink);
+  font-family: var(--font-dm-sans), system-ui, -apple-system, sans-serif;
+  margin: 0;
+  min-width: 320px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Luxury micro-interactions and scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #dcd9d0;
+  border-radius: 9999px;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: #2b3d34;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #b8b5ab;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #394f44;
+}
+
+.glass-panel {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(232, 230, 223, 0.8);
+}
+
+.dark .glass-panel {
+  background: rgba(18, 28, 23, 0.85);
+  border: 1px solid rgba(34, 50, 42, 0.8);
+}
+
+.luxury-card {
+  background: #ffffff;
+  border: 1px solid #e8e6df;
+  box-shadow: 0 2px 8px -2px rgba(17, 26, 22, 0.04), 0 8px 24px -4px rgba(17, 26, 22, 0.05);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.dark .luxury-card {
+  background: #121c17;
+  border: 1px solid #1e2e26;
+  box-shadow: 0 4px 16px -2px rgba(0, 0, 0, 0.4);
+}
+
+.luxury-card:hover {
+  transform: translateY(-2px);
+  border-color: #cbd5cf;
+  box-shadow: 0 8px 24px -4px rgba(17, 26, 22, 0.08), 0 20px 48px -8px rgba(17, 26, 22, 0.06);
+}
+
+.dark .luxury-card:hover {
+  border-color: #2e4439;
+  box-shadow: 0 8px 28px -4px rgba(0, 0, 0, 0.6);
+}
+
+.luxury-gradient {
+  background: linear-gradient(135deg, #094032 0%, #0d5c48 50%, #157960 100%);
+}
+
+.dark .luxury-gradient {
+  background: linear-gradient(135deg, #05261e 0%, #0d5c48 50%, #14725b 100%);
+}
+
+.gold-shimmer {
+  background: linear-gradient(90deg, #b88a47 0%, #dfb981 50%, #b88a47 100%);
+  background-size: 200% auto;
+  color: transparent;
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+
+/* Dark mode auto-inversion for white cards, inputs & panels */
+.dark .bg-white {
+  background-color: var(--safar-surface) !important;
+}
+
+.dark .bg-\[\#ffffff\]\/85,
+.dark .bg-\[\#ffffff\]\/90 {
+  background-color: rgba(18, 28, 23, 0.9) !important;
+}
+
+.dark .border-\[\#e8e6df\],
+.dark .border-\[\#f0eee9\],
+.dark .border-sand-200,
+.dark .border-sand-300,
+.dark .border-ivory-300,
+.dark .border-ivory-200 {
+  border-color: var(--safar-line) !important;
+}
+
+.dark .text-ink-900,
+.dark .text-\[\#111a16\] {
+  color: var(--safar-ink) !important;
+}
+
+.dark .text-ink-500,
+.dark .text-ink-600,
+.dark .text-\[\#405048\],
+.dark .text-\[\#6c7d74\] {
+  color: var(--safar-muted) !important;
+}
+
+.dark .bg-sand-50,
+.dark .bg-sand-100,
+.dark .bg-ivory-100,
+.dark .bg-ivory-50,
+.dark .bg-\[\#f4f3ee\],
+.dark .bg-\[\#faf9f6\] {
+  background-color: var(--safar-surface-2) !important;
+}
+
+.dark h1,
+.dark h2,
+.dark h3,
+.dark h4 {
+  color: var(--safar-ink);
+}
+
+.dark input,
+.dark select,
+.dark textarea {
+  background-color: var(--safar-surface-2) !important;
+  color: var(--safar-ink) !important;
+  border-color: var(--safar-line) !important;
+}
+
+/* Suppress Netlify collaborative feedback drawer badge overlay */
+netlify-drawer,
+#netlify-drawer,
+[data-netlify-drawer],
+#netlify-drawer-iframe,
+div[class*="netlify-drawer"],
+div[id*="netlify-drawer"],
+div[class*="netlify-feedback"],
+iframe[title*="Netlify"],
+iframe[src*="netlify"],
+[aria-label*="Netlify feedback"],
+[title*="Netlify Feedback"],
+button[aria-label*="Netlify"],
+div[data-netlify-identity-button] {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+  opacity: 0 !important;
+  width: 0 !important;
+  height: 0 !important;
+  position: absolute !important;
+  left: -9999px !important;
+}
+
+/* Ensure crystal clear contrast for headings in light and dark mode */
+h1, h2, h3, h4 {
+  color: var(--safar-ink);
+}

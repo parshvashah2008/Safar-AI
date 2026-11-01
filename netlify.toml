@@ -1,0 +1,17 @@
+[build]
+  command = "npm run build"
+  publish = ".next"
+
+[build.environment]
+  NODE_VERSION = "20"
+  NETLIFY_FEEDBACK_DISABLED = "true"
+  NETLIFY_DRAWER_ENABLED = "false"
+
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Netlify-Drawer = "off"
+    Cache-Control = "public, max-age=0, must-revalidate"
