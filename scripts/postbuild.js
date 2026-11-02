@@ -23,9 +23,15 @@ if (fs.existsSync(appDir)) {
   for (const file of files) {
     if (file.endsWith('.html')) {
       const src = path.join(appDir, file);
-      fs.copyFileSync(src, path.join(nextDir, file));
-      fs.copyFileSync(src, path.join(distDir, file));
-      console.log(`Copied ${file} to dist/ and .next/`);
+      let htmlContent = fs.readFileSync(src, 'utf8');
+      const cacheMeta = '<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />\n<meta http-equiv="Pragma" content="no-cache" />\n<meta http-equiv="Expires" content="0" />';
+      if (htmlContent.includes('<head>')) {
+        htmlContent = htmlContent.replace('<head>', `<head>\n${cacheMeta}`);
+      }
+
+      fs.writeFileSync(path.join(nextDir, file), htmlContent, 'utf8');
+      fs.writeFileSync(path.join(distDir, file), htmlContent, 'utf8');
+      console.log(`Copied ${file} with cache-busting headers to dist/ and .next/`);
 
       // Also create folder/index.html for clean URLs (e.g. dist/plan/index.html)
       const baseName = path.basename(file, '.html');
@@ -34,21 +40,23 @@ if (fs.existsSync(appDir)) {
         if (!fs.existsSync(subDir)) {
           fs.mkdirSync(subDir, { recursive: true });
         }
-        fs.copyFileSync(src, path.join(subDir, 'index.html'));
+        fs.writeFileSync(path.join(subDir, 'index.html'), htmlContent, 'utf8');
       }
     }
   }
 }
 
-// 2. Mirror static assets to dist/_next/static and .next/_next/static
+// 2. Mirror static assets to dist/_next/static, .next/_next/static, and dist/static
 const staticSrc = path.join(nextDir, 'static');
 const distNextStatic = path.join(distDir, '_next', 'static');
 const nextNextStatic = path.join(nextDir, '_next', 'static');
+const distRootStatic = path.join(distDir, 'static');
 
 if (fs.existsSync(staticSrc)) {
   fs.cpSync(staticSrc, distNextStatic, { recursive: true });
   fs.cpSync(staticSrc, nextNextStatic, { recursive: true });
-  console.log('Mirrored static assets to dist/_next/static');
+  fs.cpSync(staticSrc, distRootStatic, { recursive: true });
+  console.log('Mirrored static assets to dist/_next/static and dist/static');
 }
 
 // 3. Copy public files (favicon, images, etc.) to dist/

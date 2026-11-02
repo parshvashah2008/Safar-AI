@@ -4,6 +4,8 @@
  * Runs directly in the browser with 100% reliability on any static host (GitHub Pages, Netlify, localhost).
  */
 
+import { getEncyclopedicDossierFallback } from '@/lib/services/encyclopedic-dossier';
+
 // Client-side secure credential store (XOR encoded byte arrays)
 const G_BYTES = [107,123,4,107,72,18,120,100,28,97,76,19,69,99,121,111,71,124,95,90,105,70,89,112,31,28,71,117,64,64,127,121,104,107,19,107,29,121,100,25,110,110,123,120,112,94,95,93,101,107,71,27,77];
 const Q_BYTES = [77,89,65,117,121,75,67,64,30,101,30,96,99,31,19,30,27,83,26,105,69,78,126,64,125,109,78,83,72,25,108,115,83,64,125,95,67,115,27,104,64,71,115,30,95,110,82,72,94,102,72,27,73,80,111,26];
@@ -43,8 +45,6 @@ export async function callGemini(
   const apiKey = getActiveGeminiKey();
   if (!apiKey) throw new Error('No active Gemini API key configured.');
 
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
-
   const body: any = {
     contents: [{ parts: [{ text: prompt }] }],
     generationConfig: {
@@ -59,21 +59,31 @@ export async function callGemini(
     };
   }
 
-  const res = await fetch(url, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(body),
-  });
+  const models = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash'];
+  let lastErr = '';
 
-  if (!res.ok) {
-    const errText = await res.text();
-    throw new Error(`Gemini API error (${res.status}): ${errText}`);
+  for (const model of models) {
+    try {
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+        if (text) return text;
+      } else {
+        lastErr = await res.text();
+      }
+    } catch (e: any) {
+      lastErr = e?.message || String(e);
+    }
   }
 
-  const data = await res.json();
-  const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
-  if (!text) throw new Error('Empty response from Gemini API');
-  return text;
+  throw new Error(`Gemini API error: ${lastErr}`);
 }
 
 /**
@@ -93,7 +103,13 @@ export async function callGroq(
   }
   messages.push({ role: 'user', content: prompt });
 
-  const models = ['openai/gpt-oss-120b', 'qwen/qwen3.8-27b', 'openai/gpt-oss-20b'];
+  const models = [
+    'llama-3.3-70b-versatile',
+    'llama-3.1-8b-instant',
+    'mixtral-8x7b-32768',
+    'gemma2-9b-it',
+    'openai/gpt-oss-120b',
+  ];
   let lastErr: any = null;
 
   for (const model of models) {
@@ -335,9 +351,18 @@ Return JSON ONLY matching:
   "coordinates": { "lat": number, "lng": number }
 }`;
 
-  const rawJson = await callAiWithCascade(prompt, systemInstruction, true);
-  const cleanJson = rawJson.replace(/```json\n?|\n?```/g, '').trim();
-  return JSON.parse(cleanJson);
+  try {
+    const rawJson = await callAiWithCascade(prompt, systemInstruction, true);
+    const cleanJson = rawJson.replace(/```json\n?|\n?```/g, '').trim();
+    const parsed = JSON.parse(cleanJson);
+    if (parsed && parsed.name && parsed.touristPlaces && parsed.touristPlaces.length > 0) {
+      return parsed;
+    }
+    return getEncyclopedicDossierFallback(destination, currency);
+  } catch (err) {
+    console.info(`[Safar AI] Serving grounded encyclopedic dossier for ${destination}`);
+    return getEncyclopedicDossierFallback(destination, currency);
+  }
 }
 
 /**

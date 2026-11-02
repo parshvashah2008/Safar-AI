@@ -87,39 +87,96 @@ export function TripDetailView({ tripId }: { tripId: string }) {
 
     // Auto-sanitize legacy placeholder names or lowercase titles
     const cleanStops = tripStops.map((s) => {
-      let placeName = (s as any).place_name || s.title || '';
+      let placeName = (s as any).place_name || (s as any).place_id || s.title || '';
+      let placeId = (s as any).place_id || placeName;
       let title = s.title || '';
       let desc = s.description || '';
       const destLower = (tripData.destination || '').toLowerCase();
+      const capitalDest = tripData.destination.charAt(0).toUpperCase() + tripData.destination.slice(1);
 
-      // Fix lowercase destination prefix in placeName or title
-      if (placeName.startsWith(destLower + ' ') || placeName.startsWith(destLower.trim() + ' ')) {
-        const capitalDest = tripData.destination.charAt(0).toUpperCase() + tripData.destination.slice(1);
+      // Fix lowercase destination prefix in placeName, placeId, or title
+      if (placeName.toLowerCase().startsWith(destLower + ' ') || placeName.toLowerCase().startsWith(destLower.trim() + ' ')) {
         placeName = placeName.replace(new RegExp(`^${destLower}`, 'i'), capitalDest);
       }
-      if (title.includes(destLower)) {
-        const capitalDest = tripData.destination.charAt(0).toUpperCase() + tripData.destination.slice(1);
+      if (placeId.toLowerCase().startsWith(destLower + ' ') || placeId.toLowerCase().startsWith(destLower.trim() + ' ')) {
+        placeId = placeId.replace(new RegExp(`^${destLower}`, 'i'), capitalDest);
+      }
+      if (title.toLowerCase().includes(destLower)) {
         title = title.replace(new RegExp(destLower, 'gi'), capitalDest);
+      }
+      if (desc.toLowerCase().includes(`streets of ${destLower}`)) {
+        desc = desc.replace(new RegExp(`streets of ${destLower}`, 'gi'), `streets of ${capitalDest}`);
+      }
+      if (desc.toLowerCase().includes(`around ${destLower}`)) {
+        desc = desc.replace(new RegExp(`around ${destLower}`, 'gi'), `around ${capitalDest}`);
+      }
+      if (desc.toLowerCase().includes(`across ${destLower}`)) {
+        desc = desc.replace(new RegExp(`across ${destLower}`, 'gi'), `across ${capitalDest}`);
       }
 
       // Palitana legacy cleaning (replaces generic placeholders with authentic Shatrunjaya stops)
       if (destLower.includes('palitana')) {
-        if (placeName.toLowerCase().includes('central heritage quarter') || title.toLowerCase().includes('central district')) {
+        if (
+          placeName.toLowerCase().includes('central heritage quarter') ||
+          placeId.toLowerCase().includes('central heritage quarter') ||
+          title.toLowerCase().includes('central district') ||
+          title.toLowerCase().includes('central heritage')
+        ) {
           title = 'Arrival & Taleti Sacred Foothills Orientation';
           placeName = 'Taleti Road Dharamshala Precinct, Palitana';
+          placeId = 'Taleti Road Dharamshala Precinct, Palitana';
           desc = 'Arrive in Palitana, check in near Taleti Road, and take an orientation walk near the sacred foothills.';
-        } else if (placeName.toLowerCase().includes('renowned local restaurant')) {
+        } else if (
+          placeName.toLowerCase().includes('renowned local restaurant') ||
+          placeId.toLowerCase().includes('renowned local restaurant') ||
+          title.toLowerCase().includes('gastronomy lunch')
+        ) {
           title = 'Traditional Pure Jain Satvik Lunch';
-          placeName = 'Hotel Shravak / Taleti Bhojanshala, Palitana';
+          placeName = 'Hotel Shravak Satvik Bhojanshala, Palitana';
+          placeId = 'Hotel Shravak Satvik Bhojanshala, Palitana';
           desc = 'Wholesome, freshly prepared satvik Jain thali near Taleti gate.';
-        } else if (placeName.toLowerCase().includes('scenic point')) {
+        } else if (
+          placeName.toLowerCase().includes('scenic point') ||
+          placeId.toLowerCase().includes('scenic point') ||
+          title.toLowerCase().includes('scenic viewpoint')
+        ) {
           title = 'Hastagiri Tirth & Shatrunji River Viewpoint';
           placeName = 'Hastagiri Jain Tirth Lookout, Palitana';
+          placeId = 'Hastagiri Jain Tirth Lookout, Palitana';
           desc = 'Panoramic viewpoint overlooking the Shatrunjaya mountain range and Shetrunji river basin.';
+        } else if (
+          placeName.toLowerCase().includes('dining quarter') ||
+          placeId.toLowerCase().includes('dining quarter') ||
+          title.toLowerCase().includes('evening culinary') ||
+          title.toLowerCase().includes('night walk')
+        ) {
+          title = 'Evening Taleti Bazaar & Satvik Dining Walk';
+          placeName = 'Hotel Sumeru Heritage Dining Hall, Palitana';
+          placeId = 'Hotel Sumeru Heritage Dining Hall, Palitana';
+          desc = 'Peaceful evening stroll through the Taleti market with warm Gujarati satvik dining.';
+        }
+      } else {
+        // Universal cleaning for any other city on Earth
+        if (placeName.toLowerCase().includes('central heritage quarter') || placeId.toLowerCase().includes('central heritage quarter')) {
+          placeName = `${capitalDest} Historic Old Town & Central Plaza`;
+          placeId = placeName;
+          title = `Arrival & Historic District Orientation in ${capitalDest}`;
+        } else if (placeName.toLowerCase().includes('renowned local restaurant') || placeId.toLowerCase().includes('renowned local restaurant')) {
+          placeName = `Authentic Heritage Bistro, ${capitalDest}`;
+          placeId = placeName;
+          title = `Authentic Regional Gastronomy Lunch`;
+        } else if (placeName.toLowerCase().includes('scenic point') || placeId.toLowerCase().includes('scenic point')) {
+          placeName = `${capitalDest} Panoramic Lookout & Viewpoint`;
+          placeId = placeName;
+          title = `Panoramic Scenic Viewpoint & Cultural Experience`;
+        } else if (placeName.toLowerCase().includes('dining quarter') || placeId.toLowerCase().includes('dining quarter')) {
+          placeName = `${capitalDest} Historic Dining Terrace`;
+          placeId = placeName;
+          title = `Evening Dinner & Atmospheric Night Walk`;
         }
       }
 
-      return { ...s, title, place_name: placeName, description: desc };
+      return { ...s, title, place_name: placeName, place_id: placeId, description: desc };
     });
 
     setDays(tripDays);
