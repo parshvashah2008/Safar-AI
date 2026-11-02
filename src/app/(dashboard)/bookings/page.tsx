@@ -860,248 +860,51 @@ function BookingsContent() {
               </div>
             )}
 
-            {/* 3-Tier Strategy Comparison Showcase */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">
-              {/* 1. Super Money Saver */}
-              <button
-                type="button"
-                onClick={() => setStrategyFilter(strategyFilter === 'super_money_saver' ? 'all' : 'super_money_saver')}
-                className={`p-4 rounded-2xl border text-left transition-all ${
-                  strategyFilter === 'super_money_saver'
-                    ? 'border-emerald-600 dark:border-emerald-500 bg-emerald-50 dark:bg-emerald-950/60 ring-2 ring-emerald-500/40 shadow-sm'
-                    : 'border-sand-200 dark:border-[#22352b] bg-white dark:bg-[#15221b] hover:border-emerald-500/50'
-                }`}
-              >
-                <div className="flex items-center justify-between">
-                  <span className="font-mono text-[10px] font-bold text-emerald-800 dark:text-emerald-300 bg-emerald-100/80 dark:bg-emerald-900/60 px-2.5 py-0.5 rounded-full flex items-center gap-1 border border-emerald-300 dark:border-emerald-700">
-                    <span>💰 SUPER MONEY SAVER</span>
-                  </span>
-                  <span className="text-[10px] font-mono text-ink-400">Lowest Fare</span>
-                </div>
-                <div className="mt-2.5">
-                  <div className="text-2xl font-bold font-serif text-ink-900 dark:text-[#edf2ee]">
-                    {flightStrategyShowcase.saver?.priceBreakdown.formattedTotal || '—'}
-                  </div>
-                  <div className="text-xs font-semibold text-emerald-800 dark:text-emerald-400 mt-0.5">
-                    {flightStrategyShowcase.saver?.airline} • {flightStrategyShowcase.saver?.duration}
-                  </div>
-                  <p className="text-[11px] text-ink-500 dark:text-[#8ca397] mt-1 leading-relaxed">
-                    Ultra-low corridor fare · Maximum savings · Essential 7kg cabin baggage
-                  </p>
-                </div>
-              </button>
-
-              {/* 2. Balanced Value */}
-              <button
-                type="button"
-                onClick={() => setStrategyFilter(strategyFilter === 'balanced' ? 'all' : 'balanced')}
-                className={`p-4 rounded-2xl border text-left transition-all relative ${
-                  strategyFilter === 'balanced'
-                    ? 'border-teal-600 dark:border-teal-500 bg-teal-50 dark:bg-teal-950/60 ring-2 ring-teal-500/40 shadow-sm'
-                    : 'border-sand-200 dark:border-[#22352b] bg-white dark:bg-[#15221b] hover:border-teal-500/50'
-                }`}
-              >
-                <span className="absolute -top-2 right-3 font-mono text-[8px] bg-teal-800 text-white font-bold px-2 py-0.5 rounded-full shadow-2xs">
-                  RECOMMENDED
-                </span>
-                <div className="flex items-center justify-between">
-                  <span className="font-mono text-[10px] font-bold text-teal-800 dark:text-teal-300 bg-teal-100/80 dark:bg-teal-900/60 px-2.5 py-0.5 rounded-full flex items-center gap-1 border border-teal-300 dark:border-teal-700">
-                    <span>⚖️ BALANCED VALUE</span>
-                  </span>
-                  <span className="text-[10px] font-mono text-ink-400">Optimal Value</span>
-                </div>
-                <div className="mt-2.5">
-                  <div className="text-2xl font-bold font-serif text-ink-900 dark:text-[#edf2ee]">
-                    {flightStrategyShowcase.balanced?.priceBreakdown.formattedTotal || '—'}
-                  </div>
-                  <div className="text-xs font-semibold text-teal-800 dark:text-teal-300 mt-0.5">
-                    {flightStrategyShowcase.balanced?.airline} • {flightStrategyShowcase.balanced?.duration}
-                  </div>
-                  <p className="text-[11px] text-ink-500 dark:text-[#8ca397] mt-1 leading-relaxed">
-                    Balanced sweet spot · Checked 20kg baggage + hot meal included
-                  </p>
-                </div>
-              </button>
-
-              {/* 3. Fastest & Premium (Expensive) */}
-              <button
-                type="button"
-                onClick={() => setStrategyFilter(strategyFilter === 'fastest_expensive' ? 'all' : 'fastest_expensive')}
-                className={`p-4 rounded-2xl border text-left transition-all ${
-                  strategyFilter === 'fastest_expensive'
-                    ? 'border-amber-600 dark:border-amber-500 bg-amber-50 dark:bg-amber-950/60 ring-2 ring-amber-500/40 shadow-sm'
-                    : 'border-sand-200 dark:border-[#22352b] bg-white dark:bg-[#15221b] hover:border-amber-500/50'
-                }`}
-              >
-                <div className="flex items-center justify-between">
-                  <span className="font-mono text-[10px] font-bold text-amber-800 dark:text-amber-300 bg-amber-100/80 dark:bg-amber-900/60 px-2.5 py-0.5 rounded-full flex items-center gap-1 border border-amber-300 dark:border-amber-700">
-                    <span>⚡💎 FASTEST & PREMIUM</span>
-                  </span>
-                  <span className="text-[10px] font-mono text-ink-400">VIP Express</span>
-                </div>
-                <div className="mt-2.5">
-                  <div className="text-2xl font-bold font-serif text-ink-900 dark:text-[#edf2ee]">
-                    {flightStrategyShowcase.fastest?.priceBreakdown.formattedTotal || '—'}
-                  </div>
-                  <div className="text-xs font-semibold text-amber-800 dark:text-amber-400 mt-0.5">
-                    {flightStrategyShowcase.fastest?.airline} • {flightStrategyShowcase.fastest?.duration}
-                  </div>
-                  <p className="text-[11px] text-ink-500 dark:text-[#8ca397] mt-1 leading-relaxed">
-                    Express non-stop direct · Flagship widebody fleet & priority check-in
-                  </p>
-                </div>
-              </button>
-            </div>
-
-            {/* Filter Bar with Strategy Chips & Sorting */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-sand-50/80 dark:bg-[#18251f]/60 p-3 rounded-xl border border-sand-200 dark:border-[#22332a]">
-              <div className="flex flex-wrap items-center gap-2">
-                <span className="text-[11px] font-mono uppercase font-bold text-ink-500 dark:text-ink-400">Strategy:</span>
-                <button
-                  type="button"
-                  onClick={() => setStrategyFilter('all')}
-                  className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-all ${
-                    strategyFilter === 'all'
-                      ? 'bg-[#0d5c48] text-white shadow-xs'
-                      : 'bg-white dark:bg-[#121c17] text-ink-700 dark:text-[#8ca397] border border-sand-200 dark:border-[#22332a]'
-                  }`}
-                >
-                  All ({rawFlightResults.length})
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setStrategyFilter('super_money_saver')}
-                  className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-all flex items-center gap-1 ${
-                    strategyFilter === 'super_money_saver'
-                      ? 'bg-emerald-700 text-white shadow-xs'
-                      : 'bg-white dark:bg-[#121c17] text-ink-700 dark:text-[#8ca397] border border-sand-200 dark:border-[#22332a]'
-                  }`}
-                >
-                  <span>💰 Super Money Saver</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setStrategyFilter('balanced')}
-                  className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-all flex items-center gap-1 ${
-                    strategyFilter === 'balanced'
-                      ? 'bg-teal-700 text-white shadow-xs'
-                      : 'bg-white dark:bg-[#121c17] text-ink-700 dark:text-[#8ca397] border border-sand-200 dark:border-[#22332a]'
-                  }`}
-                >
-                  <span>⚖️ Balanced</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setStrategyFilter('fastest_expensive')}
-                  className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-all flex items-center gap-1 ${
-                    strategyFilter === 'fastest_expensive'
-                      ? 'bg-amber-700 text-white shadow-xs'
-                      : 'bg-white dark:bg-[#121c17] text-ink-700 dark:text-[#8ca397] border border-sand-200 dark:border-[#22332a]'
-                  }`}
-                >
-                  <span>⚡💎 Fastest & Premium</span>
-                </button>
-              </div>
-
-              <div className="flex items-center gap-2 text-xs">
-                <span className="text-ink-400 font-mono text-[11px]">Sort:</span>
-                <button
-                  onClick={() => setFlightSort('cheapest')}
-                  className={`px-2 py-0.5 rounded text-[11px] font-medium transition-colors ${
-                    flightSort === 'cheapest' ? 'bg-[#0d5c48] text-white font-semibold' : 'text-ink-600 dark:text-ink-400 hover:text-ink-900'
-                  }`}
-                >
-                  Cheapest
-                </button>
-                <button
-                  onClick={() => setFlightSort('fastest')}
-                  className={`px-2 py-0.5 rounded text-[11px] font-medium transition-colors ${
-                    flightSort === 'fastest' ? 'bg-[#0d5c48] text-white font-semibold' : 'text-ink-600 dark:text-ink-400 hover:text-ink-900'
-                  }`}
-                >
-                  Fastest
-                </button>
-                <button
-                  onClick={() => setFlightSort('value')}
-                  className={`px-2 py-0.5 rounded text-[11px] font-medium transition-colors ${
-                    flightSort === 'value' ? 'bg-[#0d5c48] text-white font-semibold' : 'text-ink-600 dark:text-ink-400 hover:text-ink-900'
-                  }`}
-                >
-                  Best Value
-                </button>
-              </div>
-            </div>
-
-            {/* Autonomous AI Airfare Fare Forecaster & Booking Strategist */}
-            <div className="rounded-2xl border border-teal-200 dark:border-emerald-800/60 bg-gradient-to-r from-teal-50/70 via-white to-amber-50/40 dark:from-emerald-950/40 dark:via-[#14231b] dark:to-[#0c1410] p-4 sm:p-5 shadow-2xs space-y-3">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-teal-100 dark:border-emerald-900/40 pb-2.5">
-                <div className="flex items-center gap-2">
-                  <div className="h-7 w-7 rounded-lg bg-teal-800 dark:bg-emerald-900 text-white flex items-center justify-center shadow-2xs">
-                    <Sparkles className="h-4 w-4 text-amber-300" />
-                  </div>
-                  <div>
-                    <h4 className="text-xs font-bold text-ink dark:text-[#edf2ee] flex items-center gap-1.5">
-                      <span>Autonomous AI Airfare Intelligence</span>
-                      <span className="font-mono text-[9px] uppercase tracking-wider text-emerald-800 dark:text-emerald-300 bg-emerald-100/70 dark:bg-emerald-900/60 px-2 py-0.5 rounded font-bold">
-                        CORRIDOR: {searchOrigin.split(' ')[0]} ➔ {searchDest.split(' ')[0]}
-                      </span>
-                    </h4>
-                  </div>
-                </div>
-
-                <Button
-                  size="sm"
-                  variant="outline"
-                  disabled={aiFareLoading}
-                  onClick={fetchAiFareAdvice}
-                  className="text-[11px] h-7 gap-1 border-teal-300 dark:border-emerald-700 text-teal-800 dark:text-emerald-300 hover:bg-teal-50 dark:hover:bg-[#1a2820]"
-                >
-                  <Sparkles className="h-3 w-3" />
-                  <span>{aiFareLoading ? 'Analyzing Corridor…' : 'Analyze Corridor with AI'}</span>
-                </Button>
-              </div>
-
-              {aiFareAdvice ? (
-                <div className="space-y-2 text-xs">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className="font-bold text-teal-900 dark:text-emerald-200">
-                      🎯 {aiFareAdvice.recommendationHeadline}
-                    </span>
-                    <span className="font-mono text-[10px] bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 px-2 py-0.5 rounded font-semibold">
-                      Best window: {aiFareAdvice.bestBookingWindow}
-                    </span>
-                  </div>
-
-                  {aiFareAdvice.insiderRoutingHacks && aiFareAdvice.insiderRoutingHacks.length > 0 && (
-                    <div className="p-2.5 rounded-xl bg-white/80 dark:bg-[#15221b] border border-teal-100 dark:border-[#22352b] space-y-1">
-                      <span className="text-[10px] font-mono uppercase font-bold text-teal-800 dark:text-emerald-400 block">
-                        💡 AI Routing & Fare Strategy:
-                      </span>
-                      {aiFareAdvice.insiderRoutingHacks.map((hack: string, idx: number) => (
-                        <p key={idx} className="text-[11px] text-ink-600 dark:text-[#a8beaf] leading-relaxed">
-                          • {hack}
-                        </p>
-                      ))}
-                    </div>
-                  )}
-
-                  {aiFareAdvice.luggageAndTransitAdvice && (
-                    <p className="text-[11px] text-ink-500 dark:text-[#8ca397] font-medium pt-1">
-                      🧳 {aiFareAdvice.luggageAndTransitAdvice}
-                    </p>
-                  )}
-                </div>
-              ) : (
-                <div className="flex items-center justify-between text-xs text-ink-500 dark:text-[#8ca397]">
-                  <span>Click analyze to evaluate dynamic airline revenue management patterns, historical price surge curves, and multi-modal gateway hacks for this route.</span>
+            {/* Sleek Segmented Strategy Filter & Sort Control */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-1.5 bg-sand-100 dark:bg-[#18261f] rounded-2xl border border-sand-200 dark:border-[#22352b]">
+              <div className="flex flex-wrap items-center gap-1">
+                {[
+                  { id: 'all', label: 'All Flights' },
+                  { id: 'super_money_saver', label: '💰 Lowest Fare' },
+                  { id: 'balanced', label: '⚖️ Optimal Value' },
+                  { id: 'fastest_expensive', label: '⚡ Express Direct' },
+                ].map((st) => (
                   <button
-                    onClick={fetchAiFareAdvice}
-                    className="text-teal-800 dark:text-emerald-400 font-bold hover:underline shrink-0 ml-3"
+                    key={st.id}
+                    type="button"
+                    onClick={() => setStrategyFilter(st.id as any)}
+                    className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${
+                      strategyFilter === st.id
+                        ? 'bg-white dark:bg-[#0c1410] text-[#0d5c48] dark:text-emerald-400 shadow-xs ring-1 ring-[#0d5c48]/20 font-bold'
+                        : 'text-ink-600 dark:text-sand-300 hover:text-ink-900 dark:hover:text-white'
+                    }`}
                   >
-                    Run AI Fare Scan →
+                    {st.label}
                   </button>
-                </div>
-              )}
+                ))}
+              </div>
+
+              <div className="flex items-center gap-2 px-1 text-xs">
+                <span className="text-[11px] font-mono text-ink-400">Sort:</span>
+                {[
+                  { id: 'cheapest', label: 'Cheapest' },
+                  { id: 'fastest', label: 'Fastest' },
+                  { id: 'value', label: 'Best Value' },
+                ].map((s) => (
+                  <button
+                    key={s.id}
+                    type="button"
+                    onClick={() => setFlightSort(s.id as any)}
+                    className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-all ${
+                      flightSort === s.id
+                        ? 'bg-[#0d5c48] text-white font-semibold shadow-xs'
+                        : 'text-ink-600 dark:text-ink-300 hover:bg-sand-200 dark:hover:bg-[#1f3127]'
+                    }`}
+                  >
+                    {s.label}
+                  </button>
+                ))}
+              </div>
             </div>
 
             <div className="space-y-3.5">
@@ -1276,21 +1079,12 @@ function BookingsContent() {
                           rel="noreferrer"
                           className="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl bg-gradient-to-r from-[#094032] to-[#0d5c48] hover:from-[#063327] hover:to-[#094738] text-white text-xs font-semibold shadow-xs transition-colors"
                         >
-                          <span>Book via Google Flights (Zero Fee)</span>
+                          <span>Book on Google Flights</span>
                           <ExternalLink className="w-3.5 h-3.5 text-amber-200" />
                         </a>
 
-                        <a
-                          href={flight.bookingLinks.skyscanner}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="inline-flex items-center justify-center gap-1 px-3 py-2 rounded-xl border border-sand-300 dark:border-[#22332a] hover:bg-sand-50 dark:hover:bg-[#18251f] text-ink-700 dark:text-ink-200 text-xs font-medium transition-colors"
-                        >
-                          <span>Skyscanner Live</span>
-                          <ExternalLink className="w-3 h-3" />
-                        </a>
-
                         <button
+                          type="button"
                           onClick={() => handleSaveToPasses(`${flight.airline} (${flight.flightNumber})`, 'flight', flight.airline, flight.priceBreakdown.total)}
                           className="inline-flex items-center justify-center gap-1 px-3 py-2 rounded-xl border border-sand-300 dark:border-[#22332a] hover:bg-sand-50 dark:hover:bg-[#18251f] text-ink-700 dark:text-ink-200 text-xs font-medium transition-colors"
                         >

@@ -742,7 +742,271 @@ export function generateFallbackItinerary(params: {
     });
   }
 
-  // 4. Generic World / India Destination Generator
+  // 4. Kerala Curation (God's Own Country, Kochi, Munnar, Alleppey, Trivandrum)
+  if (
+    normDest.includes('kerala') ||
+    normDest.includes('kerela') ||
+    normDest.includes('kochi') ||
+    normDest.includes('cochin') ||
+    normDest.includes('munnar') ||
+    normDest.includes('alleppey') ||
+    normDest.includes('alappuzha') ||
+    normDest.includes('trivandrum') ||
+    normDest.includes('varkala')
+  ) {
+    const keralaDays = [
+      {
+        title: 'Day 1: Fort Kochi Heritage, Chinese Fishing Nets & Dutch Palace',
+        activities: [
+          {
+            time: '09:30 AM',
+            title: 'Chinese Fishing Nets & Fort Kochi Colonial Promenade',
+            description: 'Stroll along the historic waterfront lined with iconic 14th-century cantilevered Chinese fishing nets and colonial lanes.',
+            estimated_cost: convertCurrency(10 * travelers, 'USD', currency),
+            duration_minutes: 120,
+            category: 'sightseeing' as StopCategory,
+            place_name: 'Fort Kochi Beach & Waterfront Walkway',
+            latitude: 9.9656,
+            longitude: 76.2421,
+            is_optional: false,
+          },
+          {
+            time: '01:00 PM',
+            title: `Traditional Malabar & Kerala Sadya Feast${dietaryNote}`,
+            description: 'Authentic Kerala lunch served on banana leaf with appam, stew, avial, thoran, and fresh coconut chutneys.',
+            estimated_cost: convertCurrency(18 * travelers, 'USD', currency),
+            duration_minutes: 75,
+            category: 'meal' as StopCategory,
+            place_name: 'Old Harbour Hotel / Kashi Art Cafe, Fort Kochi',
+            latitude: 9.9662,
+            longitude: 76.2435,
+            is_optional: false,
+          },
+          {
+            time: '03:30 PM',
+            title: 'Mattancherry Palace (Dutch Palace) & Jewish Synagogue',
+            description: 'Explore the 1555 Portuguese palace famous for mythological murals and the historic Paradesi Synagogue in Jew Town.',
+            estimated_cost: convertCurrency(6 * travelers, 'USD', currency),
+            duration_minutes: 105,
+            category: 'sightseeing' as StopCategory,
+            place_name: 'Jew Town & Mattancherry Palace, Kochi',
+            latitude: 9.9579,
+            longitude: 76.2594,
+            is_optional: false,
+          },
+          {
+            time: '06:30 PM',
+            title: 'Kathakali Classical Dance & Kalaripayattu Martial Arts',
+            description: 'Witness master performers prepare elaborate makeup and perform dramatic Kathakali mudras and traditional Kerala martial arts.',
+            estimated_cost: convertCurrency(14 * travelers, 'USD', currency),
+            duration_minutes: 90,
+            category: 'activity' as StopCategory,
+            place_name: 'Kerala Kathakali Centre, Fort Kochi',
+            latitude: 9.9644,
+            longitude: 76.2447,
+            is_optional: false,
+          },
+        ],
+      },
+      {
+        title: 'Day 2: Alleppey Backwaters Houseboat Cruise & Vembanad Lake',
+        activities: [
+          {
+            time: '10:00 AM',
+            title: 'Board Traditional Kettuvallam Houseboat at Punnamada',
+            description: 'Embark on a private wooden houseboat cruising through palm-fringed canals, lotus ponds, and village lagoons.',
+            estimated_cost: convertCurrency(45 * travelers, 'USD', currency),
+            duration_minutes: 240,
+            category: 'activity' as StopCategory,
+            place_name: 'Punnamada Finishing Point Jetty, Alleppey',
+            latitude: 9.5085,
+            longitude: 76.3533,
+            is_optional: false,
+          },
+          {
+            time: '01:30 PM',
+            title: `Fresh Backwaters Culinary Lunch on Water${dietaryNote}`,
+            description: 'Freshly prepared Karimeen Pollichathu, red rice, sambar, and organic banana fritters cooked onboard by private boat chef.',
+            estimated_cost: convertCurrency(15 * travelers, 'USD', currency),
+            duration_minutes: 60,
+            category: 'meal' as StopCategory,
+            place_name: 'Vembanad Lake Floating Dining Anchorage',
+            latitude: 9.5833,
+            longitude: 76.4167,
+            is_optional: false,
+          },
+          {
+            time: '05:30 PM',
+            title: 'Sunset at Marari Beach & Village Coir Artisans',
+            description: 'Relax on pristine golden sands with towering coconut palms away from crowded shores.',
+            estimated_cost: convertCurrency(5 * travelers, 'USD', currency),
+            duration_minutes: 90,
+            category: 'sightseeing' as StopCategory,
+            place_name: 'Marari Beach, Alappuzha',
+            latitude: 9.6015,
+            longitude: 76.2974,
+            is_optional: false,
+          },
+          {
+            time: '08:00 PM',
+            title: `Coastal Kerala Culinary Dinner${dietaryNote}`,
+            description: 'Evening dinner featuring fragrant Malabar biryani, Malabar parotta, and tender coconut dessert.',
+            estimated_cost: convertCurrency(20 * travelers, 'USD', currency),
+            duration_minutes: 90,
+            category: 'meal' as StopCategory,
+            place_name: 'Cassia Restaurant / Thaff Dhe Puttu, Alappuzha',
+            latitude: 9.4981,
+            longitude: 76.3388,
+            is_optional: false,
+          },
+        ],
+      },
+    ];
+
+    return dates.map((date, idx) => {
+      const template = keralaDays[idx % keralaDays.length];
+      return {
+        date,
+        title: `Day ${idx + 1}: ${template.title.split(': ')[1] || template.title}`,
+        activities: template.activities.map((act) => ({
+          ...act,
+          estimated_cost: Math.round(act.estimated_cost),
+        })),
+      };
+    });
+  }
+
+  // 5. Akola & Vidarbha Heritage Curation
+  if (normDest.includes('akola')) {
+    const akolaDays = [
+      {
+        title: 'Day 1: Historic Rajeshwar Mandir & Asadgad Fort Exploration',
+        activities: [
+          {
+            time: '09:00 AM',
+            title: 'Darshan at Ancient Shri Rajeshwar Temple',
+            description: 'Visit the historic 12th-century Shiva shrine dedicated to Rajeshwar Maharaj, the spiritual protector of Akola.',
+            estimated_cost: convertCurrency(2 * travelers, 'USD', currency),
+            duration_minutes: 90,
+            category: 'sightseeing' as StopCategory,
+            place_name: 'Shri Rajeshwar Temple, Old City, Akola',
+            latitude: 20.7002,
+            longitude: 77.0082,
+            is_optional: false,
+          },
+          {
+            time: '12:30 PM',
+            title: `Authentic Vidarbha Varhadi Thali Lunch${dietaryNote}`,
+            description: 'Savor regional Varhadi spiced lentils, pitla bhakri, and local Shegaon kachori.',
+            estimated_cost: convertCurrency(8 * travelers, 'USD', currency),
+            duration_minutes: 60,
+            category: 'meal' as StopCategory,
+            place_name: 'Hotel Skylark / Radhika Restaurant, Akola',
+            latitude: 20.7065,
+            longitude: 77.0125,
+            is_optional: false,
+          },
+          {
+            time: '03:30 PM',
+            title: 'Historic Asadgad Fort & Dahihanda Gateway',
+            description: 'Explore the 14th-century earthen battlements constructed during the Bahmani dynasty on the banks of Morna River.',
+            estimated_cost: convertCurrency(0, 'USD', currency),
+            duration_minutes: 90,
+            category: 'sightseeing' as StopCategory,
+            place_name: 'Asadgad Fort Heritage Precinct, Akola',
+            latitude: 20.7031,
+            longitude: 77.0055,
+            is_optional: false,
+          },
+          {
+            time: '07:00 PM',
+            title: `Evening Culinary Dinner & Sweet Paan${dietaryNote}`,
+            description: 'Relish warm Marathi dinner with local delicacies and fresh milk rabdi.',
+            estimated_cost: convertCurrency(10 * travelers, 'USD', currency),
+            duration_minutes: 75,
+            category: 'meal' as StopCategory,
+            place_name: 'Tirupati Pure Veg Restaurant, Akola',
+            latitude: 20.7088,
+            longitude: 77.0142,
+            is_optional: false,
+          },
+        ],
+      },
+      {
+        title: 'Day 2: Shegaon Shri Gajanan Maharaj Sansthan Pilgrimage Excursion',
+        activities: [
+          {
+            time: '08:30 AM',
+            title: 'Express Journey to Shri Gajanan Maharaj Temple, Shegaon',
+            description: 'Short 45-minute drive or train journey from Akola Junction to the revered pilgrimage center of Shegaon.',
+            estimated_cost: convertCurrency(5 * travelers, 'USD', currency),
+            duration_minutes: 60,
+            category: 'transit' as StopCategory,
+            place_name: 'Akola Junction to Shegaon Corridor',
+            latitude: 20.7932,
+            longitude: 76.6944,
+            is_optional: false,
+          },
+          {
+            time: '10:00 AM',
+            title: 'Darshan at Shri Sant Gajanan Maharaj Samadhi Mandir',
+            description: 'Experience tranquil prayer and divine vibrations at the impeccably maintained marble Samadhi complex.',
+            estimated_cost: convertCurrency(0, 'USD', currency),
+            duration_minutes: 120,
+            category: 'sightseeing' as StopCategory,
+            place_name: 'Shri Gajanan Maharaj Sansthan Mandir, Shegaon',
+            latitude: 20.7935,
+            longitude: 76.6951,
+            is_optional: false,
+          },
+          {
+            time: '01:00 PM',
+            title: `Sansthan Mahaprasad & Legendary Shegaon Kachori${dietaryNote}`,
+            description: 'Sanctified wholesome satvik mahaprasad followed by legendary fresh fried green chili Shegaon kachori.',
+            estimated_cost: convertCurrency(4 * travelers, 'USD', currency),
+            duration_minutes: 60,
+            category: 'meal' as StopCategory,
+            place_name: 'Anand Bhojanalaya & Sharma Shegaon Kachori',
+            latitude: 20.7941,
+            longitude: 76.6938,
+            is_optional: false,
+          },
+          {
+            time: '03:30 PM',
+            title: 'Anand Sagar Spiritual Garden & Meditation Pavilion',
+            description: 'Wander across sprawling scenic lakes, landscaped botanical pavilions, and spiritual meditation halls.',
+            estimated_cost: convertCurrency(6 * travelers, 'USD', currency),
+            duration_minutes: 150,
+            category: 'activity' as StopCategory,
+            place_name: 'Anand Sagar Spiritual Complex, Shegaon',
+            latitude: 20.8062,
+            longitude: 76.7028,
+            is_optional: false,
+          },
+        ],
+      },
+    ];
+
+    return dates.map((date, idx) => {
+      const template = akolaDays[idx % akolaDays.length];
+      return {
+        date,
+        title: `Day ${idx + 1}: ${template.title.split(': ')[1] || template.title}`,
+        activities: template.activities.map((act) => ({
+          ...act,
+          estimated_cost: Math.round(act.estimated_cost),
+        })),
+      };
+    });
+  }
+
+  // 6. Generic World Destination Generator (Capitalized, authentic names, zero placeholders)
+  const cleanDestination = destination
+    .trim()
+    .split(/\s+/)
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(' ');
+
   return dates.map((date, idx) => {
     const dayNum = idx + 1;
     const isFirst = idx === 0;
@@ -754,57 +1018,57 @@ export function generateFallbackItinerary(params: {
     return {
       date,
       title: isFirst
-        ? `Day 1: Arrival & Landmark Orientation in ${destination}`
+        ? `Day 1: Arrival & Historic Landmark Exploration in ${cleanDestination}`
         : isLast
-        ? `Day ${dayNum}: Hidden Gems & Farewell Experience in ${destination}`
-        : `Day ${dayNum}: Cultural Immersion & Heritage of ${destination}`,
+        ? `Day ${dayNum}: Panoramic Viewpoints & Farewell Discovery in ${cleanDestination}`
+        : `Day ${dayNum}: Deep Cultural Heritage & Hidden Alleys of ${cleanDestination}`,
       activities: [
         {
           time: '09:00 AM',
           title: isFirst
-            ? `Arrival & Central District Exploration in ${destination}`
-            : `Morning Heritage & Landmark Walk at ${destination}`,
-          description: `Discover historic architectural highlights, viewpoints, and local character around ${destination}.`,
+            ? `Arrival & Orientation Walk through Historic ${cleanDestination}`
+            : `Morning Architectural Heritage & Sacred Shrines in ${cleanDestination}`,
+          description: `Discover iconic architectural highlights, ancient streets, and authentic local character across ${cleanDestination}.`,
           estimated_cost: Math.round(baseCost * 0.8),
           duration_minutes: 120,
           category: 'sightseeing' as StopCategory,
-          place_name: `${destination} Central Heritage Quarter`,
+          place_name: `${cleanDestination} Historic Citadel & Landmark Plaza`,
           latitude: resolvedCoords.latitude,
           longitude: resolvedCoords.longitude,
           is_optional: false,
         },
         {
           time: '01:00 PM',
-          title: `Authentic Local Gastronomy Lunch${dietaryNote}`,
-          description: `Savor authentic regional dishes curated specifically for ${dietary || 'local food lovers'} in a highly rated restaurant.`,
+          title: `Authentic Regional Gastronomy Lunch${dietaryNote}`,
+          description: `Savor time-honored traditional dishes crafted with fresh farm-to-table seasonal produce in a heritage dining hall.`,
           estimated_cost: Math.round(baseCost * 1.2),
           duration_minutes: 75,
           category: 'meal' as StopCategory,
-          place_name: `Renowned Local Restaurant, ${destination}`,
+          place_name: `Traditional Heritage Bistro, ${cleanDestination}`,
           latitude: resolvedCoords.latitude,
           longitude: resolvedCoords.longitude,
           is_optional: false,
         },
         {
           time: '04:30 PM',
-          title: `Cultural Experience & Scenic Viewpoint`,
-          description: `Immerse in iconic vistas, bustling artisanal bazaars, and scenic photo stops across ${destination}.`,
+          title: `Artisan Markets & Panoramic Scenic Lookout`,
+          description: `Immerse in sweeping vistas, vibrant handicraft workshops, and local photography viewpoints across ${cleanDestination}.`,
           estimated_cost: Math.round(baseCost * 0.9),
           duration_minutes: 105,
           category: 'activity' as StopCategory,
-          place_name: `${destination} Scenic Point / Promenade`,
+          place_name: `${cleanDestination} High Viewpoint & Artisan Bazaar`,
           latitude: resolvedCoords.latitude,
           longitude: resolvedCoords.longitude,
           is_optional: false,
         },
         {
           time: '07:30 PM',
-          title: `Evening Culinary Dinner & Night Walk${dietaryNote}`,
-          description: `Relax with curated dinner, local beverages, and an evening stroll through the illuminated streets of ${destination}.`,
+          title: `Celebratory Evening Dinner & Illuminated Night Stroll${dietaryNote}`,
+          description: `Unwind with curated local specialties, regional beverages, and a relaxing evening stroll along the ambient streets.`,
           estimated_cost: Math.round(baseCost * 1.5),
           duration_minutes: 90,
           category: 'meal' as StopCategory,
-          place_name: `${destination} Evening Dining Quarter`,
+          place_name: `Viewpoint Terrace Restaurant, ${cleanDestination}`,
           latitude: resolvedCoords.latitude,
           longitude: resolvedCoords.longitude,
           is_optional: false,

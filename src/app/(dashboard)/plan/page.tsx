@@ -4,6 +4,7 @@ import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import {
+  AlertCircle,
   AlertTriangle,
   ArrowRight,
   Check,
@@ -731,341 +732,140 @@ function PlannerContent() {
                     className="rounded-xl border-sand-300 dark:border-[#22352b] bg-white dark:bg-[#0c1410] dark:text-[#edf2ee] font-mono pl-8"
                   />
                 </div>
+
+                {/* Subtle Inline Market Price Recommendation */}
                 {aiEstimate && (
-                  <div className="flex flex-wrap items-center gap-1.5 pt-1">
-                    <span className="text-[10px] text-ink-400 dark:text-[#8ca397] font-medium">Real Market Strategy:</span>
-                    <button
-                      type="button"
-                      onClick={() => setForm((prev) => ({ ...prev, budget: aiEstimate.tiers.backpacker }))}
-                      className="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-emerald-50 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 hover:bg-emerald-100 transition-colors"
-                      title="Apply Super Money Saver budget"
-                    >
-                      💰 Saver: {aiEstimate.formattedBackpacker}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setForm((prev) => ({ ...prev, budget: aiEstimate.tiers.comfortable }))}
-                      className="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-amber-50 dark:bg-amber-950/60 text-amber-900 dark:text-amber-300 border border-amber-200 dark:border-amber-800 hover:bg-amber-100 transition-colors"
-                      title="Apply Balanced Comfortable budget"
-                    >
-                      ⚖️ Balanced: {aiEstimate.formattedComfortable}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setForm((prev) => ({ ...prev, budget: aiEstimate.tiers.luxury }))}
-                      className="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-sky-50 dark:bg-sky-950/60 text-sky-900 dark:text-sky-300 border border-sky-200 dark:border-sky-800 hover:bg-sky-100 transition-colors"
-                      title="Apply Premium Executive budget"
-                    >
-                      ⚡💎 Premium: {aiEstimate.formattedLuxury}
-                    </button>
+                  <div className="flex items-center justify-between pt-1 text-[11px] text-ink-500 dark:text-[#8ca397]">
+                    <span>
+                      Suggested for {form.travelers} traveler{form.travelers > 1 ? 's' : ''}:{' '}
+                      <strong className="text-teal-900 dark:text-emerald-300">{aiEstimate.formattedComfortable}</strong>
+                    </span>
+                    {form.budget !== aiEstimate.tiers.comfortable && (
+                      <button
+                        type="button"
+                        onClick={() => setForm((prev) => ({ ...prev, budget: aiEstimate.tiers.comfortable }))}
+                        className="text-[11px] font-semibold text-[#0d5c48] dark:text-emerald-400 hover:underline"
+                      >
+                        Auto-Fill
+                      </button>
+                    )}
+                  </div>
+                )}
+
+                {/* Gentle Excess Guard (Only shown for unrealistic entries >10L) */}
+                {(form.budget >= 1000000 || form.budget === 4000000 || form.budget === 40000000) && (
+                  <div className="mt-2 p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-200 text-xs flex items-center justify-between gap-2">
+                    <span>Notice: Unusually high budget for this route (~{aiEstimate?.formattedComfortable || '₹40,500'}).</span>
+                    {aiEstimate?.totalRecommended && (
+                      <button
+                        type="button"
+                        onClick={() => setForm({ ...form, budget: aiEstimate.totalRecommended })}
+                        className="px-2 py-0.5 rounded bg-amber-600 text-white font-semibold text-[11px] shrink-0"
+                      >
+                        Adjust to Market
+                      </button>
+                    )}
                   </div>
                 )}
               </div>
             </div>
 
-            {/* User-Friendly Transport Mode Selector */}
-            <div className="space-y-3 pt-2">
+            {/* Streamlined Preferred Transport Mode Selector */}
+            <div className="space-y-2.5 pt-1">
               <div className="flex items-center justify-between">
                 <Label className="text-xs font-semibold text-ink-900 dark:text-[#edf2ee] flex items-center gap-1.5">
                   <Navigation className="w-3.5 h-3.5 text-[#0d5c48] dark:text-emerald-400" />
-                  <span>Preferred Transport Mode</span>
-                  <span className="font-mono text-[9px] uppercase px-1.5 py-0.5 rounded bg-emerald-50 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 font-bold">
-                    RECOMMENDED ACCORDINGLY
-                  </span>
+                  <span>How would you like to travel?</span>
                 </Label>
+                <span className="text-[10px] text-ink-400 dark:text-sand-400 font-mono">
+                  Grounded by Safar AI
+                </span>
               </div>
 
-              <div className="grid grid-cols-2 sm:grid-cols-5 gap-2.5">
+              {/* Calm, Modern Segmented Control */}
+              <div className="grid grid-cols-2 sm:grid-cols-5 gap-1.5 p-1 bg-sand-100 dark:bg-[#18261f] rounded-2xl border border-sand-200 dark:border-[#22352b]">
                 {[
-                  { id: 'any', label: 'AI Recommended', icon: Compass, sub: 'Best Multimodal' },
-                  { id: 'flight', label: 'Airplane', icon: Plane, sub: 'Fastest Transit' },
-                  { id: 'train', label: 'Train', icon: Train, sub: 'Scenic Rail' },
-                  { id: 'car_bus', label: 'Car or Bus', icon: Car, sub: 'Road & Sleeper' },
-                  { id: 'ship', label: 'Ship / Ferry', icon: Ship, sub: 'Waterways & Cruises' },
+                  { id: 'any', label: 'All / AI Best', icon: Compass },
+                  { id: 'flight', label: '✈️ Airplane', icon: Plane },
+                  { id: 'train', label: '🚆 Train', icon: Train },
+                  { id: 'car_bus', label: '🚗 Car or Bus', icon: Car },
+                  { id: 'ship', label: '🚢 Ship / Ferry', icon: Ship },
                 ].map((mode) => {
-                  const Icon = mode.icon;
                   const isSelected = form.transportMode === mode.id;
                   return (
                     <button
                       key={mode.id}
                       type="button"
                       onClick={() => setForm((prev) => ({ ...prev, transportMode: mode.id as TransportMode }))}
-                      className={`p-3 rounded-2xl border text-left transition-all relative flex flex-col justify-between ${
+                      className={`py-2 px-2.5 rounded-xl text-xs font-semibold transition-all text-center truncate ${
                         isSelected
-                          ? 'border-[#0d5c48] dark:border-emerald-500 bg-emerald-50/80 dark:bg-emerald-950/60 ring-2 ring-[#0d5c48]/30 shadow-xs'
-                          : 'border-sand-200 dark:border-[#22352b] bg-white dark:bg-[#121c17] hover:border-[#0d5c48]/40'
+                          ? 'bg-white dark:bg-[#0c1410] text-[#0d5c48] dark:text-emerald-400 shadow-xs ring-1 ring-[#0d5c48]/20 font-bold'
+                          : 'text-ink-600 dark:text-sand-300 hover:text-ink-900 dark:hover:text-white'
                       }`}
                     >
-                      <div className="flex items-center justify-between">
-                        <div className={`w-7 h-7 rounded-lg flex items-center justify-center ${
-                          isSelected
-                            ? 'bg-[#0d5c48] text-white'
-                            : 'bg-sand-100 dark:bg-[#1a2b22] text-ink-600 dark:text-sand-300'
-                        }`}>
-                          <Icon className="w-4 h-4" />
-                        </div>
-                        {isSelected && (
-                          <div className="w-2 h-2 rounded-full bg-[#0d5c48] dark:bg-emerald-400" />
-                        )}
-                      </div>
-                      <div className="mt-2.5">
-                        <div className="text-xs font-bold text-ink-900 dark:text-white">
-                          {mode.label}
-                        </div>
-                        <div className="text-[10px] text-ink-500 dark:text-sand-400 font-mono mt-0.5">
-                          {mode.sub}
-                        </div>
-                      </div>
+                      {mode.label}
                     </button>
                   );
                 })}
               </div>
 
-              {/* Real-Time Airport / Station Notice Banner */}
+              {/* Contextual Route Intelligence (Clean, single-line badges) */}
               {form.destination.trim() && (
-                <div className="space-y-2 pt-1">
-                  {/* Airport Alert if city lacks commercial airport */}
+                <div className="pt-1">
+                  {/* Non-airport notice */}
                   {(form.transportMode === 'flight' || form.transportMode === 'any') &&
                     (!transitOriginProfile.airport.hasCommercialService || !transitDestProfile.airport.hasCommercialService) && (
-                      <div className="p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-200 text-xs flex items-start gap-3 shadow-xs animate-in fade-in-0 duration-200">
-                        <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
-                        <div className="space-y-1 flex-1">
-                          <span className="font-bold text-amber-300 block">
-                            Commercial Airport Notice Grounded by Safar AI
-                          </span>
+                      <div className="px-3.5 py-2.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-200 text-xs flex items-center gap-2">
+                        <AlertCircle className="w-4 h-4 text-amber-400 shrink-0" />
+                        <span>
                           {!transitOriginProfile.airport.hasCommercialService && (
-                            <p className="text-sand-200 text-xs leading-relaxed">
-                              <strong>{transitOriginProfile.city}:</strong> {transitOriginProfile.airport.notice}
-                            </p>
+                            <strong>{transitOriginProfile.city}: {transitOriginProfile.airport.notice} </strong>
                           )}
                           {!transitDestProfile.airport.hasCommercialService && (
-                            <p className="text-sand-200 text-xs leading-relaxed">
-                              <strong>{transitDestProfile.city}:</strong> {transitDestProfile.airport.notice}
-                            </p>
+                            <strong>{transitDestProfile.city}: {transitDestProfile.airport.notice}</strong>
                           )}
-                          <div className="flex flex-wrap items-center gap-2 pt-1.5">
-                            <button
-                              type="button"
-                              onClick={() => setForm((prev) => ({ ...prev, transportMode: 'train' }))}
-                              className="text-[11px] font-semibold bg-emerald-800 hover:bg-emerald-700 text-white px-2.5 py-1 rounded-lg flex items-center gap-1 transition-colors"
-                            >
-                              <Train className="w-3 h-3" />
-                              <span>Switch to Train (Direct from {transitOriginProfile.city})</span>
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => setForm((prev) => ({ ...prev, transportMode: 'car_bus' }))}
-                              className="text-[11px] font-semibold bg-sand-200 dark:bg-[#1e2e26] hover:bg-sand-300 dark:hover:bg-[#283d33] text-ink-900 dark:text-white px-2.5 py-1 rounded-lg flex items-center gap-1 transition-colors"
-                            >
-                              <Car className="w-3 h-3" />
-                              <span>Switch to Car or Bus</span>
-                            </button>
-                          </div>
-                        </div>
+                        </span>
                       </div>
                     )}
 
-                  {/* Regional Multi-Airport Hub Notice (e.g. Kerala, Goa) */}
+                  {/* Multi-airport state notice (e.g. Kerala, Goa) */}
                   {(form.transportMode === 'flight' || form.transportMode === 'any') &&
                     transitDestProfile.airport.hasCommercialService &&
                     transitDestProfile.airport.notice && (
-                      <div className="p-3.5 rounded-xl bg-teal-500/10 border border-teal-500/30 text-teal-200 text-xs flex items-start gap-3 shadow-xs animate-in fade-in-0 duration-200">
-                        <Plane className="w-4 h-4 text-teal-400 shrink-0 mt-0.5" />
-                        <div className="space-y-1 flex-1">
-                          <span className="font-bold text-teal-300 block">
-                            Direct Airport Gateways in {transitDestProfile.city}
-                          </span>
-                          <p className="text-sand-200 text-xs leading-relaxed">
-                            {transitDestProfile.airport.notice}
-                          </p>
-                          {transitDestProfile.airport.feederSummary && (
-                            <p className="text-teal-300/90 text-[11px] font-mono mt-0.5">
-                              {transitDestProfile.airport.feederSummary}
-                            </p>
-                          )}
-                        </div>
+                      <div className="px-3.5 py-2.5 rounded-xl bg-teal-500/10 border border-teal-500/20 text-teal-200 text-xs flex items-center gap-2">
+                        <Plane className="w-4 h-4 text-teal-400 shrink-0" />
+                        <span>
+                          <strong>{transitDestProfile.city}:</strong> {transitDestProfile.airport.notice}
+                        </span>
                       </div>
                     )}
 
-                  {/* Ship Notice if inland */}
-                  {form.transportMode === 'ship' && (!transitOriginProfile.seaport.isCoastal && !transitDestProfile.seaport.isCoastal) && (
-                    <div className="p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-200 text-xs flex items-start gap-3 shadow-xs">
-                      <Ship className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
-                      <div className="space-y-1 flex-1">
-                        <span className="font-bold text-amber-300 block">Inland Route Notice</span>
-                        <p className="text-sand-200 text-xs leading-relaxed">
-                          {transitOriginProfile.city} is an inland landlocked city. Nearest passenger seaport: <strong>{transitOriginProfile.seaport.portName}</strong>. {transitOriginProfile.seaport.notice}
-                        </p>
-                        <div className="flex items-center gap-2 pt-1">
-                          <button
-                            type="button"
-                            onClick={() => setForm((prev) => ({ ...prev, transportMode: 'train' }))}
-                            className="text-[11px] font-semibold bg-emerald-800 hover:bg-emerald-700 text-white px-2.5 py-1 rounded-lg"
-                          >
-                            Switch to Train (Recommended)
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Car or Bus Info */}
-                  {form.transportMode === 'car_bus' && (
-                    <div className="p-3 rounded-xl bg-teal-500/10 border border-teal-500/30 text-teal-200 text-xs flex items-center gap-2.5">
-                      <Car className="w-4 h-4 text-teal-400 shrink-0" />
-                      <span>
-                        <strong>Road Link:</strong> Direct highway corridor connecting {transitOriginProfile.city} and {transitDestProfile.city}. Private AC cabs and luxury sleeper buses available.
-                      </span>
-                    </div>
-                  )}
-
-                  {/* Train Info */}
+                  {/* Train note */}
                   {form.transportMode === 'train' && (
-                    <div className="p-3 rounded-xl bg-teal-500/10 border border-teal-500/30 text-teal-200 text-xs flex items-center gap-2.5">
+                    <div className="px-3.5 py-2.5 rounded-xl bg-teal-500/10 border border-teal-500/20 text-teal-200 text-xs flex items-center gap-2">
                       <Train className="w-4 h-4 text-teal-400 shrink-0" />
                       <span>
-                        <strong>Rail Connection:</strong> {transitOriginProfile.railway.stationName} ({transitOriginProfile.railway.stationCode}) ➔ {transitDestProfile.railway.stationName} ({transitDestProfile.railway.stationCode}).
+                        <strong>Rail Corridor:</strong> {transitOriginProfile.railway.stationName} ➔ {transitDestProfile.railway.stationName}
                       </span>
                     </div>
                   )}
-                </div>
-              )}
-            </div>
 
-            {/* AI Real Market Price Anchor & Excessive Budget Guard */}
-            <div className="rounded-2xl border border-teal-200/80 dark:border-emerald-800/60 bg-gradient-to-br from-teal-50/50 via-white to-amber-50/20 dark:from-emerald-950/30 dark:via-[#121c17] dark:to-amber-950/10 p-4 space-y-3">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div className="w-6 h-6 rounded-lg bg-teal-700 dark:bg-emerald-800 text-white flex items-center justify-center shadow-2xs">
-                    <Sparkles className="h-3.5 w-3.5 text-amber-300" />
-                  </div>
-                  <div>
-                    <span className="text-xs font-bold text-ink-900 dark:text-[#edf2ee] flex items-center gap-1.5">
-                      <span>AI Real-Market Price Anchor</span>
-                      {isEstimatingBudget && (
-                        <span className="inline-flex items-center gap-1 text-[10px] text-teal-700 dark:text-emerald-400">
-                          <Loader2 className="h-3 w-3 animate-spin" /> Verifying live rates…
-                        </span>
-                      )}
-                    </span>
-                    <p className="text-[11px] text-ink-500 dark:text-[#8ca397]">
-                      Live estimated cost calibrated to real airline fares, lodging, and daily meals for this route.
-                    </p>
-                  </div>
-                </div>
-
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => handleEstimateRealBudget(form.destination, form.origin)}
-                  className="h-7 text-[10px] font-mono text-teal-700 dark:text-emerald-400 hover:bg-teal-50 dark:hover:bg-[#1a2d22] gap-1 px-2"
-                >
-                  <Coins className="h-3 w-3" />
-                  <span>Recalculate AI Rate</span>
-                </Button>
-              </div>
-
-              {/* Excessive Budget Warning (e.g. >= 10,00,000 / 4 Crore) */}
-              {(form.budget >= 1000000 || form.budget === 4000000 || form.budget === 40000000) && (
-                <div className="rounded-xl border border-amber-300 dark:border-amber-700/80 bg-amber-50 dark:bg-amber-950/40 p-3 text-xs text-amber-900 dark:text-amber-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
-                  <div className="flex items-center gap-2">
-                    <AlertTriangle className="h-4 w-4 text-amber-600 dark:text-amber-400 shrink-0" />
-                    <span>
-                      Notice: Entered allowance (<strong>{formatCurrencyAmount(form.budget, form.currency)}</strong>) is unusually excessive for this journey. Realistic corridor cost is ~<strong>{aiEstimate?.formattedComfortable || 'much lower'}</strong>.
-                    </span>
-                  </div>
-                  {aiEstimate?.totalRecommended && (
-                    <Button
-                      type="button"
-                      size="sm"
-                      onClick={() => setForm({ ...form, budget: aiEstimate.totalRecommended })}
-                      className="h-7 text-[11px] bg-amber-700 hover:bg-amber-800 text-white shrink-0 rounded-lg shadow-2xs font-semibold"
-                    >
-                      Apply Real Price ({aiEstimate.formattedComfortable})
-                    </Button>
+                  {/* Car / Bus note */}
+                  {form.transportMode === 'car_bus' && (
+                    <div className="px-3.5 py-2.5 rounded-xl bg-teal-500/10 border border-teal-500/20 text-teal-200 text-xs flex items-center gap-2">
+                      <Car className="w-4 h-4 text-teal-400 shrink-0" />
+                      <span>
+                        <strong>Highway Connection:</strong> Direct road corridor between {transitOriginProfile.city} and {transitDestProfile.city}
+                      </span>
+                    </div>
                   )}
-                </div>
-              )}
 
-              {/* 1-Click Realistic Price Tiers */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-1">
-                <button
-                  type="button"
-                  onClick={() => aiEstimate?.tiers?.backpacker && setForm({ ...form, budget: aiEstimate.tiers.backpacker })}
-                  className={`p-3 rounded-xl border text-left transition-all ${
-                    aiEstimate?.tiers?.backpacker && form.budget === aiEstimate.tiers.backpacker
-                      ? 'border-emerald-600 dark:border-emerald-500 bg-emerald-50 dark:bg-emerald-950/60 ring-2 ring-emerald-500/30'
-                      : 'border-sand-200 dark:border-[#22352b] bg-white dark:bg-[#0c1410] hover:border-emerald-500/50'
-                  }`}
-                >
-                  <div className="text-[10px] font-mono uppercase tracking-wider text-ink-500 dark:text-[#8ca397] font-semibold">
-                    🎒 Backpacker
-                  </div>
-                  <div className="font-mono text-sm font-bold text-ink-900 dark:text-[#edf2ee] mt-1">
-                    {aiEstimate?.formattedBackpacker || (isEstimatingBudget ? 'Checking…' : '—')}
-                  </div>
-                  <div className="text-[10px] text-ink-400 dark:text-[#718579] mt-0.5">
-                    Hostels, trains/discount flights, local eats
-                  </div>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => aiEstimate?.tiers?.comfortable && setForm({ ...form, budget: aiEstimate.tiers.comfortable })}
-                  className={`p-3 rounded-xl border text-left transition-all relative ${
-                    aiEstimate?.tiers?.comfortable && form.budget === aiEstimate.tiers.comfortable
-                      ? 'border-emerald-600 dark:border-emerald-500 bg-emerald-50 dark:bg-emerald-950/60 ring-2 ring-emerald-500/30'
-                      : 'border-sand-200 dark:border-[#22352b] bg-white dark:bg-[#0c1410] hover:border-emerald-500/50'
-                  }`}
-                >
-                  <span className="absolute -top-2 right-2 px-1.5 py-0.5 rounded-full font-mono text-[8px] bg-emerald-700 text-white font-bold tracking-wider">
-                    RECOMMENDED
-                  </span>
-                  <div className="text-[10px] font-mono uppercase tracking-wider text-teal-800 dark:text-emerald-300 font-semibold">
-                    ✨ Comfortable
-                  </div>
-                  <div className="font-mono text-sm font-bold text-ink-900 dark:text-[#edf2ee] mt-1">
-                    {aiEstimate?.formattedComfortable || (isEstimatingBudget ? 'Checking…' : '—')}
-                  </div>
-                  <div className="text-[10px] text-ink-400 dark:text-[#718579] mt-0.5">
-                    3-4★ hotels, standard flights, great dining
-                  </div>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => aiEstimate?.tiers?.luxury && setForm({ ...form, budget: aiEstimate.tiers.luxury })}
-                  className={`p-3 rounded-xl border text-left transition-all ${
-                    aiEstimate?.tiers?.luxury && form.budget === aiEstimate.tiers.luxury
-                      ? 'border-emerald-600 dark:border-emerald-500 bg-emerald-50 dark:bg-emerald-950/60 ring-2 ring-emerald-500/30'
-                      : 'border-sand-200 dark:border-[#22352b] bg-white dark:bg-[#0c1410] hover:border-emerald-500/50'
-                  }`}
-                >
-                  <div className="text-[10px] font-mono uppercase tracking-wider text-amber-800 dark:text-amber-300 font-semibold">
-                    👑 Luxury
-                  </div>
-                  <div className="font-mono text-sm font-bold text-ink-900 dark:text-[#edf2ee] mt-1">
-                    {aiEstimate?.formattedLuxury || (isEstimatingBudget ? 'Checking…' : '—')}
-                  </div>
-                  <div className="text-[10px] text-ink-400 dark:text-[#718579] mt-0.5">
-                    5★ heritage resorts, direct flights, private cars
-                  </div>
-                </button>
-              </div>
-
-              {/* Expense Breakdown & Market Insight */}
-              {aiEstimate?.breakdown && (
-                <div className="pt-2 border-t border-teal-200/50 dark:border-emerald-800/40 space-y-1.5">
-                  <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] text-ink-600 dark:text-[#8ca397]">
-                    <span>✈️ Transit/Airfare: <strong className="font-mono text-ink-900 dark:text-[#edf2ee]">{formatCurrencyAmount(aiEstimate.breakdown.transitTotal, form.currency)}</strong></span>
-                    <span>🏨 Lodging: <strong className="font-mono text-ink-900 dark:text-[#edf2ee]">{formatCurrencyAmount(aiEstimate.breakdown.lodgingTotal, form.currency)}</strong></span>
-                    <span>🍽️ Food & Activities: <strong className="font-mono text-ink-900 dark:text-[#edf2ee]">{formatCurrencyAmount(aiEstimate.breakdown.foodAndActivitiesTotal, form.currency)}</strong></span>
-                  </div>
-                  {aiEstimate?.realMarketInsight && (
-                    <p className="text-[10px] text-teal-800/90 dark:text-emerald-300/90 italic font-medium">
-                      💡 {aiEstimate.realMarketInsight}
-                    </p>
+                  {/* Ship note */}
+                  {form.transportMode === 'ship' && (
+                    <div className="px-3.5 py-2.5 rounded-xl bg-teal-500/10 border border-teal-500/20 text-teal-200 text-xs flex items-center gap-2">
+                      <Ship className="w-4 h-4 text-teal-400 shrink-0" />
+                      <span>{transitDestProfile.seaport.notice}</span>
+                    </div>
                   )}
                 </div>
               )}

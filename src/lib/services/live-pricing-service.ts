@@ -181,6 +181,11 @@ const AIRPORT_REGISTRY: Record<string, AirportInfo> = {
   IXL: { code: 'IXL', name: 'Kushok Bakula Rimpochee Airport', city: 'Leh', country: 'India', lat: 34.1359, lng: 77.5465 },
   SXR: { code: 'SXR', name: 'Sheikh ul-Alam International Airport', city: 'Srinagar', country: 'India', lat: 33.9871, lng: 74.7741 },
   DED: { code: 'DED', name: 'Jolly Grant Airport', city: 'Dehradun', country: 'India', lat: 30.1897, lng: 78.1803 },
+  IXE: { code: 'IXE', name: 'Mangaluru International Airport (Bajpe)', city: 'Mangalore', country: 'India', lat: 12.9613, lng: 74.8900 },
+  NAG: { code: 'NAG', name: 'Dr. Babasaheb Ambedkar International Airport', city: 'Nagpur', country: 'India', lat: 21.0922, lng: 79.0472 },
+  TRV: { code: 'TRV', name: 'Thiruvananthapuram International Airport', city: 'Trivandrum', country: 'India', lat: 8.4821, lng: 76.9200 },
+  CCJ: { code: 'CCJ', name: 'Calicut International Airport', city: 'Kozhikode', country: 'India', lat: 11.1369, lng: 75.9553 },
+  CNN: { code: 'CNN', name: 'Kannur International Airport', city: 'Kannur', country: 'India', lat: 11.9189, lng: 75.5481 },
 
   // USA & Canada
   JFK: { code: 'JFK', name: 'John F. Kennedy International Airport', city: 'New York', country: 'United States', lat: 40.6413, lng: -73.7781 },
@@ -256,10 +261,14 @@ export function resolveAirport(input: string): AirportInfo {
   }
 
   const prof = resolveCityTransitProfile(input);
+  const displayCity = !prof.airport.hasCommercialService && prof.airport.hubCity && prof.airport.hubCity !== prof.city
+    ? `${prof.airport.hubCity} (Hub for ${prof.city})`
+    : prof.city;
+
   return {
     code: prof.airport.code,
     name: prof.airport.name,
-    city: prof.city,
+    city: displayCity,
     country: prof.country,
     lat: prof.lat,
     lng: prof.lng,

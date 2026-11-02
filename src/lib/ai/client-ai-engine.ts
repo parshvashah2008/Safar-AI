@@ -127,6 +127,8 @@ export async function callGroq(
   throw new Error(`Groq API failure: ${lastErr}`);
 }
 
+let geminiQuotaExhausted = typeof window !== 'undefined' && sessionStorage.getItem('safar_gemini_429') === 'true';
+
 /**
  * Resilient Multi-Model Cascade: Try Gemini first, fallback seamlessly to Groq
  */
@@ -135,9 +137,30 @@ export async function callAiWithCascade(
   systemInstruction?: string,
   jsonMode: boolean = false
 ): Promise<string> {
+  // If Gemini quota has been hit in this session, execute directly on Groq for sub-second responses
+  if (geminiQuotaExhausted) {
+    try {
+      return await callGroq(prompt, systemInstruction, jsonMode);
+    } catch (groqErr) {
+      console.warn('Groq primary attempt failed, trying Gemini:', groqErr);
+      try {
+        return await callGemini(prompt, systemInstruction, jsonMode);
+      } catch {
+        throw groqErr;
+      }
+    }
+  }
+
   try {
     return await callGemini(prompt, systemInstruction, jsonMode);
-  } catch (geminiErr) {
+  } catch (geminiErr: any) {
+    const errMsg = String(geminiErr?.message || '');
+    if (errMsg.includes('429') || errMsg.includes('quota') || errMsg.includes('RESOURCE_EXHAUSTED')) {
+      geminiQuotaExhausted = true;
+      if (typeof window !== 'undefined') {
+        try { sessionStorage.setItem('safar_gemini_429', 'true'); } catch {}
+      }
+    }
     console.warn('Gemini client call failed, cascading to Groq:', geminiErr);
     try {
       return await callGroq(prompt, systemInstruction, jsonMode);
