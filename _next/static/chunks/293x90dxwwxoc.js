@@ -1,0 +1,132 @@
+(()=>{"use strict";(globalThis.TURBOPACK||(globalThis.TURBOPACK=[])).push(["object"==typeof document?document.currentScript:void 0,74886,e=>{let t=(0,e.i(75254).f)("Copy",[["rect",{width:"14",height:"14",x:"8",y:"8",rx:"2",ry:"2",key:"17jyea"}],["path",{d:"M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2",key:"zix9uf"}]]);e.s(["f",0,t],74886)},31278,e=>{let t=(0,e.i(75254).f)("LoaderCircle",[["path",{d:"M21 12a9 9 0 1 1-6.219-8.56",key:"13zald"}]]);e.s(["f",0,t],31278)},79416,e=>{var t=e.i(18050),a=e.i(71645),r=e.i(43531),i=e.i(74886),n=e.i(65157);let s=(0,e.i(75254).f)("Languages",[["path",{d:"m5 8 6 6",key:"1wu5hv"}],["path",{d:"m4 14 6-6 2-3",key:"1k1g8d"}],["path",{d:"M2 5h12",key:"or177f"}],["path",{d:"M7 2h1",key:"1t2jsx"}],["path",{d:"m22 22-5-10-5 10",key:"don7ne"}],["path",{d:"M14 18h6",key:"1m8k6r"}]]);var o=e.i(31278),l=e.i(83086),c=e.i(19455),d=e.i(40974);let u=a.forwardRef(({className:e,...a},r)=>(0,t.jsx)("textarea",{className:(0,d.c)("flex min-h-[80px] w-full rounded-xl border border-ivory-300 bg-white px-3 py-2 text-xs text-ink placeholder:text-ink-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500/50 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-ink-900 dark:border-ink-700 dark:text-ivory-100",e),ref:r,...a}));u.displayName="Textarea";var h=e.i(30994),m=e.i(16728);let p=[{code:"hi",name:"Hindi (हिंदी)"},{code:"gu",name:"Gujarati (ગુજરાતી)"},{code:"ja",name:"Japanese (日本語)"},{code:"fr",name:"French (Français)"},{code:"es",name:"Spanish (Español)"},{code:"it",name:"Italian (Italiano)"},{code:"de",name:"German (Deutsch)"},{code:"ar",name:"Arabic (العربية)"},{code:"th",name:"Thai (ไทย)"},{code:"id",name:"Indonesian (Bahasa)"}],g=["Where is the nearest hospital?","How much does this cost?","I need help","Thank you very much","Where is the bathroom?","Do you have vegetarian food?","Please speak slowly"];e.s(["default",0,function(){let{activeSearch:e}=(0,m.H)(),[d,x]=(0,a.useState)("Where is the nearest hospital?"),[f,y]=(0,a.useState)("hi"),[b,v]=(0,a.useState)("निकटतम अस्पताल कहाँ है?"),[k,w]=(0,a.useState)("Nikatatam aspataal kahan hai?"),[j,N]=(0,a.useState)('In emergencies, say "Madad" (help) clearly while asking for directions.'),[S,T]=(0,a.useState)(!1),[C,A]=(0,a.useState)(!1),[I,E]=(0,a.useState)("Autonomous Neural AI");(0,a.useEffect)(()=>{if(e.destination){let t=e.destination.toLowerCase();t.includes("palitana")||t.includes("gujarat")||t.includes("surat")||t.includes("ahmedabad")?y("gu"):t.includes("japan")||t.includes("kyoto")||t.includes("tokyo")?y("ja"):t.includes("france")||t.includes("paris")?y("fr"):t.includes("italy")||t.includes("amalfi")||t.includes("rome")||t.includes("florence")?y("it"):t.includes("germany")||t.includes("berlin")?y("de"):t.includes("spain")||t.includes("madrid")||t.includes("barcelona")?y("es"):t.includes("thailand")||t.includes("bangkok")||t.includes("phuket")?y("th"):t.includes("bali")||t.includes("indonesia")?y("id"):(t.includes("dubai")||t.includes("uae"))&&y("ar")}},[e.destination]);let $=async e=>{let t=(e||d).trim();if(t){T(!0);try{let e=!1;try{let a=localStorage.getItem("safar_gemini_api_key"),r=localStorage.getItem("safar_groq_api_key"),i=await fetch("/api/translate",{method:"POST",headers:{"Content-Type":"application/json",...a?{"x-gemini-key":a}:{},...r?{"x-groq-key":r}:{}},body:JSON.stringify({text:t,targetLang:f})});if(i.ok&&i.headers.get("content-type")?.includes("application/json")){let t=await i.json();v(t.translatedText),w(t.pronunciation||""),N(t.culturalEtiquette||""),E(t.provider||"Autonomous Neural AI"),e=!0}}catch(e){}if(!e){let a=p.find(e=>e.code===f)?.name||f,r=await (0,h.p)(t,a);r&&r.translatedText&&(v(r.translatedText),w(r.transliteration||""),N(r.culturalNote||""),E("Gemini & Groq Neural AI"),e=!0)}}catch{v("Translation unavailable at this moment.")}finally{T(!1)}}};return(0,t.jsxs)("div",{className:"max-w-4xl mx-auto space-y-8 pb-12",children:[(0,t.jsxs)("div",{children:[(0,t.jsx)("span",{className:"font-mono text-[10px] tracking-widest uppercase text-teal-700 dark:text-emerald-400 font-semibold",children:"AUTONOMOUS MULTILINGUAL INTELLIGENCE"}),(0,t.jsx)("h1",{className:"font-editorial text-3xl sm:text-4xl font-medium tracking-tight mt-1 text-ink dark:text-[#edf2ee]",children:"Global Polyglot & Cultural Guide"}),(0,t.jsx)("p",{className:"text-xs sm:text-sm text-ink-400 dark:text-[#8ca397] mt-1",children:"Instant multilingual translations with phonetic pronunciation guides and street-smart cultural etiquette."})]}),(0,t.jsxs)("div",{className:"rounded-2xl border border-ivory-300 dark:border-[#1e2e26] bg-white dark:bg-[#121c17] p-6 sm:p-8 shadow-card space-y-6",children:[(0,t.jsxs)("div",{className:"flex items-center justify-between border-b border-ivory-200 dark:border-[#1e2e26] pb-4",children:[(0,t.jsxs)("div",{className:"flex items-center gap-2 text-xs font-semibold text-ink dark:text-[#edf2ee]",children:[(0,t.jsx)(s,{className:"h-4 w-4 text-teal-600 dark:text-emerald-400"}),(0,t.jsx)("span",{children:"English (Input)"})]}),(0,t.jsxs)("div",{className:"flex items-center gap-3",children:[(0,t.jsx)("span",{className:"font-mono text-[10px] uppercase text-ink-400 dark:text-[#8ca397]",children:"Target Language:"}),(0,t.jsx)("select",{value:f,onChange:e=>{y(e.target.value),setTimeout(()=>$(),50)},className:"h-9 rounded-xl border border-ivory-300 dark:border-[#22352b] bg-white dark:bg-[#15221b] px-3 text-xs text-ink dark:text-[#edf2ee] font-semibold focus:outline-none focus:ring-2 focus:ring-teal-500",children:p.map(e=>(0,t.jsx)("option",{value:e.code,children:e.name},e.code))})]})]}),(0,t.jsxs)("div",{className:"grid grid-cols-1 md:grid-cols-2 gap-6",children:[(0,t.jsxs)("div",{className:"space-y-2",children:[(0,t.jsx)("span",{className:"font-mono text-[9px] uppercase tracking-wider text-ink-400 dark:text-[#8ca397] block font-semibold",children:"Type or select travel phrase"}),(0,t.jsx)(u,{rows:4,value:d,onChange:e=>x(e.target.value),placeholder:"Enter text to translate...",className:"rounded-xl p-3 text-sm bg-white dark:bg-[#15221b] border-ivory-300 dark:border-[#22352b]"}),(0,t.jsxs)(c.f,{size:"sm",onClick:()=>$(),disabled:S,className:"text-xs gap-1.5 mt-2 bg-teal-800 hover:bg-teal-900 dark:bg-emerald-700 dark:hover:bg-emerald-600 text-white",children:[S?(0,t.jsx)(o.f,{className:"h-3.5 w-3.5 animate-spin"}):(0,t.jsx)(n.f,{className:"h-3.5 w-3.5"}),(0,t.jsx)("span",{children:"Translate with AI"})]})]}),(0,t.jsxs)("div",{className:"space-y-2",children:[(0,t.jsxs)("div",{className:"flex items-center justify-between",children:[(0,t.jsx)("span",{className:"font-mono text-[9px] uppercase tracking-wider text-teal-700 dark:text-emerald-400 font-semibold",children:"AI Translation & Phonetics"}),(0,t.jsxs)("button",{onClick:()=>{navigator.clipboard?.writeText(b),A(!0),setTimeout(()=>A(!1),2e3)},className:"inline-flex items-center gap-1 text-[11px] text-ink-400 dark:text-[#8ca397] hover:text-teal-700 transition-colors",title:"Copy translated text",children:[C?(0,t.jsx)(r.f,{className:"h-3.5 w-3.5 text-teal-600"}):(0,t.jsx)(i.f,{className:"h-3.5 w-3.5"}),(0,t.jsx)("span",{children:C?"Copied":"Copy"})]})]}),(0,t.jsxs)("div",{className:"min-h-[120px] rounded-xl border border-ivory-300 dark:border-[#22352b] bg-ivory-50/70 dark:bg-[#15221b] p-4 text-sm text-ink dark:text-[#edf2ee] font-medium leading-relaxed flex flex-col justify-between space-y-3",children:[(0,t.jsxs)("div",{className:"space-y-1.5",children:[(0,t.jsx)("div",{className:"text-base font-semibold text-teal-950 dark:text-emerald-200",children:b}),k&&(0,t.jsxs)("div",{className:"text-xs text-ink-500 dark:text-[#8ca397] font-mono",children:["🗣️ ",(0,t.jsx)("span",{className:"italic",children:k})]}),j&&(0,t.jsxs)("div",{className:"text-[11px] text-amber-800 dark:text-amber-300/90 bg-amber-50 dark:bg-amber-950/40 p-2 rounded-lg border border-amber-200/60 dark:border-amber-800/40",children:["💡 ",(0,t.jsx)("span",{className:"font-semibold",children:"Local Etiquette:"})," ",j]})]}),(0,t.jsx)("div",{className:"pt-2 border-t border-ivory-200/60 dark:border-[#1e2e26] flex items-center justify-between text-[10px] text-ink-400 dark:text-[#8ca397] font-mono",children:(0,t.jsx)("span",{children:I})})]})]})]})]}),(0,t.jsxs)("div",{className:"rounded-2xl border border-ivory-300 dark:border-[#1e2e26] bg-white dark:bg-[#121c17] p-6 shadow-card space-y-4",children:[(0,t.jsxs)("div",{className:"flex items-center gap-2",children:[(0,t.jsx)(l.f,{className:"h-4 w-4 text-sand-700 dark:text-amber-300"}),(0,t.jsx)("h3",{className:"font-editorial text-lg font-medium text-ink dark:text-[#edf2ee]",children:"Essential Street & Emergency Phrases"})]}),(0,t.jsx)("p",{className:"text-xs text-ink-400 dark:text-[#8ca397]",children:"Click any phrase to trigger instant neural translation with pronunciation and cultural nuance:"}),(0,t.jsx)("div",{className:"flex flex-wrap gap-2 pt-2",children:g.map(e=>(0,t.jsx)("button",{onClick:()=>{x(e),$(e)},className:"rounded-xl border border-ivory-300 dark:border-[#22352b] bg-ivory-100/60 dark:bg-[#15221b] px-3.5 py-2 text-xs text-ink-600 dark:text-[#a8beaf] hover:bg-teal-50 dark:hover:bg-[#1c2e24] hover:border-teal-300 dark:hover:border-emerald-600 hover:text-teal-900 dark:hover:text-[#edf2ee] transition-all text-left",children:e},e))})]})]})}],79416)},30994,e=>{let t=[107,123,4,107,72,18,120,100,28,97,76,19,69,99,121,111,71,124,95,90,105,70,89,112,31,28,71,117,64,64,127,121,104,107,19,107,29,121,100,25,110,110,123,120,112,94,95,93,101,107,71,27,77],a=[77,89,65,117,121,75,67,64,30,101,30,96,99,31,19,30,27,83,26,105,69,78,126,64,125,109,78,83,72,25,108,115,83,64,125,95,67,115,27,104,64,71,115,30,95,110,82,72,94,102,72,27,73,80,111,26];function r(){{let e=localStorage.getItem("safar_gemini_api_key")?.trim();if(e&&e.length>10)return e}try{return t.map(e=>String.fromCharCode(42^e)).join("")}catch{return""}}async function i(e,t,a=!1){let n=r();if(!n)throw Error("No active Gemini API key configured.");let s=`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${n}`,o={contents:[{parts:[{text:e}]}],generationConfig:{temperature:.3,...a?{responseMimeType:"application/json"}:{}}};t&&(o.systemInstruction={parts:[{text:t}]});let l=await fetch(s,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(o)});if(!l.ok){let e=await l.text();throw Error(`Gemini API error (${l.status}): ${e}`)}let c=await l.json(),d=c.candidates?.[0]?.content?.parts?.[0]?.text;if(!d)throw Error("Empty response from Gemini API");return d}async function n(e,t,r=!1){let i=function(){{let e=localStorage.getItem("safar_groq_api_key")?.trim();if(e&&e.length>10)return e}try{return a.map(e=>String.fromCharCode(42^e)).join("")}catch{return""}}();if(!i)throw Error("No active Groq API key configured.");let s=[];t&&s.push({role:"system",content:t}),s.push({role:"user",content:e});let o=null;for(let e of["openai/gpt-oss-120b","qwen/qwen3.8-27b","openai/gpt-oss-20b"])try{let t=await fetch("https://api.groq.com/openai/v1/chat/completions",{method:"POST",headers:{Authorization:`Bearer ${i}`,"Content-Type":"application/json"},body:JSON.stringify({model:e,messages:s,temperature:.3,...r?{response_format:{type:"json_object"}}:{}})});if(t.ok){let e=await t.json(),a=e.choices?.[0]?.message?.content;if(a)return a}else o=await t.text()}catch(e){o=e}throw Error(`Groq API failure: ${o}`)}async function s(e,t,a=!1){try{return await i(e,t,a)}catch(r){console.warn("Gemini client call failed, cascading to Groq:",r);try{return await n(e,t,a)}catch(e){throw console.error("Both Gemini and Groq client calls failed:",e),e}}}async function o(e){let t=e.origin?.trim()||"India",a=e.interests&&e.interests.length>0?e.interests.join(", "):"Cultural heritage, scenic landmarks, local cuisine, photography",r=`You are Safar AI's elite geospatial travel synthesis engine.
+You craft authentic, deeply researched, multi-day itineraries for any city, pilgrimage, or region on Earth.
+CRITICAL RULES:
+1. ALWAYS use the real, authentic place names of attractions, temples, viewpoints, and restaurants.
+   NEVER output generic placeholders like "Central Heritage Quarter", "Renowned Local Restaurant", or "Scenic Point".
+   For meal activities, place_name MUST be an actual, verified, highly rated restaurant, historic eatery, or street food stall in that city.
+   For example, for Palitana use: Shatrunjaya Hill, Shri Adishwar Temple, Chaumukhji Temple, Ghee Kanta, Taleti Foot-hills, Hotel Sumeru, Hotel Shravak Jain Restaurant, etc.
+   For Paris use: Eiffel Tower, Louvre, Montmartre, Caf\xe9 de Flore, etc.
+   For Tokyo use: Senso-ji, Shibuya Crossing, Meiji Shrine, Afuri Ramen, etc.
+2. Every activity MUST have accurate, realistic latitude and longitude coordinates.
+3. Every activity MUST use strict 12-hour clock format (e.g., "06:30 AM", "01:00 PM", "07:30 PM").
+4. Reflect dietary preferences strictly (e.g. Jain / pure vegetarian for pilgrimage destinations).
+5. Ground transit in the user's preferred transport mode (${e.transportMode||"Best available"}):
+   - If "flight": focus on flight arrivals/departures, nearest commercial airport, and flight transfers.
+   - If "train": ground the trip via express trains, Vande Bharat, and the central railway station.
+   - If "car_bus": ground the trip via highway driving, road trip stops, interstate AC buses, or cab transfers.
+   - If "ship": ground via coastal ferries, river cruises, waterways, or port terminals.
+6. Output valid JSON ONLY matching the required schema.`,i=`Synthesize a realistic itinerary for ${e.destination}.
+Origin: ${t}
+Dates: ${e.startDate} to ${e.endDate}
+Travelers: ${e.travelers}
+Total Planned Budget: ${e.currency} ${e.budget}
+Preferred Transport Mode: ${e.transportMode||"Best Available"}
+Interests: ${a}
+Dietary: ${e.dietary||"None specified"}
+Accessibility & Pacing: ${e.accessibility||"Standard"}
+
+Return JSON ONLY:
+{
+  "corrected_destination": "Full City/Destination Name, State/Country",
+  "transitAdvice": "Brief practical advice on reaching here from ${t}",
+  "days": [
+    {
+      "day_number": 1,
+      "date": "${e.startDate}",
+      "title": "Inspiring Day Title",
+      "activities": [
+        {
+          "time": "09:00 AM",
+          "title": "Action-oriented activity title",
+          "description": "Authentic description of what travelers will see, experience, and tips",
+          "place_name": "Actual Real Place Name",
+          "category": "Sightseeing",
+          "estimated_cost": 500,
+          "duration_minutes": 90,
+          "latitude": 21.5160,
+          "longitude": 71.8540,
+          "is_optional": false
+        }
+      ]
+    }
+  ]
+}`;return JSON.parse((await s(i,r,!0)).replace(/```json\n?|\n?```/g,"").trim())}async function l(e,t="INR"){let a=`You are Safar AI's World Knowledge Dossier Curator.
+You possess exhaustive, deeply grounded travel intelligence for EVERY city, town, island, pilgrimage, and country on Earth.
+CRITICAL ENCYCLOPEDIC RULES:
+1. ALWAYS provide real, named tourist attractions and heritage landmarks with authentic local histories.
+2. ALWAYS provide real, existing, highly regarded local restaurants, authentic cafes, and street food bazaars with exact cuisine types and dietary notes (e.g., Pure Vegetarian, Jain, Halal, Vegan, Seafood).
+3. NEVER return generic placeholders like "Local Restaurant" or "Scenic Point". Use real names (e.g. for Palitana: Hotel Shravak Jain Restaurant, Hotel Sumeru, Ghee Kanta; for Kyoto: Nishiki Market, Gion Karyo; for Paris: Le Comptoir du Relais, Caf\xe9 de Flore).
+4. Provide realistic GPS coordinates (lat, lng).
+5. Output valid JSON ONLY matching the schema.`,r=`Create an exhaustive travel and gastronomy dossier for "${e}". Currency: ${t}.
+Return JSON ONLY matching:
+{
+  "name": "${e}",
+  "country": string,
+  "region": string,
+  "isDomestic": boolean,
+  "tagline": "Compelling poetic one-liner capturing the city's spirit",
+  "overview": "2-3 rich paragraphs detailing historical origins, cultural significance, geographical landscape, and atmospheric vibe.",
+  "idealDuration": "e.g. 3 - 4 Days",
+  "bestMonths": "e.g. October to March",
+  "climateVibe": "e.g. Crisp sunny mornings, mild evenings",
+  "touristPlaces": [
+    {
+      "name": "Actual Real Attraction Name",
+      "category": "Heritage / Nature / Temple / Architecture",
+      "description": "Why this place is iconic, what to see, and historical significance",
+      "bestTimeToVisit": "e.g. Sunrise / Early Morning"
+    }
+  ],
+  "iconicRestaurants": [
+    {
+      "name": "Actual Real Restaurant / Cafe / Eatery Name",
+      "cuisineType": "e.g. Authentic Gujarati Thali / Traditional Trattoria / Street Food Alley",
+      "mustTryDishes": "Signature local dish to order here",
+      "dietaryTags": "e.g. Pure Veg / Jain Friendly / Halal / Vegan Options",
+      "atmosphere": "e.g. Historic, Bustling, Rooftop with view"
+    }
+  ],
+  "localCuisine": [
+    "Famous Local Dish 1: with ingredients/description",
+    "Famous Local Dish 2: with ingredients/description",
+    "Famous Local Dish 3: with ingredients/description",
+    "Famous Local Dish 4: with ingredients/description"
+  ],
+  "secretExperiences": [
+    {
+      "title": "Offbeat Hidden Experience",
+      "description": "What to do away from tourist crowds",
+      "insiderTip": "Specific timing, etiquette, or local trick"
+    }
+  ],
+  "travelTips": [
+    "Practical safety, transit, or cash payment tip",
+    "Local cultural etiquette or dress code",
+    "Best viewpoint or sunrise photography spot",
+    "Local market or craft souvenir recommendation"
+  ],
+  "budgetTiers": {
+    "backpacker": "e.g. ${t} 1,500 - 2,500 / day",
+    "comfortable": "e.g. ${t} 4,500 - 7,500 / day",
+    "luxury": "e.g. ${t} 15,000+ / day"
+  },
+  "transitGateway": "Direct flight/rail hubs and how to reach the city center",
+  "visaAndPermits": "Visa requirements or domestic travel permits if any",
+  "coordinates": { "lat": number, "lng": number }
+}`;return JSON.parse((await s(r,a,!0)).replace(/```json\n?|\n?```/g,"").trim())}async function c(e,t=[],a){let r=`You are SAFAR Copilot, an expert AI travel companion.
+You are warm, culturally astute, practical, and highly knowledgeable about domestic and international journeys.
+${a?`Active Trip Context: Destination: ${a.destination}, Dates: ${a.startDate} to ${a.endDate}, Budget: ${a.currency} ${a.budget}`:""}
+Provide direct, concise, and helpful advice. Highlight local customs, transit, safety, authentic eateries, and timing.`,i=t.slice(-6).map(e=>`${"user"===e.role?"Traveler":"Copilot"}: ${e.content}`).join("\n"),n=`${i?`Previous conversation:
+${i}
+
+`:""}Traveler's current question: ${e}`;return await s(n,r,!1)}async function d(e,t,a="Auto-detect"){let r=`Translate this text accurately for a traveler:
+Source Language: ${a}
+Target Language: ${t}
+Text to Translate: "${e}"
+
+Respond ONLY with valid JSON (no markdown):
+{
+  "translatedText": "natural traveler translation",
+  "transliteration": "pronunciation guide in Latin alphabet (if target script is non-Latin, otherwise null)",
+  "culturalNote": "brief practical advice on politeness, tone, or regional nuance, otherwise null"
+}`;return JSON.parse((await s(r,"You are an expert multilingual translation engine for international travelers.",!0)).replace(/```json\n?|\n?```/g,"").trim())}e.s(["l",0,s,"J",0,c,"o",0,l,"R",0,o,"G",0,r,"p",0,d])}])})();

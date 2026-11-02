@@ -1,1 +1,0 @@
-(globalThis.TURBOPACK||(globalThis.TURBOPACK=[])).push(["object"==typeof document?document.currentScript:void 0,11480,t=>{t.v(i=>Promise.all(["static/chunks/2b6ligmyekamd.js"].map(i=>t.l(i))).then(()=>i(62636)))},51250,t=>{"use strict";var i=t.i(18050),e=t.i(71645),s=t.i(37025);t.s(["default",0,function({params:t}){let l=(0,e.use)(t);return(0,i.jsx)(s.f,{tripId:l.id})}])}]);
