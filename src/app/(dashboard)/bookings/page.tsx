@@ -842,6 +842,24 @@ function BookingsContent() {
                 </div>
               </div>
             )}
+            {/* Regional Multi-Airport Gateway Notice (e.g. Kerala, Goa) */}
+            {destProfile.airport.hasCommercialService && destProfile.airport.notice && (
+              <div className="p-4 rounded-2xl bg-teal-500/10 border border-teal-500/30 text-teal-100 text-xs flex items-start gap-3.5 shadow-sm">
+                <Plane className="w-5 h-5 text-teal-400 shrink-0 mt-0.5" />
+                <div className="space-y-1 flex-1">
+                  <div className="font-bold text-teal-300 text-sm flex items-center gap-2">
+                    <span>Direct Airport Gateways</span>
+                    <span className="font-mono text-[9px] uppercase px-2 py-0.5 rounded bg-teal-500/20 text-teal-200 font-semibold">
+                      VERIFIED BY SAFAR AI
+                    </span>
+                  </div>
+                  <p className="text-sand-200 leading-relaxed text-xs">
+                    {destProfile.airport.notice}
+                  </p>
+                </div>
+              </div>
+            )}
+
             {/* 3-Tier Strategy Comparison Showcase */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">
               {/* 1. Super Money Saver */}

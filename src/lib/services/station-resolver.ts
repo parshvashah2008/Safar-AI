@@ -15,6 +15,7 @@ export interface CommercialAirport {
   lat: number;
   lng: number;
   isHub?: boolean;
+  aliases?: string[];
 }
 
 export interface NonAirportCityHub {
@@ -93,21 +94,21 @@ export interface CityTransitProfile {
 export const COMMERCIAL_AIRPORTS: Record<string, CommercialAirport> = {
   // India — Major Metros & Regional Gateways
   DEL: { code: 'DEL', name: 'Indira Gandhi International Airport', city: 'New Delhi', country: 'India', lat: 28.5562, lng: 77.1000, isHub: true },
-  BOM: { code: 'BOM', name: 'Chhatrapati Shivaji Maharaj International Airport', city: 'Mumbai', country: 'India', lat: 19.0896, lng: 72.8656, isHub: true },
-  BLR: { code: 'BLR', name: 'Kempegowda International Airport', city: 'Bengaluru', country: 'India', lat: 13.1986, lng: 77.7066, isHub: true },
-  MAA: { code: 'MAA', name: 'Chennai International Airport', city: 'Chennai', country: 'India', lat: 12.9941, lng: 80.1709, isHub: true },
+  BOM: { code: 'BOM', name: 'Chhatrapati Shivaji Maharaj International Airport', city: 'Mumbai', country: 'India', lat: 19.0896, lng: 72.8656, isHub: true, aliases: ['mumbai', 'bombay'] },
+  BLR: { code: 'BLR', name: 'Kempegowda International Airport', city: 'Bengaluru', country: 'India', lat: 13.1986, lng: 77.7066, isHub: true, aliases: ['bengaluru', 'bangalore', 'banglore'] },
+  MAA: { code: 'MAA', name: 'Chennai International Airport', city: 'Chennai', country: 'India', lat: 12.9941, lng: 80.1709, isHub: true, aliases: ['chennai', 'madras'] },
   HYD: { code: 'HYD', name: 'Rajiv Gandhi International Airport', city: 'Hyderabad', country: 'India', lat: 17.2403, lng: 78.4294, isHub: true },
-  CCU: { code: 'CCU', name: 'Netaji Subhash Chandra Bose International Airport', city: 'Kolkata', country: 'India', lat: 22.6547, lng: 88.4467, isHub: true },
+  CCU: { code: 'CCU', name: 'Netaji Subhash Chandra Bose International Airport', city: 'Kolkata', country: 'India', lat: 22.6547, lng: 88.4467, isHub: true, aliases: ['kolkata', 'calcutta'] },
   AMD: { code: 'AMD', name: 'Sardar Vallabhbhai Patel International Airport', city: 'Ahmedabad', country: 'India', lat: 23.0772, lng: 72.6347, isHub: true },
   PNQ: { code: 'PNQ', name: 'Pune International Airport', city: 'Pune', country: 'India', lat: 18.5822, lng: 73.9197 },
   GOI: { code: 'GOI', name: 'Dabolim Airport', city: 'Goa (Dabolim)', country: 'India', lat: 15.3808, lng: 73.8314 },
   GOX: { code: 'GOX', name: 'Manohar International Airport (Mopa)', city: 'North Goa', country: 'India', lat: 15.7686, lng: 73.8647 },
-  COK: { code: 'COK', name: 'Cochin International Airport', city: 'Kochi', country: 'India', lat: 10.1556, lng: 76.3917 },
-  IXE: { code: 'IXE', name: 'Mangaluru International Airport (Bajpe)', city: 'Mangalore', country: 'India', lat: 12.9613, lng: 74.8900 },
+  COK: { code: 'COK', name: 'Cochin International Airport', city: 'Kochi', country: 'India', lat: 10.1556, lng: 76.3917, isHub: true, aliases: ['kochi', 'cochin', 'ernakulam', 'nedumbassery', 'central kerala', 'kerala cochin'] },
+  IXE: { code: 'IXE', name: 'Mangaluru International Airport (Bajpe)', city: 'Mangalore', country: 'India', lat: 12.9613, lng: 74.8900, aliases: ['mangalore', 'mangaluru', 'bajpe', 'dakshina kannada'] },
   NAG: { code: 'NAG', name: 'Dr. Babasaheb Ambedkar International Airport', city: 'Nagpur', country: 'India', lat: 21.0922, lng: 79.0472, isHub: true },
   IXU: { code: 'IXU', name: 'Chhatrapati Sambhaji Nagar (Aurangabad) Airport', city: 'Aurangabad', country: 'India', lat: 19.8631, lng: 75.3981 },
   STV: { code: 'STV', name: 'Surat International Airport', city: 'Surat', country: 'India', lat: 21.1141, lng: 72.7419 },
-  BDQ: { code: 'BDQ', name: 'Vadodara Airport', city: 'Vadodara', country: 'India', lat: 22.3362, lng: 73.2263 },
+  BDQ: { code: 'BDQ', name: 'Vadodara Airport', city: 'Vadodara', country: 'India', lat: 22.3362, lng: 73.2263, aliases: ['vadodara', 'baroda'] },
   BVC: { code: 'BVC', name: 'Bhavnagar Airport', city: 'Bhavnagar', country: 'India', lat: 21.7525, lng: 72.1856 },
   HSR: { code: 'HSR', name: 'Rajkot International Airport (Hirasar)', city: 'Rajkot', country: 'India', lat: 22.3619, lng: 71.0189 },
   IXK: { code: 'IXK', name: 'Keshod Airport (Junagadh / Somnath Gateway)', city: 'Keshod', country: 'India', lat: 21.3175, lng: 70.2678 },
@@ -127,9 +128,9 @@ export const COMMERCIAL_AIRPORTS: Record<string, CommercialAirport> = {
   CJB: { code: 'CJB', name: 'Coimbatore International Airport', city: 'Coimbatore', country: 'India', lat: 11.0297, lng: 77.0434 },
   IXM: { code: 'IXM', name: 'Madurai Airport', city: 'Madurai', country: 'India', lat: 9.8344, lng: 78.0933 },
   TRZ: { code: 'TRZ', name: 'Tiruchirappalli International Airport', city: 'Trichy', country: 'India', lat: 10.7654, lng: 78.7097 },
-  TRV: { code: 'TRV', name: 'Thiruvananthapuram International Airport', city: 'Trivandrum', country: 'India', lat: 8.4821, lng: 76.9200 },
-  CCJ: { code: 'CCJ', name: 'Calicut International Airport (Kozhikode)', city: 'Kozhikode', country: 'India', lat: 11.1369, lng: 75.9553 },
-  CNN: { code: 'CNN', name: 'Kannur International Airport', city: 'Kannur', country: 'India', lat: 11.9189, lng: 75.5481 },
+  TRV: { code: 'TRV', name: 'Thiruvananthapuram International Airport', city: 'Trivandrum', country: 'India', lat: 8.4821, lng: 76.9200, isHub: true, aliases: ['trivandrum', 'thiruvananthapuram', 'tvm', 'trivandram', 'trivendrum', 'south kerala', 'kerala trivandrum'] },
+  CCJ: { code: 'CCJ', name: 'Calicut International Airport (Kozhikode)', city: 'Kozhikode', country: 'India', lat: 11.1369, lng: 75.9553, aliases: ['calicut', 'kozhikode', 'karipur', 'malabar'] },
+  CNN: { code: 'CNN', name: 'Kannur International Airport', city: 'Kannur', country: 'India', lat: 11.9189, lng: 75.5481, aliases: ['kannur', 'cannanore', 'mattannur', 'north kerala'] },
   JAI: { code: 'JAI', name: 'Jaipur International Airport', city: 'Jaipur', country: 'India', lat: 26.8242, lng: 75.8122 },
   UDR: { code: 'UDR', name: 'Maharana Pratap Airport', city: 'Udaipur', country: 'India', lat: 24.6178, lng: 73.8961 },
   JDH: { code: 'JDH', name: 'Jodhpur Airport', city: 'Jodhpur', country: 'India', lat: 26.2511, lng: 73.0489 },
@@ -137,16 +138,16 @@ export const COMMERCIAL_AIRPORTS: Record<string, CommercialAirport> = {
   BKB: { code: 'BKB', name: 'Nal Airport (Bikaner)', city: 'Bikaner', country: 'India', lat: 28.0706, lng: 73.2064 },
   KQH: { code: 'KQH', name: 'Kishangarh Airport (Ajmer / Pushkar Gateway)', city: 'Kishangarh', country: 'India', lat: 26.5983, lng: 74.8147 },
   LKO: { code: 'LKO', name: 'Chaudhary Charan Singh International Airport', city: 'Lucknow', country: 'India', lat: 26.7606, lng: 80.8893 },
-  VNS: { code: 'VNS', name: 'Lal Bahadur Shastri International Airport', city: 'Varanasi', country: 'India', lat: 25.4524, lng: 82.8593 },
+  VNS: { code: 'VNS', name: 'Lal Bahadur Shastri International Airport', city: 'Varanasi', country: 'India', lat: 25.4524, lng: 82.8593, aliases: ['varanasi', 'banaras', 'benares', 'kashi'] },
   AYJ: { code: 'AYJ', name: 'Maharishi Valmiki International Airport', city: 'Ayodhya', country: 'India', lat: 26.7456, lng: 82.1558 },
   IXD: { code: 'IXD', name: 'Prayagraj Airport', city: 'Prayagraj', country: 'India', lat: 25.4403, lng: 81.7342 },
   GOP: { code: 'GOP', name: 'Gorakhpur Airport', city: 'Gorakhpur', country: 'India', lat: 26.7397, lng: 83.4497 },
   AGR: { code: 'AGR', name: 'Agra Airport (Kheria)', city: 'Agra', country: 'India', lat: 27.1558, lng: 77.9609 },
-  DED: { code: 'DED', name: 'Jolly Grant Airport (Dehradun / Rishikesh Gateway)', city: 'Dehradun', country: 'India', lat: 30.1897, lng: 78.1803 },
-  ATQ: { code: 'ATQ', name: 'Sri Guru Ram Dass Jee International Airport', city: 'Amritsar', country: 'India', lat: 31.7096, lng: 74.7973 },
+  DED: { code: 'DED', name: 'Jolly Grant Airport (Dehradun / Rishikesh Gateway)', city: 'Dehradun', country: 'India', lat: 30.1897, lng: 78.1803, aliases: ['dehradun', 'rishikesh', 'haridwar', 'mussoorie'] },
+  ATQ: { code: 'ATQ', name: 'Sri Guru Ram Dass Jee International Airport', city: 'Amritsar', country: 'India', lat: 31.7096, lng: 74.7973, aliases: ['amritsar', 'golden temple'] },
   IXC: { code: 'IXC', name: 'Shaheed Bhagat Singh International Airport', city: 'Chandigarh', country: 'India', lat: 30.6735, lng: 76.7885 },
-  IXL: { code: 'IXL', name: 'Kushok Bakula Rimpochee Airport', city: 'Leh', country: 'India', lat: 34.1359, lng: 77.5465 },
-  SXR: { code: 'SXR', name: 'Sheikh ul-Alam International Airport', city: 'Srinagar', country: 'India', lat: 33.9871, lng: 74.7741 },
+  IXL: { code: 'IXL', name: 'Kushok Bakula Rimpochee Airport', city: 'Leh', country: 'India', lat: 34.1359, lng: 77.5465, aliases: ['leh', 'ladakh', 'pangong'] },
+  SXR: { code: 'SXR', name: 'Sheikh ul-Alam International Airport', city: 'Srinagar', country: 'India', lat: 33.9871, lng: 74.7741, aliases: ['srinagar', 'kashmir', 'gulmarg', 'pahalgam'] },
   IXJ: { code: 'IXJ', name: 'Jammu Civil Enclave', city: 'Jammu', country: 'India', lat: 32.6892, lng: 74.8375 },
   KUU: { code: 'KUU', name: 'Kullu-Manali Airport (Bhuntar)', city: 'Bhuntar / Manali', country: 'India', lat: 31.8767, lng: 77.1542 },
   DHM: { code: 'DHM', name: 'Kangra Airport (Gaggal / Dharamshala)', city: 'Dharamshala', country: 'India', lat: 32.1650, lng: 76.2633 },
@@ -210,7 +211,455 @@ export const COMMERCIAL_AIRPORTS: Record<string, CommercialAirport> = {
 // 2. Comprehensive Directory of Non-Airport Cities, Towns & Pilgrimages
 // Explicit mapping of real hubs, road links, and railheads
 // -------------------------------------------------------------
+
+// -------------------------------------------------------------
+// 1.1 State & Regional Multi-Hub Gateways (Kerala, Goa, Kashmir, etc.)
+// -------------------------------------------------------------
+export interface StateOrRegionalHub {
+  id: string;
+  aliases: string[];
+  displayName: string;
+  state: string;
+  hasCommercialAirport: true;
+  primaryAirport: CommercialAirport;
+  secondaryAirports: CommercialAirport[];
+  overviewNotice: string;
+  railway: {
+    stationName: string;
+    stationCode: string;
+    notice: string;
+  };
+  seaport: {
+    isCoastal: boolean;
+    hasPassengerWaterway: boolean;
+    portName: string;
+    notice: string;
+  };
+}
+
+export const STATE_AND_REGIONAL_HUBS: Record<string, StateOrRegionalHub> = {
+  kerala: {
+    id: 'kerala',
+    aliases: ['kerala', 'kerela', 'keralam', 'gods own country', 'central kerala', 'south kerala', 'north kerala'],
+    displayName: 'Kerala (Kochi & Trivandrum Gateways)',
+    state: 'Kerala',
+    hasCommercialAirport: true,
+    primaryAirport: COMMERCIAL_AIRPORTS.COK,
+    secondaryAirports: [COMMERCIAL_AIRPORTS.TRV, COMMERCIAL_AIRPORTS.CCJ, COMMERCIAL_AIRPORTS.CNN],
+    overviewNotice:
+      'Kerala is served by 4 international airports: Cochin International (COK) in central Kerala (primary gateway for Kochi, Munnar, Alleppey), Trivandrum International (TRV) in the south (primary gateway for capital, Kovalam, Varkala), Calicut (CCJ), and Kannur (CNN).',
+    railway: {
+      stationName: 'Ernakulam Junction (ERS) / Thiruvananthapuram Central (TVC)',
+      stationCode: 'ERS',
+      notice:
+        'Extensive Southern Railway mainline network runs along the coastal Kerala spine connecting Trivandrum, Kollam, Alleppey, Ernakulam (Kochi), Thrissur, and Kozhikode.',
+    },
+    seaport: {
+      isCoastal: true,
+      hasPassengerWaterway: true,
+      portName: 'Cochin Port (Willingdon Island Cruise Terminal) & Alleppey Waterway Jetty',
+      notice:
+        'Major international cruise terminal active at Cochin Port, plus world-famous backwater passenger ferries and luxury houseboats across Alleppey, Kumarakom, and Kollam.',
+    },
+  },
+
+  goa: {
+    id: 'goa',
+    aliases: ['goa', 'north goa', 'south goa', 'panaji', 'panjim', 'calangute', 'baga', 'anjuna', 'candolim', 'colva'],
+    displayName: 'Goa (Mopa & Dabolim Gateways)',
+    state: 'Goa',
+    hasCommercialAirport: true,
+    primaryAirport: COMMERCIAL_AIRPORTS.GOX,
+    secondaryAirports: [COMMERCIAL_AIRPORTS.GOI],
+    overviewNotice:
+      'Goa is served by 2 commercial international airports: Manohar International Airport at Mopa (GOX) in North Goa and Dabolim Airport (GOI) in South Goa.',
+    railway: {
+      stationName: 'Madgaon Junction (MAO) / Thivim (THVM)',
+      stationCode: 'MAO',
+      notice: 'Konkan Railway mainline connects North Goa via Thivim and South Goa via Madgaon Junction.',
+    },
+    seaport: {
+      isCoastal: true,
+      hasPassengerWaterway: true,
+      portName: 'Mormugao Port Trust & Panaji Jetty',
+      notice: 'Ocean cruises and coastal passenger ferries dock at Mormugao Port and Panaji ferry terminal.',
+    },
+  },
+
+  kashmir: {
+    id: 'kashmir',
+    aliases: ['kashmir', 'kashmeer', 'jammu and kashmir', 'j&k', 'gulmarg', 'pahalgam', 'sonamarg'],
+    displayName: 'Kashmir Valley (Srinagar Gateway)',
+    state: 'Jammu & Kashmir',
+    hasCommercialAirport: true,
+    primaryAirport: COMMERCIAL_AIRPORTS.SXR,
+    secondaryAirports: [COMMERCIAL_AIRPORTS.IXJ],
+    overviewNotice:
+      'Kashmir is served directly by Sheikh ul-Alam International Airport (SXR) in Srinagar with regular flights from Delhi, Mumbai, and all major Indian metros.',
+    railway: {
+      stationName: 'Srinagar Railway Station (SINA) / Jammu Tawi (JAT)',
+      stationCode: 'SINA',
+      notice: 'Vande Bharat and Northern Railway express trains connect through Udhampur-Srinagar-Baramulla Rail Link (USBRL).',
+    },
+    seaport: {
+      isCoastal: false,
+      hasPassengerWaterway: false,
+      portName: 'Inland',
+      notice: 'Dal Lake Shikaras and Jhelum water taxis operate locally in Srinagar.',
+    },
+  },
+
+  himachal: {
+    id: 'himachal',
+    aliases: ['himachal', 'himachal pradesh', 'spiti', 'kinnaur'],
+    displayName: 'Himachal Pradesh (Kullu / Chandigarh Gateways)',
+    state: 'Himachal Pradesh',
+    hasCommercialAirport: true,
+    primaryAirport: COMMERCIAL_AIRPORTS.IXC,
+    secondaryAirports: [COMMERCIAL_AIRPORTS.KUU, COMMERCIAL_AIRPORTS.DHM],
+    overviewNotice:
+      'Himachal Pradesh is served by Kullu-Manali Airport (KUU), Kangra/Dharamshala Airport (DHM), and Chandigarh International Airport (IXC) as the major high-frequency gateway.',
+    railway: {
+      stationName: 'Kalka / Chandigarh Railway Station (KLK / CDG)',
+      stationCode: 'CDG',
+      notice: 'UNESCO World Heritage Kalka-Shimla toy train and broad-gauge express trains to Chandigarh.',
+    },
+    seaport: {
+      isCoastal: false,
+      hasPassengerWaterway: false,
+      portName: 'Inland',
+      notice: 'Inland Himalayan state with scenic mountain river valleys.',
+    },
+  },
+
+  uttarakhand: {
+    id: 'uttarakhand',
+    aliases: ['uttarakhand', 'uttaranchal', 'garhwal', 'kumaon'],
+    displayName: 'Uttarakhand (Dehradun Gateway)',
+    state: 'Uttarakhand',
+    hasCommercialAirport: true,
+    primaryAirport: COMMERCIAL_AIRPORTS.DED,
+    secondaryAirports: [COMMERCIAL_AIRPORTS.DEL],
+    overviewNotice:
+      'Uttarakhand is served directly by Jolly Grant Airport (DED) in Dehradun, providing immediate gateway access to Rishikesh (20 km), Haridwar (35 km), and Mussoorie (55 km).',
+    railway: {
+      stationName: 'Haridwar Junction (HW) / Dehradun (DDN)',
+      stationCode: 'HW',
+      notice: 'Northern Railway mainline terminal with direct Vande Bharat and Shatabdi Express services.',
+    },
+    seaport: {
+      isCoastal: false,
+      hasPassengerWaterway: false,
+      portName: 'Inland',
+      notice: 'Inland Himalayan state on the holy banks of the Ganges.',
+    },
+  },
+};
+
 export const KNOWN_NON_AIRPORT_CITIES: Record<string, NonAirportCityHub> = {
+  // ALLEPPEY / ALAPPUZHA (KERALA)
+  alleppey: {
+    city: 'Alleppey (Alappuzha)',
+    hasCommercialAirport: false,
+    reason: 'Alleppey backwaters have no commercial airstrip. Nearest airport is Cochin International (COK).',
+    primaryAirport: {
+      code: 'COK',
+      name: 'Cochin International Airport',
+      city: 'Kochi',
+      distanceKm: 82,
+      driveTime: '2h 00m',
+      feederMode: 'drive',
+      feederRoute: 'via NH 66 Coastal Highway',
+      feederCarrier: 'Highway Taxi / KSRTC Fast Passenger',
+      lat: 10.1556,
+      lng: 76.3917,
+    },
+    secondaryAirport: {
+      code: 'TRV',
+      name: 'Thiruvananthapuram International Airport',
+      city: 'Trivandrum',
+      distanceKm: 145,
+      driveTime: '3h 30m',
+      lat: 8.4821,
+      lng: 76.9200,
+    },
+    railInfo: {
+      hasRailStation: true,
+      stationName: 'Alappuzha Railway Station',
+      stationCode: 'ALLP',
+      distanceKm: 0,
+    },
+    seaportInfo: {
+      isCoastal: true,
+      hasPassengerFerry: true,
+      portName: 'Alleppey Backwater Jetty & Houseboat Terminal',
+      nearestPortNotice: 'Famous passenger ferries and luxury houseboats operate daily across Vembanad Lake backwaters.',
+    },
+  },
+  alappuzha: {
+    city: 'Alappuzha (Alleppey)',
+    hasCommercialAirport: false,
+    reason: 'Alappuzha is reached via Cochin International Airport (COK).',
+    primaryAirport: {
+      code: 'COK',
+      name: 'Cochin International Airport',
+      city: 'Kochi',
+      distanceKm: 82,
+      driveTime: '2h 00m',
+      feederMode: 'drive',
+      feederRoute: 'via NH 66',
+      feederCarrier: 'Highway Taxi / KSRTC Bus',
+      lat: 10.1556,
+      lng: 76.3917,
+    },
+    secondaryAirport: {
+      code: 'TRV',
+      name: 'Thiruvananthapuram International Airport',
+      city: 'Trivandrum',
+      distanceKm: 145,
+      driveTime: '3h 30m',
+      lat: 8.4821,
+      lng: 76.9200,
+    },
+    railInfo: {
+      hasRailStation: true,
+      stationName: 'Alappuzha Railway Station',
+      stationCode: 'ALLP',
+      distanceKm: 0,
+    },
+    seaportInfo: {
+      isCoastal: true,
+      hasPassengerFerry: true,
+      portName: 'Alappuzha Waterways Jetty',
+      nearestPortNotice: 'SWTD government passenger water ferries to Kottayam, Nedumudy, and Kollam.',
+    },
+  },
+
+  // VARKALA (KERALA)
+  varkala: {
+    city: 'Varkala',
+    hasCommercialAirport: false,
+    reason: 'Varkala Cliff Beach has no airport; nearest commercial airport is Trivandrum (TRV).',
+    primaryAirport: {
+      code: 'TRV',
+      name: 'Thiruvananthapuram International Airport',
+      city: 'Trivandrum',
+      distanceKm: 42,
+      driveTime: '1h 15m',
+      feederMode: 'drive',
+      feederRoute: 'via NH 66 Coastal Highway',
+      feederCarrier: 'Coastal Cab / Express Train',
+      lat: 8.4821,
+      lng: 76.9200,
+    },
+    secondaryAirport: {
+      code: 'COK',
+      name: 'Cochin International Airport',
+      city: 'Kochi',
+      distanceKm: 160,
+      driveTime: '4h 00m',
+      lat: 10.1556,
+      lng: 76.3917,
+    },
+    railInfo: {
+      hasRailStation: true,
+      stationName: 'Varkala Sivagiri Railway Station',
+      stationCode: 'VAK',
+      distanceKm: 0,
+    },
+    seaportInfo: {
+      isCoastal: true,
+      hasPassengerFerry: false,
+      portName: 'Varkala Beach / Vizhinjam Port Gateway',
+      nearestPortNotice: 'Coastal Arabian Sea cliffs. Nearest major commercial port is Vizhinjam / Kollam.',
+    },
+  },
+
+  // KOVALAM (KERALA)
+  kovalam: {
+    city: 'Kovalam',
+    hasCommercialAirport: false,
+    reason: 'Kovalam beach resort is 15 mins from Trivandrum International Airport (TRV).',
+    primaryAirport: {
+      code: 'TRV',
+      name: 'Thiruvananthapuram International Airport',
+      city: 'Trivandrum',
+      distanceKm: 14,
+      driveTime: '25 mins',
+      feederMode: 'drive',
+      feederRoute: 'via Kovalam Bypass Road',
+      feederCarrier: 'Airport Taxi / Auto-Rickshaw',
+      lat: 8.4821,
+      lng: 76.9200,
+    },
+    railInfo: {
+      hasRailStation: true,
+      stationName: 'Thiruvananthapuram Central',
+      stationCode: 'TVC',
+      distanceKm: 14,
+      transferTime: '25 mins drive',
+    },
+    seaportInfo: {
+      isCoastal: true,
+      hasPassengerFerry: false,
+      portName: 'Vizhinjam Harbor (adjacent to Kovalam)',
+      nearestPortNotice: 'Vizhinjam International Transshipment Deepwater Seaport is 3 km away.',
+    },
+  },
+
+  // WAYANAD (KERALA)
+  wayanad: {
+    city: 'Wayanad',
+    hasCommercialAirport: false,
+    reason: 'Wayanad high-range district has no commercial airport. Nearest is Calicut (CCJ).',
+    primaryAirport: {
+      code: 'CCJ',
+      name: 'Calicut International Airport (Kozhikode)',
+      city: 'Kozhikode',
+      distanceKm: 85,
+      driveTime: '2h 30m',
+      feederMode: 'drive',
+      feederRoute: 'via Thamarassery Ghat Pass (NH 766)',
+      feederCarrier: 'Hill Taxi / KSRTC Super Deluxe Bus',
+      lat: 11.1369,
+      lng: 75.9553,
+    },
+    secondaryAirport: {
+      code: 'CNN',
+      name: 'Kannur International Airport',
+      city: 'Kannur',
+      distanceKm: 95,
+      driveTime: '2h 45m',
+      lat: 11.9189,
+      lng: 75.5481,
+    },
+    railInfo: {
+      hasRailStation: false,
+      stationName: 'Kozhikode Railway Station (Calicut)',
+      stationCode: 'CLT',
+      distanceKm: 72,
+      transferTime: '2h drive via Ghat road',
+    },
+    seaportInfo: {
+      isCoastal: false,
+      hasPassengerFerry: false,
+      nearestPortNotice: 'Inland Western Ghats highland reserve.',
+    },
+  },
+
+  // THEKKADY & PERIYAR (KERALA)
+  thekkady: {
+    city: 'Thekkady / Periyar',
+    hasCommercialAirport: false,
+    reason: 'Periyar wildlife sanctuary is reached via Madurai (IXM) or Cochin (COK).',
+    primaryAirport: {
+      code: 'IXM',
+      name: 'Madurai Airport',
+      city: 'Madurai',
+      distanceKm: 138,
+      driveTime: '3h 30m',
+      feederMode: 'drive',
+      feederRoute: 'via Theni Highway',
+      feederCarrier: 'Private Cab / State Bus',
+      lat: 9.8344,
+      lng: 78.0933,
+    },
+    secondaryAirport: {
+      code: 'COK',
+      name: 'Cochin International Airport',
+      city: 'Kochi',
+      distanceKm: 155,
+      driveTime: '4h 15m',
+      lat: 10.1556,
+      lng: 76.3917,
+    },
+    railInfo: {
+      hasRailStation: false,
+      stationName: 'Kottayam Railway Station',
+      stationCode: 'KTYM',
+      distanceKm: 105,
+      transferTime: '3h drive',
+    },
+    seaportInfo: {
+      isCoastal: false,
+      hasPassengerFerry: true,
+      portName: 'Periyar Lake Boat Landing',
+      nearestPortNotice: 'KTDC sightseeing passenger cruise boats on Periyar Lake.',
+    },
+  },
+
+  // KUMARAKOM (KERALA)
+  kumarakom: {
+    city: 'Kumarakom',
+    hasCommercialAirport: false,
+    reason: 'Kumarakom backwater bird sanctuary is accessed via Cochin International Airport (COK).',
+    primaryAirport: {
+      code: 'COK',
+      name: 'Cochin International Airport',
+      city: 'Kochi',
+      distanceKm: 75,
+      driveTime: '1h 50m',
+      feederMode: 'drive',
+      feederRoute: 'via NH 66',
+      feederCarrier: 'Resort Cab / Highway Taxi',
+      lat: 10.1556,
+      lng: 76.3917,
+    },
+    railInfo: {
+      hasRailStation: true,
+      stationName: 'Kottayam Railway Station',
+      stationCode: 'KTYM',
+      distanceKm: 14,
+      transferTime: '25 mins drive',
+    },
+    seaportInfo: {
+      isCoastal: true,
+      hasPassengerFerry: true,
+      portName: 'Vembanad Lake Boat Jetty',
+      nearestPortNotice: 'Direct water ferries to Muhamma / Alleppey across Vembanad Lake.',
+    },
+  },
+
+  // BEKAL (KERALA)
+  bekal: {
+    city: 'Bekal',
+    hasCommercialAirport: false,
+    reason: 'Bekal Fort is reached via Mangaluru International Airport (IXE) or Kannur (CNN).',
+    primaryAirport: {
+      code: 'IXE',
+      name: 'Mangaluru International Airport (Bajpe)',
+      city: 'Mangalore',
+      distanceKm: 68,
+      driveTime: '1h 30m',
+      feederMode: 'drive',
+      feederRoute: 'via NH 66',
+      feederCarrier: 'Interstate Cab / Express Bus',
+      lat: 12.9613,
+      lng: 74.8900,
+    },
+    secondaryAirport: {
+      code: 'CNN',
+      name: 'Kannur International Airport',
+      city: 'Kannur',
+      distanceKm: 82,
+      driveTime: '2h 00m',
+      lat: 11.9189,
+      lng: 75.5481,
+    },
+    railInfo: {
+      hasRailStation: true,
+      stationName: 'Kasaragod Railway Station',
+      stationCode: 'KGQ',
+      distanceKm: 14,
+    },
+    seaportInfo: {
+      isCoastal: true,
+      hasPassengerFerry: false,
+      portName: 'Bekal Coastal Seaboard',
+      nearestPortNotice: 'Arabian Sea coastal citadel.',
+    },
+  },
+
   // AKOLA (The exact case highlighted by the user)
   akola: {
     city: 'Akola',
@@ -831,13 +1280,73 @@ export function calculateDistanceKm(lat1: number, lon1: number, lat2: number, lo
 // 4. Authoritative City Transit Profile Resolver
 // Resolves Airport, Railway, Seaport, and Roadways for ANY city
 // -------------------------------------------------------------
+function normalizeTransitQuery(input: string): string {
+  let s = (input || '').toLowerCase().trim();
+  s = s.replace(/[^a-z0-9\s]/g, ' ');
+  s = s.replace(/\s+/g, ' ').trim();
+
+  // Common spelling and phonetic variations
+  if (s.includes('kerela') || s === 'kerala' || s === 'keralam' || s.includes('gods own country')) return 'kerala';
+  if (s.includes('trivendrum') || s.includes('trivandram') || s.includes('thiruvananthapuram') || s === 'tvm') return 'trivandrum';
+  if (s === 'cochin' || s === 'ernakulam' || s.includes('nedumbassery')) return 'kochi';
+  if (s === 'calicut') return 'kozhikode';
+  if (s === 'allepey' || s === 'alleppy') return 'alleppey';
+  if (s === 'kashmeer') return 'kashmir';
+  if (s === 'bangalore' || s === 'banglore') return 'bengaluru';
+  if (s === 'bombay') return 'mumbai';
+  if (s === 'calcutta') return 'kolkata';
+  if (s === 'madras') return 'chennai';
+  if (s === 'banaras' || s === 'benares' || s === 'kashi') return 'varanasi';
+  if (s === 'baroda') return 'vadodara';
+  return s;
+}
+
 export function resolveCityTransitProfile(cityNameInput: string): CityTransitProfile {
   const raw = (cityNameInput || '').trim();
-  const lower = raw.toLowerCase().replace(/[^a-z0-9\s]/g, ' ').trim();
+  const normalized = normalizeTransitQuery(raw);
 
-  // 1. Check known non-airport directory first (Akola, Palitana, Mount Abu, etc.)
+  // 1. Check State & Regional Multi-Airport Hubs (e.g. Kerala, Goa, Kashmir, Himachal, Uttarakhand)
+  for (const reg of Object.values(STATE_AND_REGIONAL_HUBS)) {
+    if (reg.aliases.some((a) => normalized.includes(a) || a.includes(normalized))) {
+      return {
+        city: reg.displayName,
+        country: 'India',
+        lat: reg.primaryAirport.lat,
+        lng: reg.primaryAirport.lng,
+        airport: {
+          hasCommercialService: true,
+          code: reg.primaryAirport.code,
+          name: reg.primaryAirport.name,
+          hubCity: reg.primaryAirport.city,
+          distanceToHubKm: 0,
+          driveTimeToHub: 'Direct Commercial Airport in Region',
+          notice: reg.overviewNotice,
+          feederSummary:
+            `Primary Gateways: ${reg.primaryAirport.name} (${reg.primaryAirport.code}) in ${reg.primaryAirport.city}` +
+            (reg.secondaryAirports.length > 0
+              ? `, plus ${reg.secondaryAirports.map((s) => `${s.city} (${s.code})`).join(', ')}`
+              : ''),
+        },
+        railway: {
+          hasDirectStation: true,
+          notice: reg.railway.notice,
+          stationName: reg.railway.stationName,
+          stationCode: reg.railway.stationCode,
+          distanceKm: 0,
+        },
+        seaport: {
+          isCoastal: reg.seaport.isCoastal,
+          hasPassengerWaterway: reg.seaport.hasPassengerWaterway,
+          portName: reg.seaport.portName,
+          notice: reg.seaport.notice,
+        },
+      };
+    }
+  }
+
+  // 2. Check known non-airport directory (Akola, Munnar, Alleppey, Palitana, Mount Abu, etc.)
   for (const [key, hub] of Object.entries(KNOWN_NON_AIRPORT_CITIES)) {
-    if (lower.includes(key) || key.includes(lower)) {
+    if (normalized.includes(key) || key.includes(normalized)) {
       return {
         city: hub.city,
         country: 'India',
@@ -845,7 +1354,7 @@ export function resolveCityTransitProfile(cityNameInput: string): CityTransitPro
         lng: hub.primaryAirport.lng,
         airport: {
           hasCommercialService: false,
-          notice: `⚠️ ${hub.city} does not have an active commercial airport. Flights depart from nearest hub: ${hub.primaryAirport.name} (${hub.primaryAirport.code}) in ${hub.primaryAirport.city} (${hub.primaryAirport.distanceKm} km • ${hub.primaryAirport.driveTime} ${hub.primaryAirport.feederRoute}).`,
+          notice: `📍 ${hub.city} does not have an active commercial airport. Flights depart from nearest hub: ${hub.primaryAirport.name} (${hub.primaryAirport.code}) in ${hub.primaryAirport.city} (${hub.primaryAirport.distanceKm} km • ${hub.primaryAirport.driveTime} ${hub.primaryAirport.feederRoute}).`,
           code: hub.primaryAirport.code,
           name: hub.primaryAirport.name,
           hubCity: hub.primaryAirport.city,
@@ -857,7 +1366,7 @@ export function resolveCityTransitProfile(cityNameInput: string): CityTransitPro
           hasDirectStation: hub.railInfo.hasRailStation,
           notice: hub.railInfo.hasRailStation
             ? `Direct rail access available at ${hub.railInfo.stationName} (${hub.railInfo.stationCode}).`
-            : `⚠️ ${hub.city} does not have a direct railway station. Nearest mainline railhead is ${hub.railInfo.stationName} (${hub.railInfo.stationCode}), ~${hub.railInfo.distanceKm} km away (${hub.railInfo.transferTime || 'short road transfer'}).`,
+            : `📍 ${hub.city} does not have a direct railway station. Nearest mainline railhead is ${hub.railInfo.stationName} (${hub.railInfo.stationCode}), ~${hub.railInfo.distanceKm} km away (${hub.railInfo.transferTime || 'short road transfer'}).`,
           stationName: hub.railInfo.stationName,
           stationCode: hub.railInfo.stationCode,
           distanceKm: hub.railInfo.distanceKm || 0,
@@ -866,17 +1375,21 @@ export function resolveCityTransitProfile(cityNameInput: string): CityTransitPro
           isCoastal: hub.seaportInfo.isCoastal,
           hasPassengerWaterway: hub.seaportInfo.hasPassengerFerry,
           portName: hub.seaportInfo.portName || 'No direct passenger port',
-          notice: hub.seaportInfo.nearestPortNotice || (hub.seaportInfo.isCoastal ? 'Coastal passenger ferry access available.' : 'Landlocked city with no direct sea or passenger ferry access.'),
+          notice:
+            hub.seaportInfo.nearestPortNotice ||
+            (hub.seaportInfo.isCoastal
+              ? 'Coastal passenger ferry access available.'
+              : 'Landlocked city with no direct sea or passenger ferry access.'),
         },
       };
     }
   }
 
-  // 2. Check if user typed an exact airport code (e.g. IXE, DEL, BOM, JFK)
+  // 3. Check exact airport code (e.g. TRV, COK, CCJ, CNN, IXE, DEL, BOM, JFK)
   const cleanCode = raw.toUpperCase().replace(/[^A-Z]/g, '');
   if (COMMERCIAL_AIRPORTS[cleanCode]) {
     const apt = COMMERCIAL_AIRPORTS[cleanCode];
-    const isCoastal = ['BOM', 'MAA', 'CCU', 'COK', 'IXE', 'GOI', 'GOX', 'STV', 'SIN', 'HKG', 'SYD', 'DXB', 'MIA', 'BCN', 'NAP'].includes(apt.code);
+    const isCoastal = ['BOM', 'MAA', 'CCU', 'COK', 'IXE', 'TRV', 'CNN', 'CCJ', 'GOI', 'GOX', 'STV', 'SIN', 'HKG', 'SYD', 'DXB', 'MIA', 'BCN', 'NAP'].includes(apt.code);
     return {
       city: apt.city,
       country: apt.country,
@@ -900,16 +1413,20 @@ export function resolveCityTransitProfile(cityNameInput: string): CityTransitPro
         isCoastal,
         hasPassengerWaterway: isCoastal,
         portName: isCoastal ? `${apt.city} Passenger Harbor / Ferry Wharf` : 'Inland',
-        notice: isCoastal ? `Direct passenger ferry / cruise terminals active in ${apt.city}.` : `${apt.city} is an inland city with no passenger ferry services.`,
+        notice: isCoastal
+          ? `Direct passenger ferry / cruise terminals active in ${apt.city}.`
+          : `${apt.city} is an inland city with no passenger ferry services.`,
       },
     };
   }
 
-  // 3. Check if user typed an existing commercial airport city (e.g. Mangalore, Nagpur, Surat, Delhi)
+  // 4. Check existing commercial airport city & aliases (e.g. Trivandrum, Thiruvananthapuram, Kochi, Cochin, Kozhikode, Calicut, Kannur, Mangalore, Nagpur, Surat, Delhi)
   for (const apt of Object.values(COMMERCIAL_AIRPORTS)) {
     const cityLower = apt.city.toLowerCase();
-    if (lower.includes(cityLower) || cityLower.includes(lower)) {
-      const isCoastal = ['BOM', 'MAA', 'CCU', 'COK', 'IXE', 'GOI', 'GOX', 'STV', 'SIN', 'HKG', 'SYD', 'DXB', 'MIA', 'BCN', 'NAP'].includes(apt.code);
+    const matchesCity = normalized.includes(cityLower) || cityLower.includes(normalized);
+    const matchesAlias = apt.aliases && apt.aliases.some((al) => normalized.includes(al) || al.includes(normalized));
+    if (matchesCity || matchesAlias) {
+      const isCoastal = ['BOM', 'MAA', 'CCU', 'COK', 'IXE', 'TRV', 'CNN', 'CCJ', 'GOI', 'GOX', 'STV', 'SIN', 'HKG', 'SYD', 'DXB', 'MIA', 'BCN', 'NAP'].includes(apt.code);
       return {
         city: apt.city,
         country: apt.country,
@@ -933,17 +1450,56 @@ export function resolveCityTransitProfile(cityNameInput: string): CityTransitPro
           isCoastal,
           hasPassengerWaterway: isCoastal,
           portName: isCoastal ? `${apt.city} Harbor & Ferry Terminal` : 'Inland',
-          notice: isCoastal ? `Passenger ferry & cruise connections operating from ${apt.city}.` : `${apt.city} is landlocked.`,
+          notice: isCoastal
+            ? `Passenger ferry & cruise connections operating from ${apt.city}.`
+            : `${apt.city} is landlocked.`,
         },
       };
     }
   }
 
-  // 4. Fallback for any other small town, village, or global place:
-  // Identify the closest genuine commercial airport
-  const isIndia = !lower.includes('usa') && !lower.includes('uk') && !lower.includes('france') && !lower.includes('japan') && !lower.includes('dubai');
-  const candidateAirports = Object.values(COMMERCIAL_AIRPORTS).filter((a) => (isIndia ? a.country === 'India' : a.country !== 'India'));
-  const fallbackHub = candidateAirports[0] || COMMERCIAL_AIRPORTS.DEL;
+  // 5. Intelligent Geodesic & Regional Fallback (NEVER default to DEL!)
+  const isIndia =
+    !normalized.includes('usa') &&
+    !normalized.includes('uk') &&
+    !normalized.includes('france') &&
+    !normalized.includes('japan') &&
+    !normalized.includes('dubai') &&
+    !normalized.includes('singapore') &&
+    !normalized.includes('thailand') &&
+    !normalized.includes('europe');
+
+  let fallbackHub: CommercialAirport = COMMERCIAL_AIRPORTS.BOM;
+
+  if (isIndia) {
+    if (/keral|trivandr|cochin|malabar|travancor|ernakulam|kochi|alleppey|munnar|wayanad|varkala|kovalam/i.test(normalized)) {
+      fallbackHub = COMMERCIAL_AIRPORTS.COK;
+    } else if (/tamil|chennai|madras|madurai|coimbatore|trichy/i.test(normalized)) {
+      fallbackHub = COMMERCIAL_AIRPORTS.MAA;
+    } else if (/karnatak|bangal|bengalur|mysor|mangalo|hampi/i.test(normalized)) {
+      fallbackHub = COMMERCIAL_AIRPORTS.BLR;
+    } else if (/andhra|telangan|hyderab|vizag|vijayawada/i.test(normalized)) {
+      fallbackHub = COMMERCIAL_AIRPORTS.HYD;
+    } else if (/maharash|mumbai|bombay|pune|nagpur|vidarbha|konkan/i.test(normalized)) {
+      fallbackHub = COMMERCIAL_AIRPORTS.BOM;
+    } else if (/gujarat|ahmedab|surat|vadodara|rajkot|kutch/i.test(normalized)) {
+      fallbackHub = COMMERCIAL_AIRPORTS.AMD;
+    } else if (/bengal|kolkata|calcutta|odisha|bhubaneswar|assam|guwahati|northeast/i.test(normalized)) {
+      fallbackHub = COMMERCIAL_AIRPORTS.CCU;
+    } else if (/kashmir|srinagar|leh|ladakh/i.test(normalized)) {
+      fallbackHub = COMMERCIAL_AIRPORTS.SXR;
+    } else if (/uttarakhand|dehradun|rishikesh|haridwar/i.test(normalized)) {
+      fallbackHub = COMMERCIAL_AIRPORTS.DED;
+    } else if (/punjab|haryana|chandigarh|amritsar/i.test(normalized)) {
+      fallbackHub = COMMERCIAL_AIRPORTS.ATQ;
+    } else if (/rajasthan|jaipur|udaipur|jodhpur|jaisalmer/i.test(normalized)) {
+      fallbackHub = COMMERCIAL_AIRPORTS.JAI;
+    } else {
+      fallbackHub = COMMERCIAL_AIRPORTS.BOM;
+    }
+  } else {
+    fallbackHub = COMMERCIAL_AIRPORTS.DXB;
+  }
 
   return {
     city: raw || 'Destination',
@@ -952,7 +1508,7 @@ export function resolveCityTransitProfile(cityNameInput: string): CityTransitPro
     lng: fallbackHub.lng,
     airport: {
       hasCommercialService: false,
-      notice: `ℹ️ ${raw} does not have a direct commercial airport. Suggested flight gateway: ${fallbackHub.name} (${fallbackHub.code}) in ${fallbackHub.city}.`,
+      notice: `📍 ${raw} does not have a direct commercial airport. Suggested flight gateway: ${fallbackHub.name} (${fallbackHub.code}) in ${fallbackHub.city}.`,
       code: fallbackHub.code,
       name: fallbackHub.name,
       hubCity: fallbackHub.city,
@@ -970,15 +1526,12 @@ export function resolveCityTransitProfile(cityNameInput: string): CityTransitPro
     seaport: {
       isCoastal: false,
       hasPassengerWaterway: false,
-      portName: 'Inland location',
-      notice: `${raw} is an inland destination. For waterways, travel to nearest coastal harbor.`,
+      portName: 'Inland',
+      notice: `${raw} has no direct passenger waterways. Ground transport or regional flights recommended.`,
     },
   };
 }
 
-// -------------------------------------------------------------
-// 5. Roadways & Bus Search Generator (Car or Bus)
-// -------------------------------------------------------------
 export interface LiveRoadwayOffer {
   id: string;
   category: 'cab' | 'bus';

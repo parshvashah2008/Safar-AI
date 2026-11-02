@@ -865,6 +865,28 @@ function PlannerContent() {
                       </div>
                     )}
 
+                  {/* Regional Multi-Airport Hub Notice (e.g. Kerala, Goa) */}
+                  {(form.transportMode === 'flight' || form.transportMode === 'any') &&
+                    transitDestProfile.airport.hasCommercialService &&
+                    transitDestProfile.airport.notice && (
+                      <div className="p-3.5 rounded-xl bg-teal-500/10 border border-teal-500/30 text-teal-200 text-xs flex items-start gap-3 shadow-xs animate-in fade-in-0 duration-200">
+                        <Plane className="w-4 h-4 text-teal-400 shrink-0 mt-0.5" />
+                        <div className="space-y-1 flex-1">
+                          <span className="font-bold text-teal-300 block">
+                            Direct Airport Gateways in {transitDestProfile.city}
+                          </span>
+                          <p className="text-sand-200 text-xs leading-relaxed">
+                            {transitDestProfile.airport.notice}
+                          </p>
+                          {transitDestProfile.airport.feederSummary && (
+                            <p className="text-teal-300/90 text-[11px] font-mono mt-0.5">
+                              {transitDestProfile.airport.feederSummary}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    )}
+
                   {/* Ship Notice if inland */}
                   {form.transportMode === 'ship' && (!transitOriginProfile.seaport.isCoastal && !transitDestProfile.seaport.isCoastal) && (
                     <div className="p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-200 text-xs flex items-start gap-3 shadow-xs">
