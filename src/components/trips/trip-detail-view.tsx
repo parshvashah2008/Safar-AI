@@ -46,6 +46,7 @@ import {
 } from '@/lib/geo/gps';
 import { formatTo12Hour, parseTimeToMinutes } from '@/lib/utils/time-format';
 import { emitRouteChange } from '@/lib/services/sync-bus';
+import { generateClientItinerary } from '@/lib/ai/client-ai-engine';
 import type { Trip, ItineraryDay, ItineraryStop, StopCategory } from '@/types';
 
 export function TripDetailView({ tripId }: { tripId: string }) {
@@ -83,8 +84,46 @@ export function TripDetailView({ tripId }: { tripId: string }) {
     setTrip(tripData);
 
     const { days: tripDays, stops: tripStops } = await getTripItinerary(tripId);
+
+    // Auto-sanitize legacy placeholder names or lowercase titles
+    const cleanStops = tripStops.map((s) => {
+      let placeName = (s as any).place_name || s.title || '';
+      let title = s.title || '';
+      let desc = s.description || '';
+      const destLower = (tripData.destination || '').toLowerCase();
+
+      // Fix lowercase destination prefix in placeName or title
+      if (placeName.startsWith(destLower + ' ') || placeName.startsWith(destLower.trim() + ' ')) {
+        const capitalDest = tripData.destination.charAt(0).toUpperCase() + tripData.destination.slice(1);
+        placeName = placeName.replace(new RegExp(`^${destLower}`, 'i'), capitalDest);
+      }
+      if (title.includes(destLower)) {
+        const capitalDest = tripData.destination.charAt(0).toUpperCase() + tripData.destination.slice(1);
+        title = title.replace(new RegExp(destLower, 'gi'), capitalDest);
+      }
+
+      // Palitana legacy cleaning (replaces generic placeholders with authentic Shatrunjaya stops)
+      if (destLower.includes('palitana')) {
+        if (placeName.toLowerCase().includes('central heritage quarter') || title.toLowerCase().includes('central district')) {
+          title = 'Arrival & Taleti Sacred Foothills Orientation';
+          placeName = 'Taleti Road Dharamshala Precinct, Palitana';
+          desc = 'Arrive in Palitana, check in near Taleti Road, and take an orientation walk near the sacred foothills.';
+        } else if (placeName.toLowerCase().includes('renowned local restaurant')) {
+          title = 'Traditional Pure Jain Satvik Lunch';
+          placeName = 'Hotel Shravak / Taleti Bhojanshala, Palitana';
+          desc = 'Wholesome, freshly prepared satvik Jain thali near Taleti gate.';
+        } else if (placeName.toLowerCase().includes('scenic point')) {
+          title = 'Hastagiri Tirth & Shatrunji River Viewpoint';
+          placeName = 'Hastagiri Jain Tirth Lookout, Palitana';
+          desc = 'Panoramic viewpoint overlooking the Shatrunjaya mountain range and Shetrunji river basin.';
+        }
+      }
+
+      return { ...s, title, place_name: placeName, description: desc };
+    });
+
     setDays(tripDays);
-    setStops(tripStops);
+    setStops(cleanStops);
     if (tripDays.length > 0) {
       setActiveDayId(tripDays[0].id);
     }
@@ -127,71 +166,33 @@ export function TripDetailView({ tripId }: { tripId: string }) {
     if (!trip) return;
     setRegenerating(true);
     try {
-      const storedKey = typeof window !== 'undefined' ? localStorage.getItem('safar_gemini_api_key') : null;
-      const headers: Record<string, string> = { 'Content-Type': 'application/json' };
-      if (storedKey) headers['x-gemini-key'] = storedKey;
-
-      const res = await fetch('/api/ai/itinerary', {
-        method: 'POST',
-        headers,
-        body: JSON.stringify({
-          destination: trip.destination,
-          country: trip.country,
-          startDate: trip.start_date,
-          endDate: trip.end_date,
-          travelers: trip.travelers,
-          budget: trip.budget,
-          currency: trip.currency,
-          interests: trip.interests,
-          dietary: trip.dietary,
-          accessibility: trip.accessibility,
-        }),
+      // Use Client AI Engine with automatic Gemini 2.5 Flash -> Groq -> fallback cascade
+      const res = await generateClientItinerary({
+        origin: 'India',
+        destination: trip.destination,
+        startDate: trip.start_date,
+        endDate: trip.end_date,
+        travelers: trip.travelers,
+        budget: trip.budget,
+        currency: trip.currency,
+        interests: trip.interests,
+        dietary: trip.dietary || undefined,
+        accessibility: trip.accessibility || undefined,
       });
 
-      if (res.ok && res.headers.get('content-type')?.includes('application/json')) {
-        const data = await res.json();
-        if (data.days && Array.isArray(data.days) && data.days.length > 0) {
-          const applied = await applyAIItinerary(trip.id, data.days, trip.currency);
-          setDays(applied.days);
-          setStops(applied.stops);
-          if (applied.days.length > 0) {
-            setActiveDayId(applied.days[0].id);
-          }
-          if (data.corrected_destination && data.corrected_destination !== trip.destination) {
-            setTrip((prev) => (prev ? { ...prev, destination: data.corrected_destination } : null));
-          }
+      if (res.days && Array.isArray(res.days) && res.days.length > 0) {
+        const applied = await applyAIItinerary(trip.id, res.days, trip.currency);
+        setDays(applied.days);
+        setStops(applied.stops);
+        if (applied.days.length > 0) {
+          setActiveDayId(applied.days[0].id);
         }
-      } else {
-        throw new Error('Server returned non-ok status');
+        if (res.corrected_destination && res.corrected_destination !== trip.destination) {
+          setTrip((prev) => (prev ? { ...prev, destination: res.corrected_destination } : null));
+        }
       }
     } catch (e) {
-      console.warn('Server regenerate failed, attempting direct Gemini client call:', e);
-      try {
-        const clientKey =
-          typeof window !== 'undefined' ? localStorage.getItem('safar_gemini_api_key') : null;
-        if (!clientKey) {
-          throw new Error('No client API key configured');
-        }
-        const { GoogleGenerativeAI } = await import('@google/generative-ai');
-        const genAI = new GoogleGenerativeAI(clientKey);
-        const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
-        const prompt = `Create a complete JSON itinerary from ${trip.start_date} to ${trip.end_date} for ${trip.destination}, ${trip.country}.
-Travelers: ${trip.travelers}. Budget: ${trip.currency} ${trip.budget}. Interests: ${trip.interests.join(', ')}. Dietary: ${trip.dietary || 'None specified'}.
-Return JSON only: { "corrected_destination": string, "days": [{ "date": "YYYY-MM-DD", "title": string, "activities": [{ "time": "10:00 AM", "title": string, "description": string, "estimated_cost": number, "duration_minutes": number, "category": string, "place_name": string, "latitude": number, "longitude": number, "is_optional": boolean }] }] }`;
-        const resp = await model.generateContent(prompt);
-        const txt = resp.response.text().replace(/```json\n?|\n?```/g, '').trim();
-        const parsed = JSON.parse(txt);
-        if (parsed.days && Array.isArray(parsed.days) && parsed.days.length > 0) {
-          const applied = await applyAIItinerary(trip.id, parsed.days, trip.currency);
-          setDays(applied.days);
-          setStops(applied.stops);
-          if (applied.days.length > 0) {
-            setActiveDayId(applied.days[0].id);
-          }
-        }
-      } catch (err2) {
-        console.error('All regeneration routes failed:', err2);
-      }
+      console.error('Itinerary regeneration failed:', e);
     } finally {
       setRegenerating(false);
     }

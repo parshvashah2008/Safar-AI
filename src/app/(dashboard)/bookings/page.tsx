@@ -200,12 +200,18 @@ function BookingsContent() {
       setSelectedTripId(activeId);
 
       const activeTrip = allTrips.find((t) => t.id === activeId);
-      if (activeTrip) {
+      if (!initialDestFromParam && activeTrip) {
         setSearchDest(activeTrip.destination);
         if (activeTrip.start_date) setSearchDate(activeTrip.start_date);
         if (activeTrip.currency && SUPPORTED_CURRENCIES[activeTrip.currency]) {
           setSelectedCurrency(activeTrip.currency);
         }
+      } else if (initialDestFromParam) {
+        setSearchDest(initialDestFromParam);
+      }
+
+      if (initialOriginFromParam) {
+        setSearchOrigin(initialOriginFromParam);
       }
 
       // Load bookings from storage
@@ -219,7 +225,17 @@ function BookingsContent() {
       setBookings(userBookings);
     }
     loadData();
-  }, [initialTripId]);
+
+    // Listen to real-time search sync from Home Page or /plan
+    const handleSearchSync = (e: any) => {
+      const p = e.detail;
+      if (p?.origin) setSearchOrigin(p.origin);
+      if (p?.destination) setSearchDest(p.destination);
+      if (p?.travelers) setPassengers(p.travelers);
+    };
+    window.addEventListener(SYNC_EVENTS.SEARCH_CHANGED, handleSearchSync);
+    return () => window.removeEventListener(SYNC_EVENTS.SEARCH_CHANGED, handleSearchSync);
+  }, [initialTripId, initialDestFromParam, initialOriginFromParam]);
 
   const handleTripChange = (tripId: string) => {
     setSelectedTripId(tripId);

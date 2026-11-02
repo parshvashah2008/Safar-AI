@@ -6,6 +6,13 @@
  */
 
 import { convertCurrency, formatCurrencyAmount } from './currency-service';
+import {
+  findCountryByNameOrAlias,
+  findNonAirportDestination,
+  detectContinentOrRegion,
+  GLOBAL_COUNTRIES,
+  GLOBAL_NON_AIRPORT_DESTINATIONS,
+} from './global-country-data';
 
 export interface CommercialAirport {
   code: string;
@@ -205,6 +212,47 @@ export const COMMERCIAL_AIRPORTS: Record<string, CommercialAirport> = {
   KTM: { code: 'KTM', name: 'Tribhuvan International Airport', city: 'Kathmandu', country: 'Nepal', lat: 27.6966, lng: 85.3591 },
   JTR: { code: 'JTR', name: 'Santorini Thira Airport', city: 'Santorini', country: 'Greece', lat: 36.3992, lng: 25.4793 },
   NAP: { code: 'NAP', name: 'Naples International Airport (Amalfi Gateway)', city: 'Naples', country: 'Italy', lat: 40.8860, lng: 14.2908 },
+  GVA: { code: 'GVA', name: 'Geneva Airport (Cointrin)', city: 'Geneva', country: 'Switzerland', lat: 46.2381, lng: 6.1090 },
+  BSL: { code: 'BSL', name: 'EuroAirport Basel Mulhouse Freiburg', city: 'Basel', country: 'Switzerland', lat: 47.5896, lng: 7.5299 },
+  MUC: { code: 'MUC', name: 'Munich Airport (Franz Josef Strauss)', city: 'Munich', country: 'Germany', lat: 48.3537, lng: 11.7860 },
+  BER: { code: 'BER', name: 'Berlin Brandenburg Airport', city: 'Berlin', country: 'Germany', lat: 52.3667, lng: 13.5033 },
+  MXP: { code: 'MXP', name: 'Milan Malpensa Airport', city: 'Milan', country: 'Italy', lat: 45.6301, lng: 8.7231 },
+  VCE: { code: 'VCE', name: 'Venice Marco Polo Airport', city: 'Venice', country: 'Italy', lat: 45.5053, lng: 12.3519 },
+  FLR: { code: 'FLR', name: 'Florence Peretola Airport', city: 'Florence', country: 'Italy', lat: 43.8100, lng: 11.2051 },
+  EDI: { code: 'EDI', name: 'Edinburgh Airport', city: 'Edinburgh', country: 'United Kingdom', lat: 55.9500, lng: -3.3725 },
+  MAN: { code: 'MAN', name: 'Manchester Airport', city: 'Manchester', country: 'United Kingdom', lat: 53.3537, lng: -2.2750 },
+  AGP: { code: 'AGP', name: 'Málaga–Costa del Sol Airport', city: 'Málaga', country: 'Spain', lat: 36.6749, lng: -4.4991 },
+  VIE: { code: 'VIE', name: 'Vienna International Airport', city: 'Vienna', country: 'Austria', lat: 48.1103, lng: 16.5697 },
+  SZG: { code: 'SZG', name: 'Salzburg Airport (W. A. Mozart)', city: 'Salzburg', country: 'Austria', lat: 47.7944, lng: 13.0044 },
+  ATH: { code: 'ATH', name: 'Athens International Airport', city: 'Athens', country: 'Greece', lat: 37.9364, lng: 23.9445 },
+  LIS: { code: 'LIS', name: 'Humberto Delgado Airport', city: 'Lisbon', country: 'Portugal', lat: 38.7756, lng: -9.1354 },
+  OPO: { code: 'OPO', name: 'Francisco Sá Carneiro Airport', city: 'Porto', country: 'Portugal', lat: 41.2421, lng: -8.6786 },
+  OSL: { code: 'OSL', name: 'Oslo Airport (Gardermoen)', city: 'Oslo', country: 'Norway', lat: 60.1976, lng: 11.1004 },
+  BGO: { code: 'BGO', name: 'Bergen Airport (Flesland)', city: 'Bergen', country: 'Norway', lat: 60.2934, lng: 5.2181 },
+  ARN: { code: 'ARN', name: 'Stockholm Arlanda Airport', city: 'Stockholm', country: 'Sweden', lat: 59.6498, lng: 17.9238 },
+  CPH: { code: 'CPH', name: 'Copenhagen Airport (Kastrup)', city: 'Copenhagen', country: 'Denmark', lat: 55.6180, lng: 12.6508 },
+  HEL: { code: 'HEL', name: 'Helsinki-Vantaa Airport', city: 'Helsinki', country: 'Finland', lat: 60.3172, lng: 24.9633 },
+  IST: { code: 'IST', name: 'Istanbul Airport', city: 'Istanbul', country: 'Turkey', lat: 41.2753, lng: 28.7519, isHub: true },
+  SAW: { code: 'SAW', name: 'Sabiha Gökçen Airport', city: 'Istanbul', country: 'Turkey', lat: 40.8986, lng: 29.3092 },
+  AYT: { code: 'AYT', name: 'Antalya Airport', city: 'Antalya', country: 'Turkey', lat: 36.8987, lng: 30.8005 },
+  ASR: { code: 'ASR', name: 'Kayseri Erkilet Airport (Cappadocia Gateway)', city: 'Kayseri', country: 'Turkey', lat: 38.7704, lng: 35.4954 },
+  CAI: { code: 'CAI', name: 'Cairo International Airport', city: 'Cairo', country: 'Egypt', lat: 30.1219, lng: 31.4056, isHub: true },
+  HRG: { code: 'HRG', name: 'Hurghada International Airport', city: 'Hurghada', country: 'Egypt', lat: 27.1783, lng: 33.7994 },
+  JNB: { code: 'JNB', name: 'O. R. Tambo International Airport', city: 'Johannesburg', country: 'South Africa', lat: -26.1392, lng: 28.2460, isHub: true },
+  CPT: { code: 'CPT', name: 'Cape Town International Airport', city: 'Cape Town', country: 'South Africa', lat: -33.9648, lng: 18.6017 },
+  AKL: { code: 'AKL', name: 'Auckland Airport', city: 'Auckland', country: 'New Zealand', lat: -37.0082, lng: 174.7850, isHub: true },
+  ZQN: { code: 'ZQN', name: 'Queenstown Airport', city: 'Queenstown', country: 'New Zealand', lat: -45.0216, lng: 168.7454 },
+  BNE: { code: 'BNE', name: 'Brisbane Airport', city: 'Brisbane', country: 'Australia', lat: -27.3842, lng: 153.1175 },
+  PER: { code: 'PER', name: 'Perth Airport', city: 'Perth', country: 'Australia', lat: -31.9403, lng: 115.9669 },
+  CNS: { code: 'CNS', name: 'Cairns Airport', city: 'Cairns', country: 'Australia', lat: -16.8858, lng: 145.7553 },
+  GRU: { code: 'GRU', name: 'São Paulo/Guarulhos International', city: 'São Paulo', country: 'Brazil', lat: -23.4356, lng: -46.4731, isHub: true },
+  GIG: { code: 'GIG', name: 'Rio de Janeiro Galeão', city: 'Rio de Janeiro', country: 'Brazil', lat: -22.8089, lng: -43.2436 },
+  LIM: { code: 'LIM', name: 'Jorge Chávez International Airport', city: 'Lima', country: 'Peru', lat: -12.0219, lng: -77.1143, isHub: true },
+  CUZ: { code: 'CUZ', name: 'Alejandro Velasco Astete Airport (Machu Picchu Gateway)', city: 'Cusco', country: 'Peru', lat: -13.5357, lng: -71.9388 },
+  YYC: { code: 'YYC', name: 'Calgary International Airport (Banff Gateway)', city: 'Calgary', country: 'Canada', lat: 51.1215, lng: -114.0076 },
+  YUL: { code: 'YUL', name: 'Montréal–Trudeau International', city: 'Montreal', country: 'Canada', lat: 45.4706, lng: -73.7408 },
+  AMM: { code: 'AMM', name: 'Queen Alia International Airport (Petra Gateway)', city: 'Amman', country: 'Jordan', lat: 31.7226, lng: 35.9932 },
+  AQJ: { code: 'AQJ', name: 'King Hussein International Airport', city: 'Aqaba', country: 'Jordan', lat: 29.6116, lng: 35.0181 },
 };
 
 // -------------------------------------------------------------
@@ -1305,7 +1353,82 @@ export function resolveCityTransitProfile(cityNameInput: string): CityTransitPro
   const raw = (cityNameInput || '').trim();
   const normalized = normalizeTransitQuery(raw);
 
-  // 1. Check State & Regional Multi-Airport Hubs (e.g. Kerala, Goa, Kashmir, Himachal, Uttarakhand)
+  // 1. Authoritative Worldwide Country Resolution (~195 Countries)
+  // When a user enters ANY country (e.g. Switzerland, France, Germany, Japan, USA, Australia, Egypt, etc.)
+  const matchedCountry = findCountryByNameOrAlias(raw) || findCountryByNameOrAlias(normalized);
+  if (matchedCountry) {
+    return {
+      city: matchedCountry.capital,
+      country: matchedCountry.name,
+      lat: matchedCountry.primaryAirport.lat,
+      lng: matchedCountry.primaryAirport.lng,
+      airport: {
+        hasCommercialService: true,
+        code: matchedCountry.primaryAirport.code,
+        name: matchedCountry.primaryAirport.name,
+        hubCity: matchedCountry.primaryAirport.city,
+        distanceToHubKm: 0,
+        driveTimeToHub: 'Direct Gateway Airport in Country',
+        notice: matchedCountry.overviewNotice,
+        feederSummary:
+          `Primary International Hub: ${matchedCountry.primaryAirport.name} (${matchedCountry.primaryAirport.code}) in ${matchedCountry.primaryAirport.city}` +
+          (matchedCountry.secondaryAirports.length > 0
+            ? `, plus additional major gateways at ${matchedCountry.secondaryAirports.map((s) => `${s.city} (${s.code})`).join(', ')}`
+            : ''),
+      },
+      railway: {
+        hasDirectStation: true,
+        stationName: matchedCountry.railway.primaryStation,
+        stationCode: matchedCountry.primaryAirport.code.slice(0, 3),
+        distanceKm: 0,
+        notice: matchedCountry.railway.notice,
+      },
+      seaport: {
+        isCoastal: matchedCountry.seaport.isCoastal,
+        hasPassengerWaterway: matchedCountry.seaport.hasPassengerWaterway,
+        portName: matchedCountry.seaport.portName,
+        notice: matchedCountry.seaport.notice,
+      },
+    };
+  }
+
+  // 2. Iconic Global Non-Airport Destinations (Zermatt, Interlaken, Amalfi, Hallstatt, Banff, Machu Picchu, Cappadocia, Petra, Ubud, Akola, Palitana, Girnar, etc.)
+  const globalDest = findNonAirportDestination(raw) || findNonAirportDestination(normalized);
+  if (globalDest) {
+    return {
+      city: globalDest.name,
+      country: globalDest.country,
+      lat: globalDest.primaryAirport.lat,
+      lng: globalDest.primaryAirport.lng,
+      airport: {
+        hasCommercialService: false,
+        code: globalDest.primaryAirport.code,
+        name: globalDest.primaryAirport.name,
+        hubCity: globalDest.primaryAirport.city,
+        distanceToHubKm: globalDest.primaryAirport.distanceKm,
+        driveTimeToHub: globalDest.primaryAirport.driveTime,
+        notice: `📍 ${globalDest.name} does not have an active commercial airport. Flights arrive at nearest gateway: ${globalDest.primaryAirport.name} (${globalDest.primaryAirport.code}) in ${globalDest.primaryAirport.city} (${globalDest.primaryAirport.distanceKm} km • ${globalDest.primaryAirport.driveTime} ${globalDest.primaryAirport.feederRoute}).`,
+        feederSummary: `🚗 Feeder Transfer: ${globalDest.name} ➔ ${globalDest.primaryAirport.city} (${globalDest.primaryAirport.code}) via ${globalDest.primaryAirport.feederCarrier}`,
+      },
+      railway: {
+        hasDirectStation: globalDest.railInfo.hasRailStation,
+        notice: globalDest.railInfo.hasRailStation
+          ? `Direct rail access available at ${globalDest.railInfo.stationName} (${globalDest.railInfo.stationCode})${globalDest.railInfo.trainType ? ` via ${globalDest.railInfo.trainType}` : ''}.`
+          : `Nearest railway junction: ${globalDest.railInfo.stationName} (~${globalDest.railInfo.distanceKm} km away, ${globalDest.railInfo.transferTime || 'short road transfer'}).`,
+        stationName: globalDest.railInfo.stationName,
+        stationCode: globalDest.railInfo.stationCode,
+        distanceKm: globalDest.railInfo.distanceKm || 0,
+      },
+      seaport: {
+        isCoastal: globalDest.seaportInfo.isCoastal,
+        hasPassengerWaterway: Boolean(globalDest.seaportInfo.hasPassengerFerry || globalDest.seaportInfo.hasPassengerWaterway),
+        portName: globalDest.seaportInfo.portName || 'Inland',
+        notice: globalDest.seaportInfo.notice,
+      },
+    };
+  }
+
+  // 3. Check State & Regional Multi-Airport Hubs (e.g. Kerala, Goa, Kashmir, Himachal, Uttarakhand)
   for (const reg of Object.values(STATE_AND_REGIONAL_HUBS)) {
     if (reg.aliases.some((a) => normalized.includes(a) || a.includes(normalized))) {
       return {
@@ -1344,7 +1467,7 @@ export function resolveCityTransitProfile(cityNameInput: string): CityTransitPro
     }
   }
 
-  // 2. Check known non-airport directory (Akola, Munnar, Alleppey, Palitana, Mount Abu, etc.)
+  // 4. Check known non-airport directory (Akola, Munnar, Alleppey, Palitana, Mount Abu, etc.)
   for (const [key, hub] of Object.entries(KNOWN_NON_AIRPORT_CITIES)) {
     if (normalized.includes(key) || key.includes(normalized)) {
       return {
@@ -1385,11 +1508,11 @@ export function resolveCityTransitProfile(cityNameInput: string): CityTransitPro
     }
   }
 
-  // 3. Check exact airport code (e.g. TRV, COK, CCJ, CNN, IXE, DEL, BOM, JFK)
+  // 5. Check exact airport code (e.g. ZRH, CDG, LHR, FRA, FCO, JFK, LAX, HND, SIN, DXB, TRV, COK, CCJ, CNN, IXE, DEL, BOM)
   const cleanCode = raw.toUpperCase().replace(/[^A-Z]/g, '');
   if (COMMERCIAL_AIRPORTS[cleanCode]) {
     const apt = COMMERCIAL_AIRPORTS[cleanCode];
-    const isCoastal = ['BOM', 'MAA', 'CCU', 'COK', 'IXE', 'TRV', 'CNN', 'CCJ', 'GOI', 'GOX', 'STV', 'SIN', 'HKG', 'SYD', 'DXB', 'MIA', 'BCN', 'NAP'].includes(apt.code);
+    const isCoastal = ['BOM', 'MAA', 'CCU', 'COK', 'IXE', 'TRV', 'CNN', 'CCJ', 'GOI', 'GOX', 'STV', 'SIN', 'HKG', 'SYD', 'DXB', 'MIA', 'BCN', 'NAP', 'LIS', 'CPH', 'OSL', 'ATH', 'JTR'].includes(apt.code);
     return {
       city: apt.city,
       country: apt.country,
@@ -1420,13 +1543,13 @@ export function resolveCityTransitProfile(cityNameInput: string): CityTransitPro
     };
   }
 
-  // 4. Check existing commercial airport city & aliases (e.g. Trivandrum, Thiruvananthapuram, Kochi, Cochin, Kozhikode, Calicut, Kannur, Mangalore, Nagpur, Surat, Delhi)
+  // 6. Check existing commercial airport city & aliases
   for (const apt of Object.values(COMMERCIAL_AIRPORTS)) {
     const cityLower = apt.city.toLowerCase();
     const matchesCity = normalized.includes(cityLower) || cityLower.includes(normalized);
     const matchesAlias = apt.aliases && apt.aliases.some((al) => normalized.includes(al) || al.includes(normalized));
     if (matchesCity || matchesAlias) {
-      const isCoastal = ['BOM', 'MAA', 'CCU', 'COK', 'IXE', 'TRV', 'CNN', 'CCJ', 'GOI', 'GOX', 'STV', 'SIN', 'HKG', 'SYD', 'DXB', 'MIA', 'BCN', 'NAP'].includes(apt.code);
+      const isCoastal = ['BOM', 'MAA', 'CCU', 'COK', 'IXE', 'TRV', 'CNN', 'CCJ', 'GOI', 'GOX', 'STV', 'SIN', 'HKG', 'SYD', 'DXB', 'MIA', 'BCN', 'NAP', 'LIS', 'CPH', 'OSL', 'ATH', 'JTR'].includes(apt.code);
       return {
         city: apt.city,
         country: apt.country,
@@ -1458,76 +1581,38 @@ export function resolveCityTransitProfile(cityNameInput: string): CityTransitPro
     }
   }
 
-  // 5. Intelligent Geodesic & Regional Fallback (NEVER default to DEL!)
-  const isIndia =
-    !normalized.includes('usa') &&
-    !normalized.includes('uk') &&
-    !normalized.includes('france') &&
-    !normalized.includes('japan') &&
-    !normalized.includes('dubai') &&
-    !normalized.includes('singapore') &&
-    !normalized.includes('thailand') &&
-    !normalized.includes('europe');
-
-  let fallbackHub: CommercialAirport = COMMERCIAL_AIRPORTS.BOM;
-
-  if (isIndia) {
-    if (/keral|trivandr|cochin|malabar|travancor|ernakulam|kochi|alleppey|munnar|wayanad|varkala|kovalam/i.test(normalized)) {
-      fallbackHub = COMMERCIAL_AIRPORTS.COK;
-    } else if (/tamil|chennai|madras|madurai|coimbatore|trichy/i.test(normalized)) {
-      fallbackHub = COMMERCIAL_AIRPORTS.MAA;
-    } else if (/karnatak|bangal|bengalur|mysor|mangalo|hampi/i.test(normalized)) {
-      fallbackHub = COMMERCIAL_AIRPORTS.BLR;
-    } else if (/andhra|telangan|hyderab|vizag|vijayawada/i.test(normalized)) {
-      fallbackHub = COMMERCIAL_AIRPORTS.HYD;
-    } else if (/maharash|mumbai|bombay|pune|nagpur|vidarbha|konkan/i.test(normalized)) {
-      fallbackHub = COMMERCIAL_AIRPORTS.BOM;
-    } else if (/gujarat|ahmedab|surat|vadodara|rajkot|kutch/i.test(normalized)) {
-      fallbackHub = COMMERCIAL_AIRPORTS.AMD;
-    } else if (/bengal|kolkata|calcutta|odisha|bhubaneswar|assam|guwahati|northeast/i.test(normalized)) {
-      fallbackHub = COMMERCIAL_AIRPORTS.CCU;
-    } else if (/kashmir|srinagar|leh|ladakh/i.test(normalized)) {
-      fallbackHub = COMMERCIAL_AIRPORTS.SXR;
-    } else if (/uttarakhand|dehradun|rishikesh|haridwar/i.test(normalized)) {
-      fallbackHub = COMMERCIAL_AIRPORTS.DED;
-    } else if (/punjab|haryana|chandigarh|amritsar/i.test(normalized)) {
-      fallbackHub = COMMERCIAL_AIRPORTS.ATQ;
-    } else if (/rajasthan|jaipur|udaipur|jodhpur|jaisalmer/i.test(normalized)) {
-      fallbackHub = COMMERCIAL_AIRPORTS.JAI;
-    } else {
-      fallbackHub = COMMERCIAL_AIRPORTS.BOM;
-    }
-  } else {
-    fallbackHub = COMMERCIAL_AIRPORTS.DXB;
-  }
+  // 7. Intelligent Continental & Regional Geodesic Fallback
+  const detected = detectContinentOrRegion(raw || normalized);
+  const fallbackHub: CommercialAirport = COMMERCIAL_AIRPORTS[detected.gatewayCode] || COMMERCIAL_AIRPORTS.BOM;
+  const isSouthAsia = detected.region === 'South Asia';
 
   return {
     city: raw || 'Destination',
-    country: isIndia ? 'India' : 'International',
+    country: isSouthAsia ? 'India' : detected.region,
     lat: fallbackHub.lat,
     lng: fallbackHub.lng,
     airport: {
       hasCommercialService: false,
-      notice: `📍 ${raw} does not have a direct commercial airport. Suggested flight gateway: ${fallbackHub.name} (${fallbackHub.code}) in ${fallbackHub.city}.`,
+      notice: `📍 ${raw} is accessible via regional gateway ${fallbackHub.name} (${fallbackHub.code}) in ${fallbackHub.city} (${detected.region}).`,
       code: fallbackHub.code,
       name: fallbackHub.name,
       hubCity: fallbackHub.city,
-      distanceToHubKm: 120,
-      driveTimeToHub: '2h - 3h via regional highway',
-      feederSummary: `🚗 Feeder Transfer: ${raw} ➔ ${fallbackHub.city} (${fallbackHub.code}) via regional expressway/cab`,
+      distanceToHubKm: 95,
+      driveTimeToHub: '1h 30m - 2h 30m via regional expressway',
+      feederSummary: `🚗 Feeder Connection: ${raw} ➔ ${fallbackHub.city} (${fallbackHub.code}) via regional expressway/coach`,
     },
     railway: {
       hasDirectStation: true,
-      stationName: `${raw} Railhead / Junction`,
-      stationCode: 'RL',
+      stationName: `${raw} Mainline Railhead / District Station`,
+      stationCode: fallbackHub.code.slice(0, 3),
       distanceKm: 0,
-      notice: `Mainline rail connection from ${raw} Junction or closest district railway hub.`,
+      notice: `Regional railway connections linking ${raw} into the national rail network.`,
     },
     seaport: {
       isCoastal: false,
       hasPassengerWaterway: false,
       portName: 'Inland',
-      notice: `${raw} has no direct passenger waterways. Ground transport or regional flights recommended.`,
+      notice: `${raw} is situated inland. Ground transport or regional flights are recommended.`,
     },
   };
 }
@@ -1573,7 +1658,11 @@ export function searchRealTimeRoadways(
   const dProf = resolveCityTransitProfile(destination);
 
   const distanceKm = Math.max(120, calculateDistanceKm(oProf.lat, oProf.lng, dProf.lat, dProf.lng));
-  const avgSpeedKmh = 58; // Realistic Indian highway speed with tolls and tea breaks
+  const isEurope = oProf.country === 'Switzerland' || oProf.country === 'France' || oProf.country === 'Germany' || oProf.country === 'Italy' || oProf.country === 'United Kingdom' || oProf.country === 'Spain' || dProf.country === 'Switzerland';
+  const isNorthAmerica = oProf.country === 'United States' || oProf.country === 'Canada' || dProf.country === 'United States';
+  const isIntercontinental = distanceKm > 2500 && oProf.country !== dProf.country;
+
+  const avgSpeedKmh = isEurope ? 82 : isNorthAmerica ? 88 : 58; // Realistic highway speed
   const totalDriveHours = Math.round((distanceKm / avgSpeedKmh) * 10) / 10;
   const driveHoursInt = Math.floor(totalDriveHours);
   const driveMinsInt = Math.round((totalDriveHours % 1) * 60);
@@ -1581,7 +1670,11 @@ export function searchRealTimeRoadways(
 
   // Highway identification
   const isAkolaRoute = origin.toLowerCase().includes('akola') || destination.toLowerCase().includes('akola');
-  const highwayTag = isAkolaRoute
+  const highwayTag = isEurope
+    ? 'via Trans-European E-Road & Alpine Express Corridor'
+    : isNorthAmerica
+    ? 'via Interstate Highway Express Corridor'
+    : isAkolaRoute
     ? 'via NH 52 (Solapur) & NH 48 (Hubballi / Western Ghats)'
     : distanceKm > 600
     ? 'via National Golden Quadrilateral / Express Corridor'
@@ -1601,15 +1694,29 @@ export function searchRealTimeRoadways(
   const cabSedanINR = Math.round(distanceKm * 14.5 + 800);
   const cabSuvINR = Math.round(distanceKm * 20.5 + 1200);
 
+  // Regional provider branding
+  const busProvider = isEurope ? 'FlixBus Europe / RegioJet Express' : isNorthAmerica ? 'Greyhound Express / Megabus' : 'VRL Travels / IntrCity SmartBus / State RTC';
+  const busVehicle = isEurope ? 'Mercedes-Benz Tourismo / Setra HD Coach' : isNorthAmerica ? 'Prevost H3-45 Premium Intercity Coach' : 'Volvo / BharatBenz 2+1 AC Sleeper';
+  const busBookingUrl = isEurope ? 'https://www.flixbus.com' : isNorthAmerica ? 'https://www.greyhound.com' : 'https://www.redbus.in';
+  const busPartner = isEurope ? 'FlixBus / Trainline' : isNorthAmerica ? 'Greyhound / Megabus' : 'RedBus / AbhiBus (Zero Convenience Fee)';
+
+  const sedanProvider = isEurope ? 'Sixt / Enterprise European Intercity' : isNorthAmerica ? 'Enterprise / Hertz Intercity Rental' : 'MakeMyTrip Intercity / Savaari / Local Cabs';
+  const sedanVehicle = isEurope ? 'BMW 3 Series / VW Passat Touring Sedan' : isNorthAmerica ? 'Toyota Camry / Ford Fusion AC Sedan' : 'Dedicated AC Sedan (Up to 4 passengers)';
+  const sedanBookingUrl = isEurope ? 'https://www.sixt.com' : isNorthAmerica ? 'https://www.enterprise.com' : 'https://www.makemytrip.com/cabs';
+
+  const suvProvider = isEurope ? 'Blacklane Executive Chauffeur Service' : isNorthAmerica ? 'Blacklane Executive SUV' : 'Savaari Premium / Uber Intercity';
+  const suvVehicle = isEurope ? 'Mercedes-Benz V-Class Chauffeur Van' : isNorthAmerica ? 'Cadillac Escalade / Chevrolet Suburban' : 'Spacious Captain Seat AC SUV (Innova Crysta)';
+  const suvBookingUrl = isEurope || isNorthAmerica ? 'https://www.blacklane.com' : 'https://www.savaari.com';
+
   const offers: LiveRoadwayOffer[] = [
-    // 1. Budget Option: Intercity AC Sleeper Bus
+    // 1. Budget Option: Intercity Express Coach
     {
       id: `road-bus-01-${Date.now()}`,
       category: 'bus',
-      title: `${oProf.city} to ${dProf.city} Multi-Axle AC Sleeper Bus`,
-      vehicleType: 'Volvo / BharatBenz 2+1 AC Sleeper',
-      provider: 'VRL Travels / IntrCity SmartBus / State RTC',
-      routeDescription: `${highwayTag} • Reclining comfortable berths with charging ports`,
+      title: `${oProf.city} to ${dProf.city} Intercity Express Coach`,
+      vehicleType: busVehicle,
+      provider: busProvider,
+      routeDescription: `${highwayTag} • Reclining comfortable seats with USB power and Wi-Fi`,
       distanceKm,
       durationFormatted: durationStr,
       departureTime: '07:30 PM',
@@ -1617,24 +1724,24 @@ export function searchRealTimeRoadways(
       tier: 'super_money_saver',
       tierLabel: 'Super Money Saver',
       tierBadge: '💰 BEST BUDGET',
-      tierDescription: `Overnight sleeper bus saving 1 hotel night. Direct intercity boarding from ${oProf.city}.`,
+      tierDescription: `Direct intercity coach departing from central terminal in ${oProf.city}.`,
       ...convertCost(sleeperBusBaseINR),
       tollEstimate: 'Included in ticket fare',
       fuelEstimate: 'Included in ticket fare',
-      pickupPoint: `${oProf.city} Central Bus Station / Highway Bypass Naka`,
-      dropPoint: `${dProf.city} Main Bus Terminal / City Center`,
-      bookingUrl: 'https://www.redbus.in',
-      bookingPartner: 'RedBus / AbhiBus (Zero Convenience Fee)',
-      perks: ['Blanket & Pillow', 'Individual USB Charging', 'Reading Light', 'Live GPS Bus Tracking'],
+      pickupPoint: `${oProf.city} Central Bus Terminal`,
+      dropPoint: `${dProf.city} Main Bus Station`,
+      bookingUrl: busBookingUrl,
+      bookingPartner: busPartner,
+      perks: ['Complimentary Wi-Fi', 'Individual USB Charging', 'Reading Light', 'Live GPS Tracking'],
     },
 
     // 2. Balanced Option: Private Highway Sedan Cab
     {
       id: `road-cab-sedan-${Date.now()}`,
       category: 'cab',
-      title: `Private Intercity Sedan (Maruti Dzire / Honda Amaze)`,
-      vehicleType: 'Dedicated AC Sedan (Up to 4 passengers)',
-      provider: 'MakeMyTrip Intercity / Savaari / Local Cabs',
+      title: `Private Intercity Sedan (${sedanVehicle.split(' / ')[0] || 'Executive Sedan'})`,
+      vehicleType: sedanVehicle,
+      provider: sedanProvider,
       routeDescription: `Door-to-door direct highway transfer ${highwayTag} with flexible meal and photo stops`,
       distanceKm,
       durationFormatted: `${Math.max(2, driveHoursInt - 1)}h ${driveMinsInt}m`,
@@ -1643,24 +1750,24 @@ export function searchRealTimeRoadways(
       tier: 'balanced',
       tierLabel: 'Balanced Choice',
       tierBadge: '⚖️ DOOR-TO-DOOR COMFORT',
-      tierDescription: `Private vehicle pickup directly from your home/hotel in ${oProf.city} straight to your address in ${dProf.city}.`,
+      tierDescription: `Private vehicle pickup directly from your accommodation in ${oProf.city} straight to your address in ${dProf.city}.`,
       ...convertCost(cabSedanINR),
-      tollEstimate: `Approx ${formatCurrencyAmount(Math.round(distanceKm * 1.8), targetCurrency)} via FASTag`,
+      tollEstimate: `Approx ${formatCurrencyAmount(Math.round(distanceKm * 1.8), targetCurrency)} via electronic toll tag`,
       fuelEstimate: 'Included in package fare',
       pickupPoint: `Doorstep Pickup in ${oProf.city}`,
       dropPoint: `Exact Destination Address in ${dProf.city}`,
-      bookingUrl: 'https://www.makemytrip.com/cabs',
-      bookingPartner: 'Savaari / MakeMyTrip Cabs',
-      perks: ['Zero Shared Passengers', 'Stop anytime for meals', 'Generous luggage boot space', 'Verified Highway Driver'],
+      bookingUrl: sedanBookingUrl,
+      bookingPartner: sedanProvider,
+      perks: ['Zero Shared Passengers', 'Stop anytime for meals', 'Generous luggage boot space', 'Professional Highway Chauffeur'],
     },
 
-    // 3. Premium Option: Luxury SUV (Toyota Innova Crysta)
+    // 3. Premium Option: Luxury SUV / Executive Van
     {
       id: `road-cab-suv-${Date.now()}`,
       category: 'cab',
-      title: `Premium Highway SUV (Toyota Innova Crysta 7-Seater)`,
-      vehicleType: 'Spacious Captain Seat AC SUV',
-      provider: 'Savaari Premium / Uber Intercity',
+      title: `Premium Chauffeur SUV (${suvVehicle.split(' / ')[0] || 'Luxury SUV'})`,
+      vehicleType: suvVehicle,
+      provider: suvProvider,
       routeDescription: `High-comfort long-distance expressway ride with dual AC and reclining captain seats`,
       distanceKm,
       durationFormatted: `${Math.max(2, driveHoursInt - 2)}h ${driveMinsInt}m`,
@@ -1669,21 +1776,25 @@ export function searchRealTimeRoadways(
       tier: 'fastest_expensive',
       tierLabel: 'Fastest & Premium',
       tierBadge: '⚡ LUXURY ROAD CRUISE',
-      tierDescription: `Maximum legroom and suspension dampening for effortless long-distance travel across state lines.`,
+      tierDescription: `Maximum legroom and active suspension dampening for effortless long-distance travel.`,
       ...convertCost(cabSuvINR),
       tollEstimate: `Included in all-inclusive rate`,
       fuelEstimate: 'All-inclusive rate',
       pickupPoint: `Any Location in ${oProf.city}`,
       dropPoint: `Any Hotel / Resort in ${dProf.city}`,
-      bookingUrl: 'https://www.savaari.com',
-      bookingPartner: 'Savaari Car Rentals / Uber Intercity',
+      bookingUrl: suvBookingUrl,
+      bookingPartner: suvProvider,
       perks: ['Captain Seats with Armrests', 'High ground clearance', 'Complimentary bottled water', 'Chauffeur with 10+ yrs experience'],
     },
   ];
 
+  const noticeText = isIntercontinental
+    ? `🚗 Trans-Continental Overland Note: Direct highway driving distance between ${oProf.city} and ${dProf.city} spans continents (~${distanceKm} km). ✈️ Commercial flight is the primary transit mode; road offers represent regional ground transfer connections.`
+    : `🚗 Road Distance: ~${distanceKm} km ${highwayTag}. Estimated drive time: ~${durationStr}.`;
+
   return {
     offers,
-    routeNotice: `🚗 Road Distance: ~${distanceKm} km ${highwayTag}. Estimated drive time: ~${durationStr}.`,
+    routeNotice: noticeText,
     distanceKm,
   };
 }
@@ -1739,12 +1850,31 @@ export function searchRealTimeSeaways(
   const isDirectWaterway = oProf.seaport.isCoastal || dProf.seaport.isCoastal;
 
   if (!isDirectWaterway) {
+    const isEurope = oProf.country === 'Switzerland' || oProf.country === 'Austria' || oProf.country === 'Germany' || oProf.country === 'France' || dProf.country === 'Switzerland';
+    const landlockedNotice = isEurope
+      ? `ℹ️ Inland European Corridor: Both ${oProf.city} and ${dProf.city} are connected overland via high-speed rail (SBB, TGV, ICE) and motorways. Scenic lake passenger steamers (Lake Zurich, Lake Geneva, Lake Lucerne) and Rhine/Danube river cruises operate locally.`
+      : oProf.country === 'India' && dProf.country === 'India'
+      ? `ℹ️ Inland Route Notice: Both ${oProf.city} and ${dProf.city} are situated inland without direct commercial passenger waterways. We recommend choosing ✈️ Airplane, 🚆 Train, or 🚗 Car/Bus for this journey.`
+      : `ℹ️ Inland Transit Notice: Both ${oProf.city} and ${dProf.city} are situated inland without direct ocean passenger ferry services. ✈️ Airplane or 🚆 High-Speed Train recommended.`;
+
     return {
       isAvailable: false,
       offers: [],
-      notice: `ℹ️ Landlocked Route Notice: Both ${oProf.city} and ${dProf.city} are situated inland without direct commercial passenger waterways. Nearest passenger ferry/cruise gateway is Mumbai Port / Ferry Wharf (~550 km from Akola). We recommend choosing ✈️ Airplane, 🚆 Train, or 🚗 Car/Bus for this journey.`,
+      notice: landlockedNotice,
     };
   }
+
+  // Regional vessel operator branding
+  const isEurope = oProf.country === 'Greece' || dProf.country === 'Greece' || oProf.country === 'Italy' || dProf.country === 'Italy' || oProf.country === 'United Kingdom' || dProf.country === 'France';
+  const isSEAsia = oProf.country === 'Singapore' || dProf.country === 'Indonesia' || oProf.country === 'Thailand';
+
+  const ferryOperator = isEurope
+    ? (oProf.city.toLowerCase().includes('santorini') || dProf.city.toLowerCase().includes('santorini') || oProf.country === 'Greece' ? 'Blue Star Ferries / SeaJets' : 'NLG Hydrofoils / P&O Ferries')
+    : isSEAsia
+    ? 'Batam Fast / Sinbad Luxury Speedboats'
+    : 'M2M Ferries / Coastal Marine Line';
+
+  const cruiseOperator = isEurope ? 'MSC Cruises / Costa Cruises' : 'Cordelia Cruises / Angriya Sea Lines';
 
   // Coastal route options
   const offers: LiveSeawayOffer[] = [
@@ -1752,9 +1882,9 @@ export function searchRealTimeSeaways(
       id: `sea-01-${Date.now()}`,
       title: `Coastal Passenger & Vehicle Ro-Pax Vessel`,
       vesselType: 'Modern Catamaran / Ro-Pax Ferry',
-      operator: 'M2M Ferries / Coastal Marine Line',
+      operator: ferryOperator,
       route: `${oProf.seaport.portName || oProf.city} ➔ ${dProf.seaport.portName || dProf.city}`,
-      durationFormatted: '45 mins - 3h 15m (depending on coastal sector)',
+      durationFormatted: '45 mins - 3h 15m (depending on maritime sector)',
       departureTime: '08:00 AM / 02:30 PM / 06:00 PM',
       arrivalTime: 'Maritime Harbor Dock',
       tier: 'balanced',
@@ -1765,15 +1895,15 @@ export function searchRealTimeSeaways(
       boardingPort: oProf.seaport.portName || `${oProf.city} Coastal Jetty`,
       arrivalPort: dProf.seaport.portName || `${dProf.city} Maritime Wharf`,
       vehicleCarriage: 'Vehicles Allowed (Cars, SUVs, Two-wheelers)',
-      bookingUrl: 'https://m2mferries.com',
+      bookingUrl: isEurope ? 'https://www.ferries.gr' : 'https://m2mferries.com',
       perks: ['Open-air sundeck', 'Air-conditioned lounge', 'Snack bar & cafe', 'Drive-on drive-off vehicle ramp'],
     },
     {
       id: `sea-cruise-02-${Date.now()}`,
       title: `Coastal Voyage & Luxury Cruise Liner`,
       vesselType: 'Ocean-Going Cruise Ship',
-      operator: 'Cordelia Cruises / Angriya Sea Lines',
-      route: `West Coast Maritime Corridor (Mumbai • Goa • Mangaluru • Kochi)`,
+      operator: cruiseOperator,
+      route: `${oProf.city} • Coastal Maritime Belt • ${dProf.city}`,
       durationFormatted: '1 Night / 2 Days (Overnight at Sea)',
       departureTime: '04:30 PM (Sailing)',
       arrivalTime: '10:00 AM (Disembarkation)',
@@ -1782,10 +1912,10 @@ export function searchRealTimeSeaways(
       tierBadge: '⭐ LUXURY VOYAGE',
       tierDescription: 'Premium ocean-liner experience featuring live entertainment, oceanview staterooms, and fine dining.',
       ...convertCost(14500),
-      boardingPort: 'Mumbai International Cruise Terminal / New Mangalore Port (Panambur)',
-      arrivalPort: 'Coastal Destination Terminal',
+      boardingPort: oProf.seaport.portName || `${oProf.city} International Cruise Terminal`,
+      arrivalPort: dProf.seaport.portName || `${dProf.city} Maritime Wharf`,
       vehicleCarriage: 'Passenger Only (Valet parking at port)',
-      bookingUrl: 'https://www.cordeliacruises.com',
+      bookingUrl: isEurope ? 'https://www.msccruises.com' : 'https://www.cordeliacruises.com',
       perks: ['Oceanview Stateroom', 'All Meals Included', 'Live Broadway Theater Shows', 'Swimming Pool & Sun Deck'],
     },
   ];

@@ -5,6 +5,7 @@
  */
 
 import { convertCurrency, formatCurrencyAmount } from './currency-service';
+import { findCountryByNameOrAlias, findNonAirportDestination } from './global-country-data';
 
 export interface TransitLeg {
   step: number;
@@ -156,6 +157,19 @@ export function isInternationalLocation(location: string): boolean {
   if (!location) return false;
   const cleaned = location.toLowerCase().replace(/[^a-z0-9\s]/g, ' ').trim();
   if (!cleaned) return false;
+
+  // Direct check against authoritative worldwide country database
+  const matchedCountry = findCountryByNameOrAlias(location) || findCountryByNameOrAlias(cleaned);
+  if (matchedCountry) {
+    return matchedCountry.code !== 'IN';
+  }
+
+  // Direct check against iconic global destinations
+  const nonAirportDest = findNonAirportDestination(location) || findNonAirportDestination(cleaned);
+  if (nonAirportDest) {
+    return nonAirportDest.country !== 'India';
+  }
+
   const tokens = cleaned.split(/\s+/).filter(Boolean);
 
   for (const intl of KNOWN_INTERNATIONAL_REGIONS) {
@@ -241,6 +255,14 @@ export function isDomesticJourney(orig: string, dest: string): boolean {
  * Resolves the destination country cleanly
  */
 export function resolveCountry(destination: string): string {
+  if (!destination) return 'India';
+
+  const matchedCountry = findCountryByNameOrAlias(destination);
+  if (matchedCountry) return matchedCountry.name;
+
+  const nonAirportDest = findNonAirportDestination(destination);
+  if (nonAirportDest) return nonAirportDest.country;
+
   const d = destination.toLowerCase().trim();
 
   // International detectors
