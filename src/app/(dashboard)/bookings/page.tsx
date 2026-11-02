@@ -73,6 +73,7 @@ function BookingsContent() {
   const stored = getStoredActiveSearch();
   const initialTripId = searchParams?.get('tripId') || '';
   const initialCategory = (searchParams?.get('category') as SearchCategory) || 'flight';
+  const initialOriginFromParam = searchParams?.get('origin') || stored.origin || '';
   const initialDestFromParam = searchParams?.get('destination') || stored.destination || '';
 
   const [trips, setTrips] = useState<Trip[]>([]);
@@ -83,7 +84,7 @@ function BookingsContent() {
 
   // Search Engine State
   const [activeCategory, setActiveCategory] = useState<SearchCategory>(initialCategory);
-  const [searchOrigin, setSearchOrigin] = useState(stored.origin || 'Mumbai (BOM)');
+  const [searchOrigin, setSearchOrigin] = useState(initialOriginFromParam || 'Mumbai (BOM)');
   const [searchDest, setSearchDest] = useState(initialDestFromParam || 'Palitana (BVP)');
   const [searchDate, setSearchDate] = useState('2026-11-20');
   const [passengers, setPassengers] = useState<number>(stored.travelers || 2);
