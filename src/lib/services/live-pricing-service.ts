@@ -1,6 +1,17 @@
 import { convertCurrency, formatCurrencyAmount } from './currency-service';
 import { formatTo12Hour, getCurrent12HourTime } from '@/lib/utils/time-format';
 import { isLocationInIndia } from './transit-routing';
+import {
+  resolveCityTransitProfile,
+  calculateDistanceKm as calculateGeodesicDistanceKm,
+  searchRealTimeRoadways,
+  searchRealTimeSeaways,
+  LiveRoadwayOffer,
+  LiveSeawayOffer,
+} from './station-resolver';
+
+export { searchRealTimeRoadways, searchRealTimeSeaways };
+export type { LiveRoadwayOffer, LiveSeawayOffer };
 
 export type TicketStrategyTier = 'super_money_saver' | 'balanced' | 'fastest_expensive';
 
@@ -11,6 +22,11 @@ export interface AirportInfo {
   country: string;
   lat: number;
   lng: number;
+  hasCommercialAirport?: boolean;
+  distanceToCityKm?: number;
+  driveTimeToCity?: string;
+  notice?: string;
+  feederSummary?: string;
 }
 
 export interface FlightPriceBreakdown {
@@ -51,6 +67,9 @@ export interface LiveFlightOffer {
   priceTrend: 'rising' | 'falling' | 'stable' | 'deal';
   priceConfidenceText: string;
   lastUpdated: string;
+  feederNotice?: string;
+  airportNotice?: string;
+  hubNotice?: string;
   bookingLinks: {
     googleFlights: string;
     skyscanner: string;
@@ -68,6 +87,8 @@ export interface LiveTrainOffer {
   departureTime: string;
   arrivalTime: string;
   duration: string;
+  stationNotice?: string;
+  feederNotice?: string;
   tier: TicketStrategyTier;
   tierLabel: string;
   tierBadge: string;
@@ -211,66 +232,42 @@ const AIRPORT_REGISTRY: Record<string, AirportInfo> = {
 
 /**
  * Intelligently resolve any user text or city into an AirportInfo structure
+ * Integrated with Safar Station Resolver to detect non-airport cities (e.g. Akola, Palitana, Mount Abu)
+ * and correctly route through the nearest genuine commercial airport hub.
  */
 export function resolveAirport(input: string): AirportInfo {
-  if (!input) return AIRPORT_REGISTRY.DEL;
+  if (!input) {
+    return {
+      ...AIRPORT_REGISTRY.DEL,
+      hasCommercialAirport: true,
+      distanceToCityKm: 0,
+      driveTimeToCity: '0 mins',
+    };
+  }
+
   const clean = input.trim().toUpperCase();
-
-  // 1. Direct code lookup
   if (AIRPORT_REGISTRY[clean]) {
-    return AIRPORT_REGISTRY[clean];
+    return {
+      ...AIRPORT_REGISTRY[clean],
+      hasCommercialAirport: true,
+      distanceToCityKm: 0,
+      driveTimeToCity: '0 mins',
+    };
   }
 
-  // 2. City or keyword match
-  const lower = input.toLowerCase().trim();
-
-  // Custom city aliases
-  if (lower.includes('surat')) return AIRPORT_REGISTRY.STV;
-  if (lower.includes('jaisalmer')) return AIRPORT_REGISTRY.JSA;
-  if (lower.includes('jodhpur')) return AIRPORT_REGISTRY.JDH;
-  if (lower.includes('vadodara') || lower.includes('baroda')) return AIRPORT_REGISTRY.BDQ;
-  if (lower.includes('lucknow')) return AIRPORT_REGISTRY.LKO;
-  if (lower.includes('agra')) return AIRPORT_REGISTRY.AGR;
-  if (lower.includes('bhopal')) return AIRPORT_REGISTRY.BHO;
-  if (lower.includes('indore')) return AIRPORT_REGISTRY.IDR;
-  if (lower.includes('leh') || lower.includes('ladakh')) return AIRPORT_REGISTRY.IXL;
-  if (lower.includes('srinagar')) return AIRPORT_REGISTRY.SXR;
-  if (lower.includes('dehradun') || lower.includes('rishikesh') || lower.includes('haridwar')) return AIRPORT_REGISTRY.DED;
-  if (lower.includes('mumbai') || lower.includes('bombay')) return AIRPORT_REGISTRY.BOM;
-  if (lower.includes('delhi') || lower.includes('ncr')) return AIRPORT_REGISTRY.DEL;
-  if (lower.includes('bangalore') || lower.includes('bengaluru')) return AIRPORT_REGISTRY.BLR;
-  if (lower.includes('new york') || lower.includes('nyc') || lower.includes('jfk') || lower.includes('manhattan')) return AIRPORT_REGISTRY.JFK;
-  if (lower.includes('usa') || lower.includes('united states') || lower.includes('america')) return AIRPORT_REGISTRY.JFK;
-  if (lower.includes('london') || lower.includes('heathrow') || lower.includes('uk')) return AIRPORT_REGISTRY.LHR;
-  if (lower.includes('paris') || lower.includes('france')) return AIRPORT_REGISTRY.CDG;
-  if (lower.includes('dubai') || lower.includes('uae')) return AIRPORT_REGISTRY.DXB;
-  if (lower.includes('singapore')) return AIRPORT_REGISTRY.SIN;
-  if (lower.includes('tokyo') || lower.includes('japan')) return AIRPORT_REGISTRY.HND;
-  if (lower.includes('kyoto') || lower.includes('osaka')) return AIRPORT_REGISTRY.KIX;
-  if (lower.includes('bali') || lower.includes('denpasar')) return AIRPORT_REGISTRY.DPS;
-  if (lower.includes('bangkok') || lower.includes('thailand')) return AIRPORT_REGISTRY.BKK;
-  if (lower.includes('jaipur') || lower.includes('rajasthan')) return AIRPORT_REGISTRY.JAI;
-  if (lower.includes('goa')) return AIRPORT_REGISTRY.GOI;
-  if (lower.includes('san francisco') || lower.includes('bay area') || lower.includes('silicon valley')) return AIRPORT_REGISTRY.SFO;
-  if (lower.includes('los angeles') || lower.includes('lax') || lower.includes('california')) return AIRPORT_REGISTRY.LAX;
-  if (lower.includes('sydney') || lower.includes('australia')) return AIRPORT_REGISTRY.SYD;
-
-  for (const info of Object.values(AIRPORT_REGISTRY)) {
-    if (lower.includes(info.city.toLowerCase()) || lower.includes(info.country.toLowerCase())) {
-      return info;
-    }
-  }
-
-  // Fallback: Dynamic generic airport representation with accurate country discernment
-  const isInIndia = isLocationInIndia(input);
-  const code = clean.replace(/[^A-Z]/g, '').slice(0, 3) || (isInIndia ? 'IND' : 'HUB');
+  const prof = resolveCityTransitProfile(input);
   return {
-    code,
-    name: `${input} Airport`,
-    city: input,
-    country: isInIndia ? 'India' : 'International',
-    lat: isInIndia ? 26.9157 : 28.5562,
-    lng: isInIndia ? 70.9083 : 77.1000,
+    code: prof.airport.code,
+    name: prof.airport.name,
+    city: prof.city,
+    country: prof.country,
+    lat: prof.lat,
+    lng: prof.lng,
+    hasCommercialAirport: prof.airport.hasCommercialService,
+    distanceToCityKm: prof.airport.distanceToHubKm,
+    driveTimeToCity: prof.airport.driveTimeToHub,
+    notice: prof.airport.notice,
+    feederSummary: prof.airport.feederSummary,
   };
 }
 
@@ -971,17 +968,21 @@ export function searchRealTimeFlights(query: FlightSearchQuery): LiveFlightOffer
   // Real-time timestamp (Strict 12-Hour Clock)
   const timeString = getCurrent12HourTime();
 
+  const isTier2Long = isDomesticIndia && distanceKm > 550 && (!['DEL', 'BOM', 'BLR'].includes(originAirport.code) || !['DEL', 'BOM', 'BLR'].includes(destAirport.code));
+
   return templates.map((tmpl, index) => {
     // Determine stops and duration
     const stops = isRegionalOriginIntl
       ? (tmpl.hubTransit?.includes('+') ? 2 : 1)
-      : (tmpl.hubTransit ? 1 : 0);
+      : (tmpl.hubTransit ? 1 : (isTier2Long && tmpl.tier !== 'fastest_expensive' ? 1 : 0));
 
     const stopDetails = isRegionalOriginIntl && gateway
       ? (tmpl.hubTransit?.includes('+')
           ? `2 Stops via ${tmpl.hubTransit}`
           : `1 Gateway Stop via ${tmpl.hubTransit || `${gateway.hubCity} (${gateway.hubCode} T2)`}`)
-      : (tmpl.hubTransit ? `1 Stop via ${tmpl.hubTransit}` : 'Non-Stop Direct');
+      : (tmpl.hubTransit
+          ? `1 Stop via ${tmpl.hubTransit}`
+          : (stops === 1 ? '1 Stop via Mumbai (BOM) / Bengaluru (BLR)' : 'Non-Stop Direct'));
 
     const durationMinutes = isRegionalOriginIntl
       ? Math.round(nonStopFlightMinutes + (stops === 2 ? 280 : 175))
@@ -1074,6 +1075,11 @@ export function searchRealTimeFlights(query: FlightSearchQuery): LiveFlightOffer
       priceTrend,
       priceConfidenceText,
       lastUpdated: timeString,
+      feederNotice: originAirport.feederSummary,
+      airportNotice: originAirport.notice,
+      hubNotice: originAirport.hasCommercialAirport === false
+        ? `Flights depart from ${originAirport.name} (${originAirport.code}) in ${originAirport.city}`
+        : undefined,
       bookingLinks: {
         googleFlights: googleFlightsUrl,
         skyscanner: skyscannerUrl,
@@ -1346,15 +1352,32 @@ export function searchRealTimeTrains(
     },
   ];
 
+  const oProf = resolveCityTransitProfile(o);
+  const dProf = resolveCityTransitProfile(d);
+
+  const originStation = oProf.railway.hasDirectStation
+    ? oProf.railway.stationName
+    : `${oProf.railway.stationName} (Feeder link from ${oProf.city})`;
+
+  const destStation = dProf.railway.hasDirectStation
+    ? dProf.railway.stationName
+    : `${dProf.railway.stationName} (Feeder link to ${dProf.city})`;
+
+  const stationNotice = (!oProf.railway.hasDirectStation || !dProf.railway.hasDirectStation)
+    ? `${!oProf.railway.hasDirectStation ? oProf.railway.notice + ' ' : ''}${!dProf.railway.hasDirectStation ? dProf.railway.notice : ''}`.trim()
+    : undefined;
+
   return trainDefs.map((t) => ({
     id: `train-${t.num}`,
     trainNumber: t.num,
     trainName: t.name,
-    originStation: `${o} Central`,
-    destStation: `${d} Junction`,
+    originStation,
+    destStation,
     departureTime: t.dep,
     arrivalTime: t.arr,
     duration: durationStr,
+    stationNotice,
+    feederNotice: !oProf.railway.hasDirectStation ? `Feeder transfer: ~${oProf.railway.distanceKm} km road link from ${oProf.city} to ${oProf.railway.stationName}` : undefined,
     tier: t.tier,
     tierLabel: t.tierLabel,
     tierBadge: t.tierBadge,
@@ -1364,7 +1387,7 @@ export function searchRealTimeTrains(
     tatkalSurgeText: 'Tatkal quota opens 10:00 AM for AC & 11:00 AM for Non-AC',
     bookingLinks: {
       irctc: `https://www.irctc.co.in/nget/train-search`,
-      confirmTkt: `https://www.confirmtkt.com/rbooking-d/trains/from/${encodeURIComponent(o)}/to/${encodeURIComponent(d)}`,
+      confirmTkt: `https://www.confirmtkt.com/rbooking-d/trains/from/${encodeURIComponent(oProf.railway.stationCode || o)}/to/${encodeURIComponent(dProf.railway.stationCode || d)}`,
     },
   }));
 }

@@ -163,6 +163,7 @@ export async function generateClientItinerary(params: {
   dietary?: string;
   accessibility?: string;
   routeMode?: string;
+  transportMode?: string;
 }): Promise<{
   corrected_destination: string;
   days: any[];
@@ -185,13 +186,19 @@ CRITICAL RULES:
 2. Every activity MUST have accurate, realistic latitude and longitude coordinates.
 3. Every activity MUST use strict 12-hour clock format (e.g., "06:30 AM", "01:00 PM", "07:30 PM").
 4. Reflect dietary preferences strictly (e.g. Jain / pure vegetarian for pilgrimage destinations).
-5. Output valid JSON ONLY matching the required schema.`;
+5. Ground transit in the user's preferred transport mode (${params.transportMode || 'Best available'}):
+   - If "flight": focus on flight arrivals/departures, nearest commercial airport, and flight transfers.
+   - If "train": ground the trip via express trains, Vande Bharat, and the central railway station.
+   - If "car_bus": ground the trip via highway driving, road trip stops, interstate AC buses, or cab transfers.
+   - If "ship": ground via coastal ferries, river cruises, waterways, or port terminals.
+6. Output valid JSON ONLY matching the required schema.`;
 
   const prompt = `Synthesize a realistic itinerary for ${params.destination}.
 Origin: ${originCity}
 Dates: ${params.startDate} to ${params.endDate}
 Travelers: ${params.travelers}
 Total Planned Budget: ${params.currency} ${params.budget}
+Preferred Transport Mode: ${params.transportMode || 'Best Available'}
 Interests: ${interestsList}
 Dietary: ${params.dietary || 'None specified'}
 Accessibility & Pacing: ${params.accessibility || 'Standard'}

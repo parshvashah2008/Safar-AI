@@ -19,6 +19,8 @@ export const SYNC_EVENTS = {
   SEARCH_CHANGED: 'safar:sync:search',
 } as const;
 
+export type TransportMode = 'any' | 'flight' | 'train' | 'car_bus' | 'ship';
+
 export interface ActiveSearchPayload {
   destination: string;
   travelers: number;
@@ -26,6 +28,7 @@ export interface ActiveSearchPayload {
   origin?: string;
   startDate?: string;
   endDate?: string;
+  transportMode?: TransportMode;
 }
 
 export interface CurrencySyncPayload {
@@ -92,6 +95,7 @@ export function emitActiveSearch(payload: Partial<ActiveSearchPayload>) {
     if (payload.travelers !== undefined) localStorage.setItem('safar_active_travelers', String(payload.travelers));
     if (payload.budget !== undefined) localStorage.setItem('safar_active_budget', String(payload.budget));
     if (payload.origin !== undefined) localStorage.setItem('safar_active_origin', payload.origin);
+    if (payload.transportMode !== undefined) localStorage.setItem('safar_active_transport_mode', payload.transportMode);
 
     const prev = getStoredActiveSearch();
     const updated: ActiveSearchPayload = { ...prev, ...payload };
@@ -101,7 +105,7 @@ export function emitActiveSearch(payload: Partial<ActiveSearchPayload>) {
 }
 
 export function getStoredActiveSearch(): ActiveSearchPayload {
-  const fallback: ActiveSearchPayload = { destination: '', travelers: 2, budget: 35000, origin: 'Mumbai' };
+  const fallback: ActiveSearchPayload = { destination: '', travelers: 2, budget: 35000, origin: 'Mumbai', transportMode: 'any' };
   if (typeof window === 'undefined') return fallback;
   try {
     const raw = localStorage.getItem('safar_active_search');
@@ -116,6 +120,7 @@ export function getStoredActiveSearch(): ActiveSearchPayload {
     travelers: Number(localStorage.getItem('safar_active_travelers')) || 2,
     budget: Number(localStorage.getItem('safar_active_budget')) || 35000,
     origin: localStorage.getItem('safar_active_origin') || 'Mumbai',
+    transportMode: (localStorage.getItem('safar_active_transport_mode') as TransportMode) || 'any',
   };
 }
 

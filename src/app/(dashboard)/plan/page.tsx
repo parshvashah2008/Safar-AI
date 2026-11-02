@@ -28,6 +28,9 @@ import {
   TrendingDown,
   Scale,
   CheckCircle,
+  Car,
+  Bus,
+  Ship,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -47,13 +50,14 @@ import {
   formatCurrencyAmount,
   convertCurrency,
 } from '@/lib/services/currency-service';
-import { SYNC_EVENTS, emitTripChange, getStoredActiveSearch, emitActiveSearch } from '@/lib/services/sync-bus';
+import { SYNC_EVENTS, emitTripChange, getStoredActiveSearch, emitActiveSearch, TransportMode } from '@/lib/services/sync-bus';
 import {
   compareRoutesWithGemini,
   CompareRoutesResult,
 } from '@/lib/services/gemini-route-service';
 import { generateFallbackItinerary } from '@/lib/services/fallback-itinerary';
 import { generateClientItinerary } from '@/lib/ai/client-ai-engine';
+import { resolveCityTransitProfile } from '@/lib/services/station-resolver';
 import type { StopCategory } from '@/types';
 
 const defaultInterests = [
@@ -115,6 +119,7 @@ function PlannerContent() {
     travelers: initialTravelers,
     budget: initialBudget,
     currency: 'INR',
+    transportMode: ((stored.transportMode || 'any') as TransportMode),
     interests: ['Heritage & Architecture', 'Local Food & Markets'],
     dietary: '',
     accessibility: '',
@@ -128,9 +133,10 @@ function PlannerContent() {
         travelers: form.travelers,
         budget: form.budget,
         origin: form.origin,
+        transportMode: form.transportMode,
       });
     }
-  }, [form.destination, form.travelers, form.budget, form.origin]);
+  }, [form.destination, form.travelers, form.budget, form.origin, form.transportMode]);
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<{ message: string; details?: string; isPaisaKamao?: boolean } | null>(null);
@@ -326,6 +332,8 @@ function PlannerContent() {
       : null;
 
   const { origin: activeOrigin, destination: activeDest } = parseRouteInput(form.destination, form.origin);
+  const transitOriginProfile = resolveCityTransitProfile(form.origin || 'Mumbai');
+  const transitDestProfile = resolveCityTransitProfile(form.destination || 'India');
   const isDomesticRoute = isDomesticJourney(activeOrigin, activeDest);
   const destinationCountry = resolveCountry(activeDest || 'India');
 
@@ -753,6 +761,153 @@ function PlannerContent() {
                   </div>
                 )}
               </div>
+            </div>
+
+            {/* User-Friendly Transport Mode Selector */}
+            <div className="space-y-3 pt-2">
+              <div className="flex items-center justify-between">
+                <Label className="text-xs font-semibold text-ink-900 dark:text-[#edf2ee] flex items-center gap-1.5">
+                  <Navigation className="w-3.5 h-3.5 text-[#0d5c48] dark:text-emerald-400" />
+                  <span>Preferred Transport Mode</span>
+                  <span className="font-mono text-[9px] uppercase px-1.5 py-0.5 rounded bg-emerald-50 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 font-bold">
+                    RECOMMENDED ACCORDINGLY
+                  </span>
+                </Label>
+              </div>
+
+              <div className="grid grid-cols-2 sm:grid-cols-5 gap-2.5">
+                {[
+                  { id: 'any', label: 'AI Recommended', icon: Compass, sub: 'Best Multimodal' },
+                  { id: 'flight', label: 'Airplane', icon: Plane, sub: 'Fastest Transit' },
+                  { id: 'train', label: 'Train', icon: Train, sub: 'Scenic Rail' },
+                  { id: 'car_bus', label: 'Car or Bus', icon: Car, sub: 'Road & Sleeper' },
+                  { id: 'ship', label: 'Ship / Ferry', icon: Ship, sub: 'Waterways & Cruises' },
+                ].map((mode) => {
+                  const Icon = mode.icon;
+                  const isSelected = form.transportMode === mode.id;
+                  return (
+                    <button
+                      key={mode.id}
+                      type="button"
+                      onClick={() => setForm((prev) => ({ ...prev, transportMode: mode.id as TransportMode }))}
+                      className={`p-3 rounded-2xl border text-left transition-all relative flex flex-col justify-between ${
+                        isSelected
+                          ? 'border-[#0d5c48] dark:border-emerald-500 bg-emerald-50/80 dark:bg-emerald-950/60 ring-2 ring-[#0d5c48]/30 shadow-xs'
+                          : 'border-sand-200 dark:border-[#22352b] bg-white dark:bg-[#121c17] hover:border-[#0d5c48]/40'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className={`w-7 h-7 rounded-lg flex items-center justify-center ${
+                          isSelected
+                            ? 'bg-[#0d5c48] text-white'
+                            : 'bg-sand-100 dark:bg-[#1a2b22] text-ink-600 dark:text-sand-300'
+                        }`}>
+                          <Icon className="w-4 h-4" />
+                        </div>
+                        {isSelected && (
+                          <div className="w-2 h-2 rounded-full bg-[#0d5c48] dark:bg-emerald-400" />
+                        )}
+                      </div>
+                      <div className="mt-2.5">
+                        <div className="text-xs font-bold text-ink-900 dark:text-white">
+                          {mode.label}
+                        </div>
+                        <div className="text-[10px] text-ink-500 dark:text-sand-400 font-mono mt-0.5">
+                          {mode.sub}
+                        </div>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Real-Time Airport / Station Notice Banner */}
+              {form.destination.trim() && (
+                <div className="space-y-2 pt-1">
+                  {/* Airport Alert if city lacks commercial airport */}
+                  {(form.transportMode === 'flight' || form.transportMode === 'any') &&
+                    (!transitOriginProfile.airport.hasCommercialService || !transitDestProfile.airport.hasCommercialService) && (
+                      <div className="p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-200 text-xs flex items-start gap-3 shadow-xs animate-in fade-in-0 duration-200">
+                        <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+                        <div className="space-y-1 flex-1">
+                          <span className="font-bold text-amber-300 block">
+                            Commercial Airport Notice Grounded by Safar AI
+                          </span>
+                          {!transitOriginProfile.airport.hasCommercialService && (
+                            <p className="text-sand-200 text-xs leading-relaxed">
+                              <strong>{transitOriginProfile.city}:</strong> {transitOriginProfile.airport.notice}
+                            </p>
+                          )}
+                          {!transitDestProfile.airport.hasCommercialService && (
+                            <p className="text-sand-200 text-xs leading-relaxed">
+                              <strong>{transitDestProfile.city}:</strong> {transitDestProfile.airport.notice}
+                            </p>
+                          )}
+                          <div className="flex flex-wrap items-center gap-2 pt-1.5">
+                            <button
+                              type="button"
+                              onClick={() => setForm((prev) => ({ ...prev, transportMode: 'train' }))}
+                              className="text-[11px] font-semibold bg-emerald-800 hover:bg-emerald-700 text-white px-2.5 py-1 rounded-lg flex items-center gap-1 transition-colors"
+                            >
+                              <Train className="w-3 h-3" />
+                              <span>Switch to Train (Direct from {transitOriginProfile.city})</span>
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setForm((prev) => ({ ...prev, transportMode: 'car_bus' }))}
+                              className="text-[11px] font-semibold bg-sand-200 dark:bg-[#1e2e26] hover:bg-sand-300 dark:hover:bg-[#283d33] text-ink-900 dark:text-white px-2.5 py-1 rounded-lg flex items-center gap-1 transition-colors"
+                            >
+                              <Car className="w-3 h-3" />
+                              <span>Switch to Car or Bus</span>
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                  {/* Ship Notice if inland */}
+                  {form.transportMode === 'ship' && (!transitOriginProfile.seaport.isCoastal && !transitDestProfile.seaport.isCoastal) && (
+                    <div className="p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-200 text-xs flex items-start gap-3 shadow-xs">
+                      <Ship className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+                      <div className="space-y-1 flex-1">
+                        <span className="font-bold text-amber-300 block">Inland Route Notice</span>
+                        <p className="text-sand-200 text-xs leading-relaxed">
+                          {transitOriginProfile.city} is an inland landlocked city. Nearest passenger seaport: <strong>{transitOriginProfile.seaport.portName}</strong>. {transitOriginProfile.seaport.notice}
+                        </p>
+                        <div className="flex items-center gap-2 pt-1">
+                          <button
+                            type="button"
+                            onClick={() => setForm((prev) => ({ ...prev, transportMode: 'train' }))}
+                            className="text-[11px] font-semibold bg-emerald-800 hover:bg-emerald-700 text-white px-2.5 py-1 rounded-lg"
+                          >
+                            Switch to Train (Recommended)
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Car or Bus Info */}
+                  {form.transportMode === 'car_bus' && (
+                    <div className="p-3 rounded-xl bg-teal-500/10 border border-teal-500/30 text-teal-200 text-xs flex items-center gap-2.5">
+                      <Car className="w-4 h-4 text-teal-400 shrink-0" />
+                      <span>
+                        <strong>Road Link:</strong> Direct highway corridor connecting {transitOriginProfile.city} and {transitDestProfile.city}. Private AC cabs and luxury sleeper buses available.
+                      </span>
+                    </div>
+                  )}
+
+                  {/* Train Info */}
+                  {form.transportMode === 'train' && (
+                    <div className="p-3 rounded-xl bg-teal-500/10 border border-teal-500/30 text-teal-200 text-xs flex items-center gap-2.5">
+                      <Train className="w-4 h-4 text-teal-400 shrink-0" />
+                      <span>
+                        <strong>Rail Connection:</strong> {transitOriginProfile.railway.stationName} ({transitOriginProfile.railway.stationCode}) ➔ {transitDestProfile.railway.stationName} ({transitDestProfile.railway.stationCode}).
+                      </span>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
 
             {/* AI Real Market Price Anchor & Excessive Budget Guard */}

@@ -12,6 +12,9 @@ import {
   MapPin,
   Navigation,
   Plane,
+  Train,
+  Car,
+  Ship,
   ShieldCheck,
   Sparkles,
   Users,
@@ -82,7 +85,9 @@ const featuredDestinations = [
 export default function HomePage() {
   const router = useRouter();
   const { activeSearch, updateSearch } = useActiveSearch();
+  const [quickOrigin, setQuickOrigin] = useState(activeSearch.origin || 'Akola');
   const [quickSearch, setQuickSearch] = useState(activeSearch.destination || '');
+  const [selectedTransport, setSelectedTransport] = useState<string>(activeSearch.transportMode || 'any');
   const [travelers, setTravelers] = useState(String(activeSearch.travelers || '2'));
   const [budget, setBudget] = useState(String(activeSearch.budget || '35000'));
 
@@ -198,11 +203,60 @@ export default function HomePage() {
           </p>
 
           {/* Interactive Quick Journey Planner Bar */}
-          <div className="max-w-4xl mx-auto pt-6">
+          <div className="max-w-4xl mx-auto pt-6 space-y-3">
+            {/* User-Friendly Transport Mode Pills */}
+            <div className="flex items-center justify-center gap-1.5 p-1 bg-white/70 dark:bg-[#121c17]/70 backdrop-blur-md rounded-2xl border border-[#e8e6df] dark:border-[#22352b] max-w-lg mx-auto shadow-2xs">
+              {[
+                { id: 'any', label: 'All Modes' },
+                { id: 'flight', label: '✈️ Flight' },
+                { id: 'train', label: '🚆 Train' },
+                { id: 'car_bus', label: '🚗 Car/Bus' },
+                { id: 'ship', label: '🚢 Ship' },
+              ].map((m) => (
+                <button
+                  key={m.id}
+                  type="button"
+                  onClick={() => {
+                    setSelectedTransport(m.id);
+                    updateSearch({ transportMode: m.id as any });
+                  }}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${
+                    selectedTransport === m.id
+                      ? 'bg-[#0d5c48] text-white shadow-xs'
+                      : 'text-ink-600 dark:text-sand-300 hover:text-ink-900 dark:hover:text-white'
+                  }`}
+                >
+                  {m.label}
+                </button>
+              ))}
+            </div>
+
             <form
               onSubmit={handleQuickSubmit}
               className="rounded-2xl border border-[#e8e6df] dark:border-[#22352b] bg-white/95 dark:bg-[#121c17]/95 p-3 sm:p-4 shadow-[0_12px_40px_rgba(17,26,22,0.06)] backdrop-blur-xl flex flex-col md:flex-row items-center gap-3 transition-colors"
             >
+              {/* Departing From (Origin) */}
+              <div className="flex-1 w-full text-left px-3 py-1.5 border-b md:border-b-0 md:border-r border-[#f0eee9] dark:border-[#22352b]">
+                <label className="block text-[10px] font-mono uppercase tracking-wider text-[#73827a] dark:text-[#8ca397] font-bold">
+                  Departing From
+                </label>
+                <div className="flex items-center gap-2 mt-0.5">
+                  <MapPin className="h-4 w-4 text-[#0d5c48] dark:text-emerald-400 shrink-0" />
+                  <input
+                    type="text"
+                    value={quickOrigin}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      setQuickOrigin(val);
+                      updateSearch({ origin: val });
+                    }}
+                    placeholder="e.g. Akola, Mumbai, Delhi, Surat"
+                    className="w-full text-xs font-semibold text-[#111a16] dark:text-[#edf2ee] placeholder:text-[#97a59d] dark:placeholder:text-[#5f7368] focus:outline-none bg-transparent"
+                  />
+                </div>
+              </div>
+
+              {/* Where to? (Destination) */}
               <div className="flex-1 w-full text-left px-3 py-1.5 border-b md:border-b-0 md:border-r border-[#f0eee9] dark:border-[#22352b]">
                 <label className="block text-[10px] font-mono uppercase tracking-wider text-[#73827a] dark:text-[#8ca397] font-bold">
                   Where to?
@@ -217,7 +271,7 @@ export default function HomePage() {
                       setQuickSearch(val);
                       updateSearch({ destination: val });
                     }}
-                    placeholder="e.g. Palitana, Manali, Kyoto, Varanasi, Amalfi"
+                    placeholder="e.g. Mangalore, Palitana, Manali, Kyoto"
                     className="w-full text-xs font-semibold text-[#111a16] dark:text-[#edf2ee] placeholder:text-[#97a59d] dark:placeholder:text-[#5f7368] focus:outline-none bg-transparent"
                   />
                 </div>

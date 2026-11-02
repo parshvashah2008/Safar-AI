@@ -19,6 +19,10 @@ import {
   Search,
   Sparkles,
   Train,
+  Car,
+  Bus,
+  Ship,
+  Anchor,
   Utensils,
   Wallet,
   X,
@@ -47,7 +51,12 @@ import {
   LiveTrainOffer,
   LiveHotelOffer,
   LiveDiningOffer,
+  searchRealTimeRoadways,
+  searchRealTimeSeaways,
+  LiveRoadwayOffer,
+  LiveSeawayOffer,
 } from '@/lib/services/live-pricing-service';
+import { resolveCityTransitProfile } from '@/lib/services/station-resolver';
 import {
   SUPPORTED_CURRENCIES,
   fetchLiveExchangeRates,
@@ -57,7 +66,7 @@ import { formatTo12Hour, getCurrent12HourTime } from '@/lib/utils/time-format';
 import { SYNC_EVENTS, emitCurrencyChange, getStoredActiveSearch, useActiveSearch } from '@/lib/services/sync-bus';
 import type { Booking, BookingType, Trip } from '@/types';
 
-type SearchCategory = 'flight' | 'train' | 'hotel' | 'dining';
+type SearchCategory = 'flight' | 'train' | 'car_bus' | 'ship' | 'hotel' | 'dining';
 
 function BookingsContent() {
   const searchParams = useSearchParams();
@@ -351,6 +360,26 @@ function BookingsContent() {
     return list;
   }, [searchOrigin, searchDest, searchDate, selectedCurrency, liveRates, strategyFilter]);
 
+  const originProfile = useMemo(() => resolveCityTransitProfile(searchOrigin), [searchOrigin]);
+  const destProfile = useMemo(() => resolveCityTransitProfile(searchDest), [searchDest]);
+
+  const roadwayData = useMemo(() => {
+    const res = searchRealTimeRoadways(searchOrigin, searchDest, searchDate, selectedCurrency, liveRates);
+    let offers = res.offers;
+    if (strategyFilter !== 'all') {
+      offers = offers.filter((r: LiveRoadwayOffer) => r.tier === strategyFilter);
+    }
+    return {
+      offers,
+      routeNotice: res.routeNotice,
+      distanceKm: res.distanceKm,
+    };
+  }, [searchOrigin, searchDest, searchDate, selectedCurrency, liveRates, strategyFilter]);
+
+  const seawayResult = useMemo(() => {
+    return searchRealTimeSeaways(searchOrigin, searchDest, searchDate, selectedCurrency, liveRates);
+  }, [searchOrigin, searchDest, searchDate, selectedCurrency, liveRates]);
+
   const hotelResults = useMemo(() => {
     let list = searchRealTimeHotels(searchDest, searchDate, undefined, selectedCurrency, liveRates);
     if (strategyFilter !== 'all') {
@@ -542,54 +571,78 @@ function BookingsContent() {
             </div>
           </div>
 
-          {/* Category Switcher Tabs */}
+          {/* User-Friendly Transport & Booking Switcher Tabs */}
           <div className="flex flex-wrap items-center gap-1.5 p-1 bg-sand-100 dark:bg-[#18251f] rounded-xl border border-sand-200 dark:border-[#22332a]">
             <button
               onClick={() => setActiveCategory('flight')}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
                 activeCategory === 'flight'
-                  ? 'bg-white dark:bg-[#121c17] text-[#0d5c48] dark:text-emerald-400 shadow-xs'
+                  ? 'bg-white dark:bg-[#121c17] text-[#0d5c48] dark:text-emerald-400 shadow-xs ring-1 ring-[#0d5c48]/20'
                   : 'text-ink-600 dark:text-ink-400 hover:text-ink-900 dark:hover:text-white'
               }`}
             >
               <Plane className="w-3.5 h-3.5" />
-              <span>Flights (Real-Time)</span>
+              <span>✈️ Airplane</span>
             </button>
 
             <button
               onClick={() => setActiveCategory('train')}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
                 activeCategory === 'train'
-                  ? 'bg-white dark:bg-[#121c17] text-[#0d5c48] dark:text-emerald-400 shadow-xs'
+                  ? 'bg-white dark:bg-[#121c17] text-[#0d5c48] dark:text-emerald-400 shadow-xs ring-1 ring-[#0d5c48]/20'
                   : 'text-ink-600 dark:text-ink-400 hover:text-ink-900 dark:hover:text-white'
               }`}
             >
               <Train className="w-3.5 h-3.5" />
-              <span>Trains (IRCTC)</span>
+              <span>🚆 Train</span>
+            </button>
+
+            <button
+              onClick={() => setActiveCategory('car_bus')}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                activeCategory === 'car_bus'
+                  ? 'bg-white dark:bg-[#121c17] text-[#0d5c48] dark:text-emerald-400 shadow-xs ring-1 ring-[#0d5c48]/20'
+                  : 'text-ink-600 dark:text-ink-400 hover:text-ink-900 dark:hover:text-white'
+              }`}
+            >
+              <Car className="w-3.5 h-3.5" />
+              <span>🚗 Car or Bus</span>
+            </button>
+
+            <button
+              onClick={() => setActiveCategory('ship')}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                activeCategory === 'ship'
+                  ? 'bg-white dark:bg-[#121c17] text-[#0d5c48] dark:text-emerald-400 shadow-xs ring-1 ring-[#0d5c48]/20'
+                  : 'text-ink-600 dark:text-ink-400 hover:text-ink-900 dark:hover:text-white'
+              }`}
+            >
+              <Ship className="w-3.5 h-3.5" />
+              <span>🚢 Ship / Ferry</span>
             </button>
 
             <button
               onClick={() => setActiveCategory('hotel')}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
                 activeCategory === 'hotel'
-                  ? 'bg-white dark:bg-[#121c17] text-[#0d5c48] dark:text-emerald-400 shadow-xs'
+                  ? 'bg-white dark:bg-[#121c17] text-[#0d5c48] dark:text-emerald-400 shadow-xs ring-1 ring-[#0d5c48]/20'
                   : 'text-ink-600 dark:text-ink-400 hover:text-ink-900 dark:hover:text-white'
               }`}
             >
               <Hotel className="w-3.5 h-3.5" />
-              <span>Stays & Hotels</span>
+              <span>🏨 Stays</span>
             </button>
 
             <button
               onClick={() => setActiveCategory('dining')}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
                 activeCategory === 'dining'
-                  ? 'bg-white dark:bg-[#121c17] text-[#0d5c48] dark:text-emerald-400 shadow-xs'
+                  ? 'bg-white dark:bg-[#121c17] text-[#0d5c48] dark:text-emerald-400 shadow-xs ring-1 ring-[#0d5c48]/20'
                   : 'text-ink-600 dark:text-ink-400 hover:text-ink-900 dark:hover:text-white'
               }`}
             >
               <Utensils className="w-3.5 h-3.5" />
-              <span>Tables & Dining</span>
+              <span>🍽️ Dining</span>
             </button>
           </div>
         </div>
@@ -599,7 +652,13 @@ function BookingsContent() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
             <div className="space-y-1">
               <Label className="text-[10px] font-mono uppercase text-ink-500 dark:text-ink-400">
-                {activeCategory === 'hotel' || activeCategory === 'dining' ? 'Location / Destination' : 'Departing From (Origin)'}
+                {activeCategory === 'hotel' || activeCategory === 'dining'
+                  ? 'Location / Destination'
+                  : activeCategory === 'car_bus'
+                  ? 'Pick-Up Location / City'
+                  : activeCategory === 'ship'
+                  ? 'Departure Port / Coastal City'
+                  : 'Departing From (Origin)'}
               </Label>
               <Input
                 value={activeCategory === 'hotel' || activeCategory === 'dining' ? searchDest : searchOrigin}
@@ -610,19 +669,37 @@ function BookingsContent() {
                     setSearchOrigin(e.target.value);
                   }
                 }}
-                placeholder="e.g. Surat, Mumbai, London, JFK"
+                placeholder={
+                  activeCategory === 'car_bus'
+                    ? 'e.g. Akola, Surat, Mumbai, Pune'
+                    : activeCategory === 'ship'
+                    ? 'e.g. Mumbai, Mandwa, Goa, Kochi'
+                    : 'e.g. Akola, Mumbai, Delhi, London'
+                }
                 className="h-9 text-xs rounded-lg bg-white dark:bg-[#121c17] border-sand-300 dark:border-[#22332a]"
               />
             </div>
 
             <div className="space-y-1">
               <Label className="text-[10px] font-mono uppercase text-ink-500 dark:text-ink-400">
-                {activeCategory === 'hotel' || activeCategory === 'dining' ? 'Property / Cuisine Style' : 'Flying To (Destination)'}
+                {activeCategory === 'hotel' || activeCategory === 'dining'
+                  ? 'Property / Cuisine Style'
+                  : activeCategory === 'car_bus'
+                  ? 'Drop-Off City / Destination'
+                  : activeCategory === 'ship'
+                  ? 'Arrival Port / Destination Island'
+                  : 'Flying To (Destination)'}
               </Label>
               <Input
                 value={searchDest}
                 onChange={(e) => setSearchDest(e.target.value)}
-                placeholder="e.g. USA, New York, Tokyo, Dubai"
+                placeholder={
+                  activeCategory === 'car_bus'
+                    ? 'e.g. Mangalore, Goa, Ahmedabad'
+                    : activeCategory === 'ship'
+                    ? 'e.g. Alibaug, Goa, Lakshadweep, Santorini'
+                    : 'e.g. Mangalore, New York, Tokyo, Dubai'
+                }
                 className="h-9 text-xs rounded-lg bg-white dark:bg-[#121c17] border-sand-300 dark:border-[#22332a]"
               />
             </div>
@@ -718,6 +795,53 @@ function BookingsContent() {
         {/* ============================================================== */}
         {activeCategory === 'flight' && (
           <div className="space-y-5">
+            {/* Commercial Airport Availability Alert Banner */}
+            {(!originProfile.airport.hasCommercialService || !destProfile.airport.hasCommercialService) && (
+              <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-100 text-xs flex items-start gap-3.5 shadow-sm">
+                <AlertCircle className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
+                <div className="space-y-1.5 flex-1">
+                  <div className="font-bold text-amber-300 text-sm flex items-center gap-2">
+                    <span>Commercial Airport Notice</span>
+                    <span className="font-mono text-[9px] uppercase px-2 py-0.5 rounded bg-amber-500/20 text-amber-200 font-semibold">
+                      GROUNDED BY SAFAR AI
+                    </span>
+                  </div>
+                  <div className="text-sand-200 leading-relaxed text-xs space-y-1">
+                    {!originProfile.airport.hasCommercialService && (
+                      <p>
+                        <strong>{originProfile.city}:</strong> {originProfile.airport.notice}
+                      </p>
+                    )}
+                    {!destProfile.airport.hasCommercialService && (
+                      <p>
+                        <strong>{destProfile.city}:</strong> {destProfile.airport.notice}
+                      </p>
+                    )}
+                  </div>
+                  <div className="flex flex-wrap items-center gap-2 pt-1">
+                    <Button
+                      type="button"
+                      size="sm"
+                      onClick={() => setActiveCategory('train')}
+                      className="h-7 text-xs bg-emerald-700 hover:bg-emerald-600 text-white rounded-lg gap-1.5"
+                    >
+                      <Train className="w-3.5 h-3.5" />
+                      <span>Switch to Train (Direct from {originProfile.city})</span>
+                    </Button>
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="outline"
+                      onClick={() => setActiveCategory('car_bus')}
+                      className="h-7 text-xs border-amber-500/40 text-amber-200 hover:bg-amber-500/20 rounded-lg gap-1.5"
+                    >
+                      <Car className="w-3.5 h-3.5" />
+                      <span>Switch to Car or Bus</span>
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            )}
             {/* 3-Tier Strategy Comparison Showcase */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">
               {/* 1. Super Money Saver */}
@@ -1169,6 +1293,17 @@ function BookingsContent() {
         {/* ============================================================== */}
         {activeCategory === 'train' && (
           <div className="space-y-4">
+            {(originProfile.railway.notice || destProfile.railway.notice) && (
+              <div className="p-4 rounded-2xl bg-teal-500/10 border border-teal-500/30 text-teal-100 text-xs flex items-start gap-3 shadow-sm">
+                <Train className="w-4 h-4 text-teal-400 shrink-0 mt-0.5" />
+                <div className="space-y-1">
+                  <span className="font-bold text-teal-300 text-sm">Railhead Connectivity</span>
+                  <p className="text-sand-200 text-xs leading-relaxed">
+                    {originProfile.railway.notice} {destProfile.railway.notice}
+                  </p>
+                </div>
+              </div>
+            )}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <span className="text-xs font-mono text-ink-500 dark:text-ink-400 uppercase tracking-wider">
                 IRCTC & National Rail Fares ({trainResults.length} Superfast Express Routes) • Grounded in {selectedCurrency}
@@ -1306,6 +1441,321 @@ function BookingsContent() {
         )}
 
         {/* ============================================================== */}
+        {/* ============================================================== */}
+        {/* CAR OR BUS RESULTS (HIGHWAY & SLEEPER COACHES) */}
+        {/* ============================================================== */}
+        {activeCategory === 'car_bus' && (
+          <div className="space-y-4">
+            {/* Route & Distance Banner */}
+            <div className="p-4 rounded-2xl bg-teal-50/80 dark:bg-emerald-950/40 border border-teal-200 dark:border-emerald-800/40 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-teal-800 dark:bg-emerald-800 text-white flex items-center justify-center shrink-0">
+                  <Car className="w-5 h-5 text-emerald-200" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-ink-900 dark:text-white text-sm flex items-center gap-2">
+                    <span>Highway Transit Corridor</span>
+                    <span className="font-mono text-[9px] uppercase px-2 py-0.5 rounded bg-emerald-100 dark:bg-emerald-900/60 text-emerald-800 dark:text-emerald-300 font-bold">
+                      VERIFIED ROAD LINK
+                    </span>
+                  </h3>
+                  <p className="text-xs text-ink-600 dark:text-sand-200 mt-0.5">
+                    {originProfile.city} ➔ {destProfile.city} • ~{roadwayData.distanceKm} km via National Highway Corridor • {roadwayData.routeNotice}
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2 shrink-0">
+                <span className="text-[11px] font-mono text-ink-500 dark:text-sand-300 bg-white dark:bg-[#121c17] px-3 py-1.5 rounded-lg border border-sand-200 dark:border-[#22352b]">
+                  ⛽ Toll & Fuel Est: ₹{Math.round(roadwayData.distanceKm * 6.5).toLocaleString()}
+                </span>
+              </div>
+            </div>
+
+            {/* Results List */}
+            <div className="space-y-3.5">
+              {roadwayData.offers.map((opt: LiveRoadwayOffer) => (
+                <div
+                  key={opt.id}
+                  className="rounded-2xl border border-sand-200 dark:border-[#1e2e26] bg-white dark:bg-[#121c17] p-5 shadow-card hover:border-[#0d5c48]/50 transition-all space-y-4"
+                >
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-sand-200 dark:border-[#1e2e26] pb-3">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-7 h-7 rounded-lg bg-teal-50 dark:bg-emerald-950 text-teal-800 dark:text-emerald-300 flex items-center justify-center border border-teal-200 dark:border-emerald-800">
+                        {opt.category === 'cab' ? <Car className="w-4 h-4" /> : <Bus className="w-4 h-4" />}
+                      </div>
+                      <div>
+                        <span className="font-bold text-ink-900 dark:text-white text-sm">
+                          {opt.title}
+                        </span>
+                        <span className="text-xs text-ink-500 dark:text-sand-300 ml-2">
+                          ({opt.vehicleType})
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-mono font-bold text-teal-800 dark:text-emerald-300 bg-teal-50 dark:bg-emerald-950/60 px-2.5 py-0.5 rounded-full border border-teal-200 dark:border-emerald-800">
+                        {opt.tierLabel}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Route & Times */}
+                  <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
+                    <div className="md:col-span-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                      <div>
+                        <div className="font-serif text-2xl font-bold text-ink-900 dark:text-white">
+                          {formatTo12Hour(opt.departureTime)}
+                        </div>
+                        <div className="text-xs font-semibold text-teal-800 dark:text-emerald-300">
+                          {opt.pickupPoint}
+                        </div>
+                        <div className="text-[11px] text-ink-500 dark:text-ink-400">
+                          {originProfile.city}
+                        </div>
+                      </div>
+
+                      <div className="flex flex-col items-center flex-1 px-4 text-center">
+                        <span className="text-[11px] font-mono text-ink-400 flex items-center gap-1 mb-1">
+                          <Clock className="w-3 h-3 text-[#0d5c48] dark:text-emerald-400" />
+                          {opt.durationFormatted}
+                        </span>
+                        <div className="w-full flex items-center gap-1">
+                          <div className="h-0.5 bg-sand-300 dark:bg-[#22332a] flex-1 rounded-full" />
+                          {opt.category === 'cab' ? (
+                            <Car className="w-3.5 h-3.5 text-[#0d5c48] dark:text-emerald-400 shrink-0" />
+                          ) : (
+                            <Bus className="w-3.5 h-3.5 text-[#0d5c48] dark:text-emerald-400 shrink-0" />
+                          )}
+                        </div>
+                        <span className="text-[10px] font-mono text-ink-500 dark:text-ink-400 mt-1">
+                          {opt.routeDescription}
+                        </span>
+                      </div>
+
+                      <div className="text-right">
+                        <div className="font-serif text-2xl font-bold text-ink-900 dark:text-white">
+                          {formatTo12Hour(opt.arrivalTime)}
+                        </div>
+                        <div className="text-xs font-semibold text-teal-800 dark:text-emerald-300">
+                          {opt.dropPoint}
+                        </div>
+                        <div className="text-[11px] text-ink-500 dark:text-ink-400">
+                          {destProfile.city}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Price Callout */}
+                    <div className="md:col-span-4 flex flex-col md:items-end justify-center md:border-l md:border-sand-200 md:dark:border-[#1e2e26] md:pl-5">
+                      <div className="flex items-center gap-1.5">
+                        <span className="w-2 h-2 rounded-full bg-emerald-500 inline-block" />
+                        <span className="text-[10px] font-mono uppercase tracking-wider text-emerald-800 dark:text-emerald-300 font-bold">
+                          ESTIMATED RATE
+                        </span>
+                      </div>
+                      <div className="font-serif text-3xl font-bold text-teal-950 dark:text-emerald-300 mt-0.5">
+                        {opt.formattedPrice}
+                      </div>
+                      <span className="text-[10px] font-mono text-ink-400 mt-0.5">
+                        {opt.category === 'cab' ? 'Full private vehicle + driver' : 'Per passenger seat / berth'}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Perks & Action buttons */}
+                  <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-sand-200 dark:border-[#1e2e26]">
+                    <div className="flex flex-wrap items-center gap-2">
+                      {opt.perks.map((p: string, i: number) => (
+                        <span
+                          key={i}
+                          className="text-[11px] px-2.5 py-0.5 rounded-md bg-sand-100 dark:bg-[#18261f] text-ink-700 dark:text-sand-300"
+                        >
+                          ✓ {p}
+                        </span>
+                      ))}
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <a
+                        href={opt.bookingUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold bg-[#0d5c48] hover:bg-[#094032] text-white shadow-xs transition-colors"
+                      >
+                        <span>Book via {opt.bookingPartner}</span>
+                        <ExternalLink className="w-3 h-3" />
+                      </a>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() =>
+                          handleSaveToPasses(
+                            `${opt.title} (${originProfile.city} ➔ ${destProfile.city})`,
+                            opt.category === 'cab' ? 'car_rental' : 'bus',
+                            opt.provider,
+                            opt.price
+                          )
+                        }
+                        className="text-xs rounded-xl border-sand-300 dark:border-[#22332a]"
+                      >
+                        <Plus className="w-3.5 h-3.5" />
+                        <span>Save Pass</span>
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* ============================================================== */}
+        {/* SHIP / FERRY RESULTS (COASTAL & MARITIME WATERWAYS) */}
+        {/* ============================================================== */}
+        {activeCategory === 'ship' && (
+          <div className="space-y-4">
+            {seawayResult.isAvailable ? (
+              <div className="space-y-3.5">
+                <div className="p-4 rounded-2xl bg-teal-500/10 border border-teal-500/30 text-teal-100 text-xs flex items-start gap-3 shadow-sm">
+                  <Ship className="w-5 h-5 text-teal-400 shrink-0 mt-0.5" />
+                  <div className="space-y-1">
+                    <span className="font-bold text-teal-300 text-sm">Maritime Coastal Route Available</span>
+                    <p className="text-sand-200 text-xs leading-relaxed">{seawayResult.notice}</p>
+                  </div>
+                </div>
+
+                {seawayResult.offers.map((s) => (
+                  <div
+                    key={s.id}
+                    className="rounded-2xl border border-sand-200 dark:border-[#1e2e26] bg-white dark:bg-[#121c17] p-5 shadow-card space-y-4"
+                  >
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-sand-200 dark:border-[#1e2e26] pb-3">
+                      <div className="flex items-center gap-2">
+                        <Anchor className="w-4 h-4 text-teal-600 dark:text-emerald-400" />
+                        <span className="font-bold text-ink-900 dark:text-white text-sm">{s.title}</span>
+                        <span className="text-xs text-ink-500">({s.vesselType})</span>
+                      </div>
+                      <span className="text-xs font-mono font-bold text-teal-800 dark:text-emerald-300 bg-teal-50 dark:bg-emerald-950/60 px-2.5 py-0.5 rounded-full border border-teal-200 dark:border-emerald-800">
+                        {s.tierLabel}
+                      </span>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
+                      <div className="md:col-span-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <div>
+                          <div className="font-serif text-2xl font-bold text-ink-900 dark:text-white">
+                            {formatTo12Hour(s.departureTime)}
+                          </div>
+                          <div className="text-xs font-semibold text-teal-800 dark:text-emerald-300">
+                            {s.boardingPort}
+                          </div>
+                        </div>
+
+                        <div className="flex flex-col items-center flex-1 px-4 text-center">
+                          <span className="text-[11px] font-mono text-ink-400 flex items-center gap-1 mb-1">
+                            <Clock className="w-3 h-3 text-[#0d5c48] dark:text-emerald-400" />
+                            {s.durationFormatted}
+                          </span>
+                          <div className="w-full flex items-center gap-1">
+                            <div className="h-0.5 bg-sand-300 dark:bg-[#22332a] flex-1 rounded-full" />
+                            <Ship className="w-3.5 h-3.5 text-[#0d5c48] dark:text-emerald-400 shrink-0" />
+                          </div>
+                          <span className="text-[10px] font-mono text-ink-500 dark:text-ink-400 mt-1">
+                            {s.vehicleCarriage}
+                          </span>
+                        </div>
+
+                        <div className="text-right">
+                          <div className="font-serif text-2xl font-bold text-ink-900 dark:text-white">
+                            {formatTo12Hour(s.arrivalTime)}
+                          </div>
+                          <div className="text-xs font-semibold text-teal-800 dark:text-emerald-300">
+                            {s.arrivalPort}
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="md:col-span-4 flex flex-col md:items-end justify-center md:border-l md:border-sand-200 md:dark:border-[#1e2e26] md:pl-5">
+                        <span className="text-[10px] font-mono uppercase text-emerald-700 dark:text-emerald-300 font-bold">
+                          LIVE SEAWAY PRICE
+                        </span>
+                        <div className="font-serif text-3xl font-bold text-teal-950 dark:text-emerald-300 mt-0.5">
+                          {s.formattedPrice}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-sand-200 dark:border-[#1e2e26]">
+                      <div className="flex flex-wrap items-center gap-2">
+                        {s.perks.map((p, i) => (
+                          <span key={i} className="text-[11px] px-2.5 py-0.5 rounded-md bg-sand-100 dark:bg-[#18261f]">
+                            ✓ {p}
+                          </span>
+                        ))}
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        <a
+                          href={s.bookingUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold bg-[#0d5c48] text-white shadow-xs"
+                        >
+                          <span>Book Ferry / Liner</span>
+                          <ExternalLink className="w-3 h-3" />
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="p-6 rounded-2xl bg-white dark:bg-[#121c17] border border-sand-200 dark:border-[#1e2e26] shadow-card space-y-4 text-center max-w-2xl mx-auto">
+                <div className="w-12 h-12 rounded-2xl bg-amber-500/10 text-amber-500 flex items-center justify-center mx-auto">
+                  <Anchor className="w-6 h-6" />
+                </div>
+                <div className="space-y-2">
+                  <h3 className="font-bold font-serif text-lg text-ink-900 dark:text-white">
+                    Inland Landlocked Location
+                  </h3>
+                  <p className="text-xs text-ink-600 dark:text-sand-300 leading-relaxed">
+                    {seawayResult.notice}
+                  </p>
+                </div>
+
+                <div className="p-3.5 rounded-xl bg-sand-50 dark:bg-[#18251f] border border-sand-200 dark:border-[#22332a] text-xs text-left space-y-2">
+                  <span className="font-bold text-teal-900 dark:text-emerald-300 block">
+                    Recommended Transit Modes for {originProfile.city} ➔ {destProfile.city}:
+                  </span>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => setActiveCategory('train')}
+                      className="text-xs justify-start gap-2 h-9 rounded-xl border-sand-300 dark:border-[#22332a]"
+                    >
+                      <Train className="w-4 h-4 text-teal-700 dark:text-emerald-400" />
+                      <span>Take Direct Train (Recommended)</span>
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => setActiveCategory('car_bus')}
+                      className="text-xs justify-start gap-2 h-9 rounded-xl border-sand-300 dark:border-[#22332a]"
+                    >
+                      <Car className="w-4 h-4 text-teal-700 dark:text-emerald-400" />
+                      <span>Highway Cab / Sleeper Bus</span>
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
         {/* HOTEL RESULTS (REAL-TIME NIGHTLY RATES) */}
         {/* ============================================================== */}
         {activeCategory === 'hotel' && (
