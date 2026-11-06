@@ -17,11 +17,14 @@ import {
   CheckCircle2,
   ExternalLink,
   Utensils,
+  Plus,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { getDestinationImage } from '@/lib/constants/destination-images';
 import { generateClientExploreDossier } from '@/lib/ai/client-ai-engine';
-import { getStoredActiveSearch, useActiveSearch } from '@/lib/services/sync-bus';
+import { getStoredActiveSearch, useActiveSearch, emitTripChange } from '@/lib/services/sync-bus';
+import { getTrips, createTrip, addItineraryStop, getTripItinerary } from '@/lib/services/trip-service';
+import { isStaticHost } from '@/lib/config';
 
 interface Destination {
   id: string;
@@ -340,31 +343,33 @@ function ExploreContent() {
     setAiGenerating(true);
     try {
       let loaded = false;
-      try {
-        const localGeminiKey = typeof window !== 'undefined' ? localStorage.getItem('safar_gemini_api_key') : null;
-        const localGroqKey = typeof window !== 'undefined' ? localStorage.getItem('safar_groq_api_key') : null;
-        const res = await fetch('/api/ai/explore-dossier', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            ...(localGeminiKey ? { 'x-gemini-key': localGeminiKey } : {}),
-            ...(localGroqKey ? { 'x-groq-key': localGroqKey } : {}),
-          },
-          body: JSON.stringify({
-            destination: q,
-            currency: 'INR',
-            userOrigin: 'India',
-          }),
-        });
+      if (!isStaticHost()) {
+        try {
+          const localGeminiKey = typeof window !== 'undefined' ? localStorage.getItem('safar_gemini_api_key') : null;
+          const localGroqKey = typeof window !== 'undefined' ? localStorage.getItem('safar_groq_api_key') : null;
+          const res = await fetch('/api/ai/explore-dossier', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              ...(localGeminiKey ? { 'x-gemini-key': localGeminiKey } : {}),
+              ...(localGroqKey ? { 'x-groq-key': localGroqKey } : {}),
+            },
+            body: JSON.stringify({
+              destination: q,
+              currency: 'INR',
+              userOrigin: 'India',
+            }),
+          });
 
-        if (res.ok && res.headers.get('content-type')?.includes('application/json')) {
-          const data = await res.json();
-          if (data.success && data.dossier) {
-            setCustomDossier(data.dossier);
-            loaded = true;
+          if (res.ok && res.headers.get('content-type')?.includes('application/json')) {
+            const data = await res.json();
+            if (data.success && data.dossier) {
+              setCustomDossier(data.dossier);
+              loaded = true;
+            }
           }
-        }
-      } catch (srvErr) {}
+        } catch (srvErr) {}
+      }
 
       // If server returned non-JSON/404 (e.g. GitHub Pages), synthesize directly with Gemini/Groq
       if (!loaded) {
@@ -377,6 +382,55 @@ function ExploreContent() {
       console.warn('AI destination dossier error:', e);
     } finally {
       setAiGenerating(false);
+    }
+  };
+
+  const [addedItemName, setAddedItemName] = useState<string | null>(null);
+
+  const handleAddToTrip = async (name: string, description: string, category: 'sightseeing' | 'meal') => {
+    try {
+      const allTrips = await getTrips();
+      let targetTrip = allTrips[0];
+      if (!targetTrip) {
+        targetTrip = await createTrip({
+          destination: customDossier?.destinationName || customQuery || 'My Journey',
+          country: customDossier?.country || 'India',
+          start_date: new Date().toISOString().split('T')[0],
+          end_date: new Date(Date.now() + 3 * 86400000).toISOString().split('T')[0],
+          travelers: 2,
+          budget: 35000,
+          currency: 'INR',
+          interests: ['Culture', 'Sightseeing', 'Food'],
+          dietary: null,
+          accessibility: null,
+          cover_image: null,
+          status: 'planning',
+        });
+      }
+      const itin = await getTripItinerary(targetTrip.id);
+      const dayId = itin.days[0]?.id || `${targetTrip.id}-day-1`;
+
+      await addItineraryStop({
+        trip_id: targetTrip.id,
+        day_id: dayId,
+        time: category === 'meal' ? '13:00' : '10:00',
+        title: name,
+        description: description || null,
+        place_id: null,
+        latitude: null,
+        longitude: null,
+        duration_minutes: category === 'meal' ? 60 : 90,
+        estimated_cost: category === 'meal' ? 450 : 0,
+        currency: targetTrip.currency,
+        category,
+        is_optional: false,
+        booking_ref: null,
+      });
+      emitTripChange(targetTrip.id);
+      setAddedItemName(name);
+      setTimeout(() => setAddedItemName(null), 3000);
+    } catch (e) {
+      console.warn('Could not add stop to trip:', e);
     }
   };
 
@@ -561,11 +615,35 @@ function ExploreContent() {
                       )}
                     </div>
                     <p className="text-[11px] text-ink-500 dark:text-[#8ca397] leading-relaxed">{att.description}</p>
-                    {att.bestTimeToVisit && (
-                      <p className="text-[10px] text-amber-700 dark:text-amber-300 font-medium pt-0.5">
-                        🕒 Best time: {att.bestTimeToVisit}
-                      </p>
-                    )}
+                    <div className="pt-2 flex items-center justify-between border-t border-sand-100 dark:border-[#22352b]">
+                      {att.bestTimeToVisit ? (
+                        <p className="text-[10px] text-amber-700 dark:text-amber-300 font-medium">
+                          🕒 Best time: {att.bestTimeToVisit}
+                        </p>
+                      ) : <span />}
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => handleAddToTrip(att.name, att.description || '', 'sightseeing')}
+                        className={`h-6 text-[10px] px-2 rounded-lg gap-1 font-semibold transition-all ${
+                          addedItemName === att.name
+                            ? 'bg-emerald-600 text-white hover:bg-emerald-600'
+                            : 'border border-sand-300 dark:border-[#2a3f33] text-teal-800 dark:text-emerald-300 hover:bg-teal-50 dark:hover:bg-[#1f3127]'
+                        }`}
+                      >
+                        {addedItemName === att.name ? (
+                          <>
+                            <CheckCircle2 className="w-3 h-3 text-white" />
+                            <span>Added!</span>
+                          </>
+                        ) : (
+                          <>
+                            <Plus className="w-3 h-3" />
+                            <span>Add to Trip</span>
+                          </>
+                        )}
+                      </Button>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -603,11 +681,35 @@ function ExploreContent() {
                         <strong className="text-ink dark:text-white">Must try:</strong> {res.mustTryDishes}
                       </p>
                     )}
-                    {res.atmosphere && (
-                      <p className="text-[10px] text-ink-400 dark:text-[#6a7d73] italic">
-                        Atmosphere: {res.atmosphere}
-                      </p>
-                    )}
+                    <div className="pt-2 flex items-center justify-between border-t border-amber-200/40 dark:border-[#2b271d]">
+                      {res.atmosphere ? (
+                        <p className="text-[10px] text-ink-400 dark:text-[#6a7d73] italic truncate max-w-[140px]">
+                          {res.atmosphere}
+                        </p>
+                      ) : <span />}
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => handleAddToTrip(res.name, `${res.cuisineType} • Must try: ${res.mustTryDishes || ''}`, 'meal')}
+                        className={`h-6 text-[10px] px-2 rounded-lg gap-1 font-semibold transition-all ${
+                          addedItemName === res.name
+                            ? 'bg-emerald-600 text-white hover:bg-emerald-600'
+                            : 'border border-amber-300/80 dark:border-[#383324] text-amber-800 dark:text-amber-300 hover:bg-amber-100/50 dark:hover:bg-[#252219]'
+                        }`}
+                      >
+                        {addedItemName === res.name ? (
+                          <>
+                            <CheckCircle2 className="w-3 h-3 text-white" />
+                            <span>Added!</span>
+                          </>
+                        ) : (
+                          <>
+                            <Plus className="w-3 h-3" />
+                            <span>Add to Trip</span>
+                          </>
+                        )}
+                      </Button>
+                    </div>
                   </div>
                 ))}
               </div>

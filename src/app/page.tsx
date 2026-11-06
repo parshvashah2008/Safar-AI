@@ -85,7 +85,7 @@ const featuredDestinations = [
 export default function HomePage() {
   const router = useRouter();
   const { activeSearch, updateSearch } = useActiveSearch();
-  const [quickOrigin, setQuickOrigin] = useState(activeSearch.origin || 'Akola');
+  const [quickOrigin, setQuickOrigin] = useState(activeSearch.origin || '');
   const [quickSearch, setQuickSearch] = useState(activeSearch.destination || '');
   const [selectedTransport, setSelectedTransport] = useState<string>(activeSearch.transportMode || 'any');
   const [travelers, setTravelers] = useState(String(activeSearch.travelers || '2'));
@@ -250,7 +250,7 @@ export default function HomePage() {
                       setQuickOrigin(val);
                       updateSearch({ origin: val });
                     }}
-                    placeholder="e.g. Akola, Mumbai, Delhi, Surat"
+                    placeholder="Where are you departing from? (e.g. Mumbai, Delhi, London)"
                     className="w-full text-xs font-semibold text-[#111a16] dark:text-[#edf2ee] placeholder:text-[#97a59d] dark:placeholder:text-[#5f7368] focus:outline-none bg-transparent"
                   />
                 </div>

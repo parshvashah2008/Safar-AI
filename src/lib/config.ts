@@ -44,3 +44,13 @@ export function requireGeminiKey(): string {
 export function getGeminiModel(): string {
   return process.env.GEMINI_MODEL || 'gemini-2.5-flash';
 }
+
+/** Check if running on a static hosting environment where /api routes do not exist */
+export function isStaticHost(): boolean {
+  if (typeof window === 'undefined') return false;
+  return (
+    window.location.hostname.includes('github.io') ||
+    window.location.hostname.includes('pages.dev') ||
+    window.location.protocol === 'file:'
+  );
+}

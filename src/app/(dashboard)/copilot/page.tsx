@@ -25,6 +25,7 @@ import { chatWithClientCopilot } from '@/lib/ai/client-ai-engine';
 import type { Trip } from '@/types';
 import { getCurrent12HourTime } from '@/lib/utils/time-format';
 import { useActiveSearch } from '@/lib/services/sync-bus';
+import { isStaticHost } from '@/lib/config';
 
 interface ChatTripInfo {
   destination: string;
@@ -158,26 +159,33 @@ export default function CopilotPage() {
           }
         : undefined;
 
-      const res = await fetch('/api/ai/chat', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(localKey ? { 'x-gemini-key': localKey } : {}),
-        },
-        body: JSON.stringify({
-          message: textToSend.trim(),
-          context: effectiveContext,
-        }),
-      });
-
       let data: any = null;
-      const isJson = res.headers.get('content-type')?.includes('application/json');
 
-      if (res.ok && isJson) {
+      if (!isStaticHost()) {
         try {
-          data = await res.json();
-        } catch (jsonErr) {
-          console.warn('Could not parse copilot JSON response:', jsonErr);
+          const res = await fetch('/api/ai/chat', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              ...(localKey ? { 'x-gemini-key': localKey } : {}),
+            },
+            body: JSON.stringify({
+              message: textToSend.trim(),
+              context: effectiveContext,
+            }),
+          });
+
+          const isJson = res.headers.get('content-type')?.includes('application/json');
+
+          if (res.ok && isJson) {
+            try {
+              data = await res.json();
+            } catch (jsonErr) {
+              console.warn('Could not parse copilot JSON response:', jsonErr);
+            }
+          }
+        } catch (fetchErr) {
+          console.warn('Network error reaching /api/ai/chat, falling back to client copilot:', fetchErr);
         }
       }
 

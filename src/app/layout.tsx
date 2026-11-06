@@ -28,6 +28,10 @@ const dmMono = DM_Mono({
 export const metadata: Metadata = {
   title: 'SAFAR AI — Your world. Your budget. Your journey.',
   description: 'An intelligent personal travel platform for domestic and international journeys.',
+  icons: {
+    icon: './favicon.ico',
+    apple: './favicon.ico',
+  },
 };
 
 export const viewport: Viewport = {
@@ -43,6 +47,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning className={`${dmSans.variable} ${playfair.variable} ${dmMono.variable}`}>
       <head>
+        <link rel="icon" href="./favicon.ico" sizes="any" />
         <script
           dangerouslySetInnerHTML={{
             __html: `

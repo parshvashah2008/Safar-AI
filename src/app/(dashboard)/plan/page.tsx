@@ -59,6 +59,7 @@ import {
 import { generateFallbackItinerary } from '@/lib/services/fallback-itinerary';
 import { generateClientItinerary } from '@/lib/ai/client-ai-engine';
 import { resolveCityTransitProfile } from '@/lib/services/station-resolver';
+import { isStaticHost } from '@/lib/config';
 import type { StopCategory } from '@/types';
 
 const defaultInterests = [
@@ -166,31 +167,33 @@ function PlannerContent() {
 
       let estimateData: any = null;
 
-      try {
-        const res = await fetch('/api/ai/estimate-budget', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            ...(localGeminiKey ? { 'x-gemini-key': localGeminiKey } : {}),
-            ...(localGroqKey ? { 'x-groq-key': localGroqKey } : {}),
-          },
-          body: JSON.stringify({
-            origin: customOrigin || 'Mumbai',
-            destination: dest,
-            days: diffDays,
-            travelers: form.travelers,
-            currency: form.currency,
-          }),
-        });
+      if (!isStaticHost()) {
+        try {
+          const res = await fetch('/api/ai/estimate-budget', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              ...(localGeminiKey ? { 'x-gemini-key': localGeminiKey } : {}),
+              ...(localGroqKey ? { 'x-groq-key': localGroqKey } : {}),
+            },
+            body: JSON.stringify({
+              origin: customOrigin || 'Mumbai',
+              destination: dest,
+              days: diffDays,
+              travelers: form.travelers,
+              currency: form.currency,
+            }),
+          });
 
-        if (res.ok && res.headers.get('content-type')?.includes('application/json')) {
-          const data = await res.json();
-          if (data.success && data.estimate) {
-            estimateData = data.estimate;
+          if (res.ok && res.headers.get('content-type')?.includes('application/json')) {
+            const data = await res.json();
+            if (data.success && data.estimate) {
+              estimateData = data.estimate;
+            }
           }
+        } catch (networkErr) {
+          console.warn('Server estimation network error, falling back to local reasoning:', networkErr);
         }
-      } catch (networkErr) {
-        console.warn('Server estimation network error, falling back to local reasoning:', networkErr);
       }
 
       // If server didn't respond (e.g. static hosting without serverless functions), calculate high-fidelity realistic market rate locally
@@ -416,56 +419,58 @@ function PlannerContent() {
 
       let serverData: any = null;
 
-      try {
-        const res = await fetch('/api/ai/itinerary', {
-          method: 'POST',
-          headers,
-          body: JSON.stringify({
-            origin,
-            destination: finalDestination,
-            startDate: form.startDate,
-            endDate: form.endDate,
-            travelers: form.travelers,
-            budget: form.budget,
-            currency: form.currency,
-            interests: form.interests,
-            dietary: form.dietary,
-            accessibility: form.accessibility,
-            routeMode,
-          }),
-          signal: controller.signal,
-        });
-        clearTimeout(timeoutId);
-
-        const isJson = res.headers.get('content-type')?.includes('application/json');
-        if (isJson) {
-          try {
-            serverData = await res.json();
-          } catch (jsonErr) {
-            console.warn('Failed to parse server response as JSON:', jsonErr);
-          }
-        }
-
-        if (serverData && serverData.error === 'INSUFFICIENT_FUNDS') {
-          setError({
-            message: serverData.replyMessage || 'insufficient money funds (PAISA KAMAO) 💸',
-            details: serverData.reason,
-            isPaisaKamao: true,
+      if (!isStaticHost()) {
+        try {
+          const res = await fetch('/api/ai/itinerary', {
+            method: 'POST',
+            headers,
+            body: JSON.stringify({
+              origin,
+              destination: finalDestination,
+              startDate: form.startDate,
+              endDate: form.endDate,
+              travelers: form.travelers,
+              budget: form.budget,
+              currency: form.currency,
+              interests: form.interests,
+              dietary: form.dietary,
+              accessibility: form.accessibility,
+              routeMode,
+            }),
+            signal: controller.signal,
           });
-          setLoading(false);
-          return;
-        }
+          clearTimeout(timeoutId);
 
-        if (res.ok && serverData && serverData.days && Array.isArray(serverData.days) && serverData.days.length > 0) {
-          aiDays = serverData.days;
-          if (serverData.corrected_destination && typeof serverData.corrected_destination === 'string') {
-            finalDestination = serverData.corrected_destination.trim();
+          const isJson = res.headers.get('content-type')?.includes('application/json');
+          if (isJson) {
+            try {
+              serverData = await res.json();
+            } catch (jsonErr) {
+              console.warn('Failed to parse server response as JSON:', jsonErr);
+            }
           }
-        } else {
-          console.warn('Server itinerary returned non-JSON or status', res.status, 'initiating resilient client AI synthesis...');
+
+          if (serverData && serverData.error === 'INSUFFICIENT_FUNDS') {
+            setError({
+              message: serverData.replyMessage || 'insufficient money funds (PAISA KAMAO) 💸',
+              details: serverData.reason,
+              isPaisaKamao: true,
+            });
+            setLoading(false);
+            return;
+          }
+
+          if (res.ok && serverData && serverData.days && Array.isArray(serverData.days) && serverData.days.length > 0) {
+            aiDays = serverData.days;
+            if (serverData.corrected_destination && typeof serverData.corrected_destination === 'string') {
+              finalDestination = serverData.corrected_destination.trim();
+            }
+          } else {
+            console.warn('Server itinerary returned non-JSON or status', res.status, 'initiating resilient client AI synthesis...');
+          }
+        } catch (fetchErr) {
+          console.warn('Network error reaching /api/ai/itinerary, falling back to client synthesis:', fetchErr);
         }
-      } catch (fetchErr) {
-        console.warn('Network error reaching /api/ai/itinerary, falling back to client synthesis:', fetchErr);
       }
 
       // If server returned non-JSON/404 or did not provide days, synthesize directly via Gemini / Groq Client Engine

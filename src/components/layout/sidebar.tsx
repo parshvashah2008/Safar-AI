@@ -22,12 +22,10 @@ import { useActiveSearch } from '@/lib/services/sync-bus';
 export const navItems = [
   { href: '/trips', label: 'My Trips', icon: Plane },
   { href: '/plan', label: 'AI Planner', icon: Sparkles, badge: 'AI' },
-  { href: '/copilot', label: 'SAFAR Copilot', icon: Compass },
-  { href: '/explore', label: 'Explore Destinations', icon: Globe2 },
-  { href: '/budget', label: 'Budget Guardian', icon: IndianRupee },
-  { href: '/wallet', label: 'Trip Wallet', icon: Wallet },
   { href: '/bookings', label: 'Bookings & Passes', icon: FileText },
-  { href: '/translate', label: 'Global Translator', icon: MapPin },
+  { href: '/explore', label: 'Explore Destinations', icon: Globe2 },
+  { href: '/budget', label: 'Trip Finance', icon: IndianRupee },
+  { href: '/copilot', label: 'Copilot & Tools', icon: Compass },
   { href: '/settings', label: 'Settings', icon: Settings2 },
 ];
 

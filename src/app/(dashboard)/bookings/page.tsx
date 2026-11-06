@@ -64,6 +64,7 @@ import {
 } from '@/lib/services/currency-service';
 import { formatTo12Hour, getCurrent12HourTime } from '@/lib/utils/time-format';
 import { SYNC_EVENTS, emitCurrencyChange, getStoredActiveSearch, useActiveSearch } from '@/lib/services/sync-bus';
+import { isStaticHost } from '@/lib/config';
 import type { Booking, BookingType, Trip } from '@/types';
 
 type SearchCategory = 'flight' | 'train' | 'car_bus' | 'ship' | 'hotel' | 'dining';
@@ -100,6 +101,7 @@ function BookingsContent() {
   const [aiFareLoading, setAiFareLoading] = useState(false);
 
   const fetchAiFareAdvice = async () => {
+    if (isStaticHost()) return;
     setAiFareLoading(true);
     try {
       const localGeminiKey = typeof window !== 'undefined' ? localStorage.getItem('safar_gemini_api_key') : null;

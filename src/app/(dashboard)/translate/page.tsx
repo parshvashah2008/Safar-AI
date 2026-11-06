@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { translateWithClientAi } from '@/lib/ai/client-ai-engine';
 import { useActiveSearch } from '@/lib/services/sync-bus';
+import { isStaticHost } from '@/lib/config';
 
 const languages = [
   { code: 'hi', name: 'Hindi (हिंदी)' },
@@ -74,31 +75,33 @@ export default function TranslatePage() {
     setLoading(true);
     try {
       let loaded = false;
-      try {
-        const localGeminiKey = typeof window !== 'undefined' ? localStorage.getItem('safar_gemini_api_key') : null;
-        const localGroqKey = typeof window !== 'undefined' ? localStorage.getItem('safar_groq_api_key') : null;
-        const res = await fetch('/api/translate', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            ...(localGeminiKey ? { 'x-gemini-key': localGeminiKey } : {}),
-            ...(localGroqKey ? { 'x-groq-key': localGroqKey } : {}),
-          },
-          body: JSON.stringify({
-            text,
-            targetLang,
-          }),
-        });
+      if (!isStaticHost()) {
+        try {
+          const localGeminiKey = typeof window !== 'undefined' ? localStorage.getItem('safar_gemini_api_key') : null;
+          const localGroqKey = typeof window !== 'undefined' ? localStorage.getItem('safar_groq_api_key') : null;
+          const res = await fetch('/api/translate', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              ...(localGeminiKey ? { 'x-gemini-key': localGeminiKey } : {}),
+              ...(localGroqKey ? { 'x-groq-key': localGroqKey } : {}),
+            },
+            body: JSON.stringify({
+              text,
+              targetLang,
+            }),
+          });
 
-        if (res.ok && res.headers.get('content-type')?.includes('application/json')) {
-          const data = await res.json();
-          setTranslatedText(data.translatedText);
-          setPronunciation(data.pronunciation || '');
-          setCulturalEtiquette(data.culturalEtiquette || '');
-          setProviderTag(data.provider || 'Autonomous Neural AI');
-          loaded = true;
-        }
-      } catch (srvErr) {}
+          if (res.ok && res.headers.get('content-type')?.includes('application/json')) {
+            const data = await res.json();
+            setTranslatedText(data.translatedText);
+            setPronunciation(data.pronunciation || '');
+            setCulturalEtiquette(data.culturalEtiquette || '');
+            setProviderTag(data.provider || 'Autonomous Neural AI');
+            loaded = true;
+          }
+        } catch (srvErr) {}
+      }
 
       // Fallback directly to Client AI Engine (Gemini / Groq)
       if (!loaded) {
