@@ -47,7 +47,8 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning className={`${dmSans.variable} ${playfair.variable} ${dmMono.variable}`}>
       <head>
-        <link rel="icon" href="./favicon.ico" sizes="any" />
+        <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
+        <link rel="alternate icon" href="./favicon.ico" />
         <script
           dangerouslySetInnerHTML={{
             __html: `
