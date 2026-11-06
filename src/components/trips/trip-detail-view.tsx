@@ -640,10 +640,17 @@ export function TripDetailView({ tripId }: { tripId: string }) {
                   <Label htmlFor="act-cost">Est. Cost (₹)</Label>
                   <Input
                     id="act-cost"
-                    type="number"
-                    placeholder="0"
+                    type="text"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
+                    placeholder="e.g. 500"
                     value={newActivity.estimated_cost}
-                    onChange={(e) => setNewActivity({ ...newActivity, estimated_cost: e.target.value })}
+                    onFocus={(e) => e.target.select()}
+                    onChange={(e) => {
+                      const digitsOnly = e.target.value.replace(/\D/g, '');
+                      const clean = digitsOnly.replace(/^0+(?=\d)/, '');
+                      setNewActivity({ ...newActivity, estimated_cost: clean });
+                    }}
                   />
                 </div>
               </div>

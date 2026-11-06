@@ -92,8 +92,14 @@ export function emitRouteChange(mode: 'budget' | 'fastest', tripId?: string) {
 export function emitActiveSearch(payload: Partial<ActiveSearchPayload>) {
   if (typeof window !== 'undefined') {
     if (payload.destination !== undefined) localStorage.setItem('safar_active_destination', payload.destination);
-    if (payload.travelers !== undefined) localStorage.setItem('safar_active_travelers', String(payload.travelers));
-    if (payload.budget !== undefined) localStorage.setItem('safar_active_budget', String(payload.budget));
+    if (payload.travelers !== undefined) {
+      const tNum = typeof payload.travelers === 'string' ? Number(String(payload.travelers).replace(/^0+(?=\d)/, '')) : payload.travelers;
+      localStorage.setItem('safar_active_travelers', String(tNum));
+    }
+    if (payload.budget !== undefined) {
+      const bNum = typeof payload.budget === 'string' ? Number(String(payload.budget).replace(/^0+(?=\d)/, '')) : payload.budget;
+      localStorage.setItem('safar_active_budget', String(bNum));
+    }
     if (payload.origin !== undefined) localStorage.setItem('safar_active_origin', payload.origin);
     if (payload.transportMode !== undefined) localStorage.setItem('safar_active_transport_mode', payload.transportMode);
 
@@ -111,14 +117,21 @@ export function getStoredActiveSearch(): ActiveSearchPayload {
     const raw = localStorage.getItem('safar_active_search');
     if (raw) {
       const parsed = JSON.parse(raw);
+      if (parsed.budget) parsed.budget = Number(String(parsed.budget).replace(/^0+(?=\d)/, '')) || 35000;
+      if (parsed.travelers) parsed.travelers = Number(String(parsed.travelers).replace(/^0+(?=\d)/, '')) || 2;
       return { ...fallback, ...parsed };
     }
   } catch (e) {}
 
+  const rawTravelers = localStorage.getItem('safar_active_travelers');
+  const cleanT = rawTravelers ? Number(rawTravelers.replace(/^0+(?=\d)/, '')) : 2;
+  const rawBudget = localStorage.getItem('safar_active_budget');
+  const cleanB = rawBudget ? Number(rawBudget.replace(/^0+(?=\d)/, '')) : 35000;
+
   return {
     destination: localStorage.getItem('safar_active_destination') || '',
-    travelers: Number(localStorage.getItem('safar_active_travelers')) || 2,
-    budget: Number(localStorage.getItem('safar_active_budget')) || 35000,
+    travelers: cleanT || 2,
+    budget: cleanB || 35000,
     origin: localStorage.getItem('safar_active_origin') || 'Mumbai',
     transportMode: (localStorage.getItem('safar_active_transport_mode') as TransportMode) || 'any',
   };

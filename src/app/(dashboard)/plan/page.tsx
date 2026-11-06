@@ -109,8 +109,13 @@ function PlannerContent() {
   const stored = getStoredActiveSearch();
   const initialDest = searchParams?.get('destination') || stored.destination || '';
   const initialOrigin = searchParams?.get('origin') || stored.origin || '';
-  const initialTravelers = Number(searchParams?.get('travelers')) || stored.travelers || 2;
-  const initialRawBudget = Number(searchParams?.get('budget')) || stored.budget || 40000;
+  const paramTravelersRaw = searchParams?.get('travelers');
+  const cleanTravelers = paramTravelersRaw ? Number(paramTravelersRaw.replace(/^0+(?=\d)/, '')) : NaN;
+  const initialTravelers = !isNaN(cleanTravelers) && cleanTravelers > 0 ? cleanTravelers : (stored.travelers || 2);
+
+  const paramBudgetRaw = searchParams?.get('budget');
+  const cleanBudget = paramBudgetRaw ? Number(paramBudgetRaw.replace(/^0+(?=\d)/, '')) : NaN;
+  const initialRawBudget = !isNaN(cleanBudget) && cleanBudget > 0 ? cleanBudget : (stored.budget || 40000);
   const initialBudget = (initialRawBudget >= 1000000 || initialRawBudget === 4000000 || initialRawBudget === 40000000) ? 40000 : initialRawBudget;
 
   const [form, setForm] = useState({
@@ -698,11 +703,17 @@ function PlannerContent() {
                 <Label htmlFor="travelers" className="text-xs font-medium text-ink-700 dark:text-[#edf2ee]">Travelers</Label>
                 <Input
                   id="travelers"
-                  type="number"
-                  min="1"
-                  max="30"
-                  value={form.travelers}
-                  onChange={(e) => setForm({ ...form, travelers: Number(e.target.value) })}
+                  type="text"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
+                  value={form.travelers ? String(form.travelers) : ''}
+                  onFocus={(e) => e.target.select()}
+                  onChange={(e) => {
+                    const digitsOnly = e.target.value.replace(/\D/g, '');
+                    const clean = digitsOnly.replace(/^0+(?=\d)/, '');
+                    setForm((prev) => ({ ...prev, travelers: clean === '' ? 1 : Math.min(30, Number(clean)) }));
+                  }}
+                  placeholder="2"
                   className="rounded-xl border-sand-300 dark:border-[#22352b] bg-white dark:bg-[#0c1410] dark:text-[#edf2ee]"
                 />
               </div>
@@ -729,11 +740,17 @@ function PlannerContent() {
                   </span>
                   <Input
                     id="budget"
-                    type="number"
-                    min="0"
-                    step="500"
-                    value={form.budget}
-                    onChange={(e) => setForm({ ...form, budget: Number(e.target.value) })}
+                    type="text"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
+                    value={form.budget ? String(form.budget) : ''}
+                    onFocus={(e) => e.target.select()}
+                    onChange={(e) => {
+                      const digitsOnly = e.target.value.replace(/\D/g, '');
+                      const clean = digitsOnly.replace(/^0+(?=\d)/, '');
+                      setForm((prev) => ({ ...prev, budget: clean === '' ? 0 : Number(clean) }));
+                    }}
+                    placeholder="e.g. 40,000"
                     className="rounded-xl border-sand-300 dark:border-[#22352b] bg-white dark:bg-[#0c1410] dark:text-[#edf2ee] font-mono pl-8"
                   />
                 </div>

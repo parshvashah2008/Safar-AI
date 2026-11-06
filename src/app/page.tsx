@@ -307,12 +307,16 @@ export default function HomePage() {
                 <div className="flex items-center gap-1.5 mt-0.5">
                   <IndianRupee className="h-3.5 w-3.5 text-[#0d5c48] dark:text-emerald-400 shrink-0" />
                   <input
-                    type="number"
+                    type="text"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
                     value={budget}
+                    onFocus={(e) => e.target.select()}
                     onChange={(e) => {
-                      const val = e.target.value;
-                      setBudget(val);
-                      updateSearch({ budget: Number(val) || 35000 });
+                      const digitsOnly = e.target.value.replace(/\D/g, '');
+                      const clean = digitsOnly.replace(/^0+(?=\d)/, '');
+                      setBudget(clean);
+                      updateSearch({ budget: clean === '' ? 35000 : Number(clean) });
                     }}
                     placeholder="35000"
                     className="w-full text-xs font-semibold text-[#111a16] dark:text-[#edf2ee] focus:outline-none bg-transparent"

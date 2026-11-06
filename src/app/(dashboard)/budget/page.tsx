@@ -620,13 +620,18 @@ Return JSON ONLY:
                 <Label htmlFor="exp-amount">Amount ({currency})</Label>
                 <Input
                   id="exp-amount"
-                  type="number"
+                  type="text"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
                   required
-                  min="1"
-                  step="1"
-                  placeholder="0"
+                  placeholder="e.g. 500"
                   value={amount}
-                  onChange={(e) => setAmount(e.target.value)}
+                  onFocus={(e) => e.target.select()}
+                  onChange={(e) => {
+                    const digitsOnly = e.target.value.replace(/\D/g, '');
+                    const clean = digitsOnly.replace(/^0+(?=\d)/, '');
+                    setAmount(clean);
+                  }}
                 />
               </div>
 
@@ -691,10 +696,17 @@ Return JSON ONLY:
             </div>
             <div className="grid grid-cols-2 gap-2">
               <Input
-                type="number"
-                placeholder="Total bill"
+                type="text"
+                inputMode="numeric"
+                pattern="[0-9]*"
+                placeholder="Total bill (e.g. 1200)"
                 value={splitAmount}
-                onChange={(e) => setSplitAmount(e.target.value)}
+                onFocus={(e) => e.target.select()}
+                onChange={(e) => {
+                  const digitsOnly = e.target.value.replace(/\D/g, '');
+                  const clean = digitsOnly.replace(/^0+(?=\d)/, '');
+                  setSplitAmount(clean);
+                }}
               />
               <Input
                 placeholder="Names separated by comma"
@@ -855,12 +867,18 @@ Return JSON ONLY:
                 <Label htmlFor="topup-amount">Allocation Amount ({currency})</Label>
                 <Input
                   id="topup-amount"
-                  type="number"
+                  type="text"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
                   required
-                  min="500"
-                  step="500"
+                  placeholder="e.g. 10000"
                   value={fundAmount}
-                  onChange={(e) => setFundAmount(e.target.value)}
+                  onFocus={(e) => e.target.select()}
+                  onChange={(e) => {
+                    const digitsOnly = e.target.value.replace(/\D/g, '');
+                    const clean = digitsOnly.replace(/^0+(?=\d)/, '');
+                    setFundAmount(clean);
+                  }}
                 />
               </div>
 
@@ -894,10 +912,17 @@ Return JSON ONLY:
                 <Label htmlFor="daily-cap">Daily Spend Limit ({currency})</Label>
                 <Input
                   id="daily-cap"
-                  type="number"
+                  type="text"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
                   placeholder="e.g. 8000"
                   value={dailyLimit}
-                  onChange={(e) => setDailyLimit(e.target.value)}
+                  onFocus={(e) => e.target.select()}
+                  onChange={(e) => {
+                    const digitsOnly = e.target.value.replace(/\D/g, '');
+                    const clean = digitsOnly.replace(/^0+(?=\d)/, '');
+                    setDailyLimit(clean);
+                  }}
                 />
               </div>
 
@@ -905,10 +930,17 @@ Return JSON ONLY:
                 <Label htmlFor="low-thresh">Low Balance Alert Threshold ({currency})</Label>
                 <Input
                   id="low-thresh"
-                  type="number"
+                  type="text"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
                   placeholder="e.g. 3000"
                   value={lowBalanceThreshold}
-                  onChange={(e) => setLowBalanceThreshold(e.target.value)}
+                  onFocus={(e) => e.target.select()}
+                  onChange={(e) => {
+                    const digitsOnly = e.target.value.replace(/\D/g, '');
+                    const clean = digitsOnly.replace(/^0+(?=\d)/, '');
+                    setLowBalanceThreshold(clean);
+                  }}
                 />
               </div>
 

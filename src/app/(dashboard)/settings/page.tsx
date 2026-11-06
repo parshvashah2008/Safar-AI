@@ -368,9 +368,16 @@ export default function SettingsPage() {
                 Amount ({calcFrom})
               </label>
               <Input
-                type="number"
+                type="text"
+                inputMode="numeric"
+                pattern="[0-9]*"
                 value={calcAmount}
-                onChange={(e) => setCalcAmount(e.target.value)}
+                onFocus={(e) => e.target.select()}
+                onChange={(e) => {
+                  const digitsOnly = e.target.value.replace(/\D/g, '');
+                  const clean = digitsOnly.replace(/^0+(?=\d)/, '');
+                  setCalcAmount(clean);
+                }}
                 className="font-mono text-sm bg-white dark:bg-[#0c1410]"
               />
             </div>

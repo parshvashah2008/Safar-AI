@@ -550,10 +550,17 @@ function BookingsContent() {
               <Label htmlFor="bkg-amt" className="text-xs text-ink-600 dark:text-ink-300">Amount Paid ({selectedCurrency})</Label>
               <Input
                 id="bkg-amt"
-                type="number"
-                placeholder="0"
+                type="text"
+                inputMode="numeric"
+                pattern="[0-9]*"
+                placeholder="e.g. 4500"
                 value={amount}
-                onChange={(e) => setAmount(e.target.value)}
+                onFocus={(e) => e.target.select()}
+                onChange={(e) => {
+                  const digitsOnly = e.target.value.replace(/\D/g, '');
+                  const clean = digitsOnly.replace(/^0+(?=\d)/, '');
+                  setAmount(clean);
+                }}
                 className="rounded-xl border-sand-300 dark:border-[#1e2e26] font-mono"
               />
             </div>
