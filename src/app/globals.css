@@ -222,3 +222,68 @@ div[data-netlify-identity-button] {
 h1, h2, h3, h4 {
   color: var(--safar-ink);
 }
+
+/* ==========================================================================
+   SAFAR AI Publication-Grade Print & PDF Stylesheet
+   Formats trip itineraries into clean, ink-efficient, luxury travel dossiers.
+   ========================================================================== */
+@media print {
+  /* Hide all interactive navigational UI */
+  aside,
+  header,
+  nav,
+  .no-print,
+  button:not(.print-keep),
+  .theme-toggle,
+  [role="dialog"]:not(.print-dialog),
+  .notification-bell,
+  footer {
+    display: none !important;
+  }
+
+  /* Reset body layout for full-page standard printing */
+  html, body {
+    background: #ffffff !important;
+    color: #111827 !important;
+    font-size: 10pt !important;
+    line-height: 1.4 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  main {
+    margin-left: 0 !important;
+    padding: 0.5in !important;
+    max-width: 100% !important;
+    width: 100% !important;
+  }
+
+  /* Ensure card backgrounds are light and crisp with clear borders */
+  .border, [class*="border-"] {
+    border-color: #e5e7eb !important;
+  }
+
+  /* Keep hero banner legible in grayscale / print */
+  .relative.overflow-hidden.rounded-3xl {
+    border-radius: 12px !important;
+    color: #111827 !important;
+  }
+
+  /* Page break utilities */
+  .print-page-break {
+    page-break-before: always !important;
+    break-before: page !important;
+  }
+
+  .print-avoid-break {
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+
+  /* Links display destination text clearly */
+  a[href^="http"]:after {
+    content: " (" attr(href) ")";
+    font-size: 8pt;
+    color: #6b7280;
+  }
+}

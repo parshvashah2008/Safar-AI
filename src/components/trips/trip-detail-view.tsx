@@ -4,16 +4,21 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import {
   ArrowLeft,
+  Calendar,
   CalendarDays,
   Check,
+  CheckCircle2,
   Compass,
+  Copy,
   ExternalLink,
+  FileDown,
   Loader2,
   MapPin,
   Navigation,
   Plane,
   Plus,
   Printer,
+  Share2,
   Sparkles,
   Users,
   Wallet,
@@ -38,6 +43,11 @@ import { getExpenses } from '@/lib/services/budget-service';
 import { getDestinationImage } from '@/lib/constants/destination-images';
 import { analyzeTransitRoute } from '@/lib/services/transit-routing';
 import { ItineraryMap } from '@/components/trips/itinerary-map';
+import {
+  downloadIcsFile,
+  generateShareSummary,
+  downloadOfflineDossierJson,
+} from '@/lib/services/trip-export';
 import {
   formatGpsCoordinates,
   getNavigationUrl,
@@ -69,6 +79,25 @@ export function TripDetailView({ tripId }: { tripId: string }) {
   });
 
   const [regenerating, setRegenerating] = useState(false);
+  const [copiedShare, setCopiedShare] = useState(false);
+
+  const handleShareClipboard = () => {
+    if (!trip) return;
+    const summary = generateShareSummary(trip, days, stops, transitData?.summary);
+    if (typeof navigator !== 'undefined' && navigator.clipboard) {
+      navigator.clipboard.writeText(summary);
+      setCopiedShare(true);
+      setTimeout(() => setCopiedShare(false), 3000);
+    }
+  };
+
+  const handleExportCalendar = () => {
+    if (trip) downloadIcsFile(trip, days, stops);
+  };
+
+  const handleExportOfflineJson = () => {
+    if (trip) downloadOfflineDossierJson(trip, days, stops, transitData);
+  };
 
   useEffect(() => {
     loadTripData();
@@ -202,6 +231,9 @@ export function TripDetailView({ tripId }: { tripId: string }) {
           } else if (parsed.modeLabel) {
             setActiveRouteMode(parsed.modeLabel);
           }
+        } else if (tripData) {
+          const autoAnalyzed = analyzeTransitRoute(tripData.country || 'India', tripData.destination);
+          setTransitData(autoAnalyzed);
         }
       } catch {}
     }
@@ -327,19 +359,68 @@ export function TripDetailView({ tripId }: { tripId: string }) {
           <span>All Trips</span>
         </Link>
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
+          {/* 1-Click Share to WhatsApp & Email */}
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleShareClipboard}
+            className="text-xs gap-1.5 bg-white dark:bg-[#121c17] hover:bg-emerald-50 dark:hover:bg-emerald-950/40 border-sand-300 dark:border-[#22332a]"
+            title="Copy formatted markdown itinerary for WhatsApp and Email"
+          >
+            {copiedShare ? (
+              <>
+                <Check className="h-3.5 w-3.5 text-emerald-600" />
+                <span className="text-emerald-700 dark:text-emerald-400 font-semibold">Copied!</span>
+              </>
+            ) : (
+              <>
+                <Share2 className="h-3.5 w-3.5 text-teal-700 dark:text-emerald-400" />
+                <span>Share</span>
+              </>
+            )}
+          </Button>
+
+          {/* 1-Click Calendar Export (.ics for Apple, Google, Outlook) */}
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleExportCalendar}
+            className="text-xs gap-1.5 bg-white dark:bg-[#121c17] hover:bg-emerald-50 dark:hover:bg-emerald-950/40 border-sand-300 dark:border-[#22332a] hidden sm:inline-flex"
+            title="Download .ics Calendar File (Google Calendar, Apple Calendar, Outlook)"
+          >
+            <Calendar className="h-3.5 w-3.5 text-teal-700 dark:text-emerald-400" />
+            <span>Add to Calendar</span>
+          </Button>
+
+          {/* 1-Click PDF Travel Dossier Print */}
           <Button
             variant="outline"
             size="sm"
             onClick={() => window.print()}
-            className="text-xs gap-1.5 hidden sm:inline-flex"
+            className="text-xs gap-1.5 bg-white dark:bg-[#121c17] hover:bg-emerald-50 dark:hover:bg-emerald-950/40 border-sand-300 dark:border-[#22332a]"
+            title="Print or Save as PDF Dossier"
           >
-            <Printer className="h-3.5 w-3.5" />
-            <span>Print</span>
+            <Printer className="h-3.5 w-3.5 text-teal-700 dark:text-emerald-400" />
+            <span>Print PDF</span>
           </Button>
+
+          {/* 1-Click Offline Passbook JSON Backup */}
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleExportOfflineJson}
+            className="text-xs gap-1.5 bg-white dark:bg-[#121c17] hover:bg-emerald-50 dark:hover:bg-emerald-950/40 border-sand-300 dark:border-[#22332a] hidden md:inline-flex"
+            title="Download Offline JSON Passbook for zero-data SIM-free travel"
+          >
+            <FileDown className="h-3.5 w-3.5 text-teal-700 dark:text-emerald-400" />
+            <span>Offline Backup</span>
+          </Button>
+
+          {/* Trip FinTech Wallet */}
           <Link href={`/wallet?tripId=${trip.id}`}>
-            <Button size="sm" variant="secondary" className="text-xs gap-1.5">
-              <Wallet className="h-3.5 w-3.5 text-teal-600" />
+            <Button size="sm" variant="secondary" className="text-xs gap-1.5 bg-sand-200 dark:bg-[#18261f] hover:bg-sand-300">
+              <Wallet className="h-3.5 w-3.5 text-teal-600 dark:text-emerald-400" />
               <span>Trip Wallet</span>
             </Button>
           </Link>
@@ -533,12 +614,23 @@ export function TripDetailView({ tripId }: { tripId: string }) {
         );
       })()}
 
-      {/* Geospatial GPS Waypoints Map */}
+      {/* Geospatial GPS Waypoints & Transit Corridor Map */}
       <ItineraryMap
         stops={currentDayStops.length > 0 ? currentDayStops : stops}
         destination={trip.destination}
         activeDayTitle={days.find((d) => d.id === activeDayId)?.title}
         dayNumber={days.find((d) => d.id === activeDayId)?.day_number || 1}
+        transitRoute={
+          transitData
+            ? {
+                origin: (transitData.legs && transitData.legs[0]?.from) || trip.country || 'Origin',
+                destination: trip.destination,
+                summary: transitData.summary,
+                totalDuration: transitData.totalDuration,
+                legs: transitData.legs || [],
+              }
+            : null
+        }
       />
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">

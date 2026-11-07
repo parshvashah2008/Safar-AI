@@ -59,6 +59,7 @@ import {
 import { generateFallbackItinerary } from '@/lib/services/fallback-itinerary';
 import { generateClientItinerary } from '@/lib/ai/client-ai-engine';
 import { resolveCityTransitProfile } from '@/lib/services/station-resolver';
+import { ItineraryMap } from '@/components/trips/itinerary-map';
 import { isStaticHost } from '@/lib/config';
 import type { StopCategory } from '@/types';
 
@@ -1196,6 +1197,30 @@ function PlannerContent() {
                         </ul>
                       </div>
                     )}
+
+                    {/* Interactive Corridor Map for Active Route */}
+                    <div className="pt-2">
+                      <ItineraryMap
+                        stops={[]}
+                        destination={activeDest || form.destination}
+                        transitRoute={{
+                          origin: activeOrigin || form.origin || 'Origin',
+                          destination: activeDest || form.destination,
+                          summary: activeRoute.summary,
+                          totalDuration: activeRoute.totalDuration,
+                          legs: activeRoute.legs.map((l: any, i: number) => ({
+                            step: l.step || i + 1,
+                            mode: l.mode,
+                            from: l.from,
+                            to: l.to,
+                            duration: l.duration,
+                            carrierOrOption: l.carrier,
+                            formattedCost: l.formattedCost,
+                            advice: l.advice,
+                          })),
+                        }}
+                      />
+                    </div>
                   </div>
                 );
               })()}
@@ -1290,6 +1315,30 @@ function PlannerContent() {
                     </div>
                   );
                 })}
+              </div>
+
+              {/* Interactive Transit Corridor Visualizer */}
+              <div className="pt-3">
+                <ItineraryMap
+                  stops={[]}
+                  destination={activeDest || form.destination}
+                  transitRoute={{
+                    origin: activeOrigin || form.origin || 'Origin',
+                    destination: activeDest || form.destination,
+                    summary: transitPreview.summary,
+                    totalDuration: transitPreview.legs.reduce((acc, curr) => acc + (acc ? ' + ' : '') + curr.duration, ''),
+                    legs: (transitPreview.legs || []).map((l: TransitLeg, i: number) => ({
+                      step: l.step || i + 1,
+                      mode: l.mode,
+                      from: l.from,
+                      to: l.to,
+                      duration: l.duration,
+                      carrierOrOption: l.carrierOrOption,
+                      formattedCost: (l as any).formattedCost,
+                      advice: l.advice,
+                    })),
+                  }}
+                />
               </div>
             </div>
           ) : null}
